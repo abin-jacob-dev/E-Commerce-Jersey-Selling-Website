@@ -1,0 +1,137 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block content %}
+  <section class="bg-[#121212] text-white py-20 relative overflow-hidden">
+    <div class="container mx-auto px-4 text-center relative z-10">
+      <h2 class="text-6xl md:text-8xl font-black uppercase mb-8 leading-tight tracking-tightest">
+        THE PITCH<br />
+        <span class="text-lime">AESTHETIC.</span>
+      </h2>
+      <a href="#" class="inline-block bg-lime text-black font-black uppercase px-12 py-4 text-sm hover:bg-white transition-colors">Shop Now</a>
+
+      <div class="mt-20 flex justify-center space-x-2">
+        <div class="w-2 h-2 rounded-full bg-lime"></div>
+        <div class="w-2 h-2 rounded-full bg-gray-600"></div>
+        <div class="w-2 h-2 rounded-full bg-gray-600"></div>
+        <div class="w-2 h-2 rounded-full bg-gray-600"></div>
+      </div>
+    </div>
+    <!-- Background decorative elements can go here -->
+  </section>
+
+  <!-- Shop by Category -->
+  <section class="py-20 bg-[#f9fafb]">
+    <div class="container mx-auto px-4 text-center">
+      <h3 class="text-3xl font-black uppercase mb-12 tracking-tightest">Shop by Category</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Category 1 -->
+        <div class="group cursor-pointer">
+          <div class="w-48 h-48 mx-auto rounded-full overflow-hidden mb-4 border-4 border-transparent group-hover:border-lime transition-all">
+            <img src="https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=300&h=300&auto=format&fit=crop" alt="Embroidery" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+          </div>
+          <h4 class="font-bold uppercase text-sm tracking-widest tracking-tightest">Embroidery</h4>
+        </div>
+        <!-- Category 2 -->
+        <div class="group cursor-pointer">
+          <div class="w-48 h-48 mx-auto rounded-full overflow-hidden mb-4 border-4 border-transparent group-hover:border-lime transition-all">
+            <img src="https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=300&h=300&auto=format&fit=crop" alt="Full Sleeve" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+          </div>
+          <h4 class="font-bold uppercase text-sm tracking-widest tracking-tightest">Full Sleeve</h4>
+        </div>
+        <!-- Category 3 -->
+        <div class="group cursor-pointer">
+          <div class="w-48 h-48 mx-auto rounded-full overflow-hidden mb-4 border-4 border-transparent group-hover:border-lime transition-all">
+            <img src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=300&h=300&auto=format&fit=crop" alt="Retro" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+          </div>
+          <h4 class="font-bold uppercase text-sm tracking-widest tracking-tightest">Retro</h4>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- New Arrivals -->
+  <section class="py-20">
+    <div class="container mx-auto px-4 text-center">
+      <h3 class="text-3xl font-black uppercase mb-12 tracking-tightest">New Arrivals.</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12">
+        <!-- Product Card -->
+        <div class="text-left group cursor-pointer">
+          <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=400&h=533&auto=format&fit=crop" alt="Jersey" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
+          </div>
+          <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">London Blue Home</h5>
+          <div class="flex space-x-2 text-xs">
+            <span class="text-lime font-bold">€110.00</span>
+            <span class="text-gray-400 line-through">€140.00</span>
+          </div>
+        </div>
+        <!-- Repeat 3 more times for the grid -->
+        <div class="text-left group cursor-pointer">
+          <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=400&h=533&auto=format&fit=crop" alt="Jersey" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
+          </div>
+          <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">London Blue Home</h5>
+          <div class="flex space-x-2 text-xs">
+            <span class="text-lime font-bold">€110.00</span>
+            <span class="text-gray-400 line-through">€140.00</span>
+          </div>
+        </div>
+        <div class="text-left group cursor-pointer">
+          <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1434682881908-b43d0467b798?q=80&w=400&h=533&auto=format&fit=crop" alt="Jersey" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
+          </div>
+          <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">Vintage 98 Replica</h5>
+          <div class="flex space-x-2 text-xs">
+            <span class="text-lime font-bold">€120.00</span>
+          </div>
+        </div>
+        <div class="text-left group cursor-pointer">
+          <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1434682881908-b43d0467b798?q=80&w=400&h=533&auto=format&fit=crop" alt="Jersey" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
+          </div>
+          <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">Vintage 98 Replica</h5>
+          <div class="flex space-x-2 text-xs">
+            <span class="text-lime font-bold">€120.00</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="mt-16 border-2 border-black font-bold uppercase px-12 py-3 text-xs hover:bg-black hover:text-white transition-colors">Load More</button>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="py-20 border-t border-gray-100">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+        <div>
+          <div class="mb-4 flex justify-center">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <h4 class="font-black uppercase mb-2 tracking-tightest">Free Shipping</h4>
+          <p class="text-xs text-gray-500 max-w-xs mx-auto">On all orders over €150. Global delivery tracked to your door.</p>
+        </div>
+        <div>
+          <div class="mb-4 flex justify-center">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path>
+            </svg>
+          </div>
+          <h4 class="font-black uppercase mb-2 tracking-tightest">Free Returns</h4>
+          <p class="text-xs text-gray-500 max-w-xs mx-auto">Easy 30-day return policy for peace of mind on every fit.</p>
+        </div>
+        <div>
+          <div class="mb-4 flex justify-center">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+          </div>
+          <h4 class="font-black uppercase mb-2 tracking-tightest">Support Online</h4>
+          <p class="text-xs text-gray-500 max-w-xs mx-auto">24/7 technical support for your queries and kit customisation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
