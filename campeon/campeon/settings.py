@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -134,3 +135,10 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+JAZZMIN_SETTINGS = {
+    # "site_header": "Library Admin",
+    "site_brand": "Campeon",
+    "site_logo": "assets/django-admin-logo.png",
+    "copyright": "Campeon",
+}
