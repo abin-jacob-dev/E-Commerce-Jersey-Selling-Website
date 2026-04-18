@@ -6,7 +6,7 @@
       <div class="text-center mb-12">
         <h2 class="text-4xl font-black mb-2 tracking-tightest">Create Account</h2>
       </div>
-{% include "partials/alert.html" %}
+      {% include 'partials/alert.html' %}
       <form class="space-y-6" method="post">
         {% csrf_token %}
 
@@ -95,7 +95,7 @@
 
       <div class="text-center mt-10">
         <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">
-          Already have an account? <a href="User Login.html" class="text-[#00a300] hover:underline">Sign In</a>
+          Already have an account? <a href="{% url 'userauths:signin' %}" class="text-[#00a300] hover:underline">Sign In</a>
         </p>
       </div>
     </div>

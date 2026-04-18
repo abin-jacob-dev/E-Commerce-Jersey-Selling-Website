@@ -4,8 +4,11 @@ from django.contrib.auth import authenticate,login
 from django.contrib import messages
 from .models import Account
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+def dashboard(request):
+    return render(request,'userauths/dashboard.html')
 def signup(request):
     if request.method == "POST":
         form = UserSignupForm(request.POST)
@@ -24,7 +27,7 @@ def signup(request):
             user.referral_code = referral_code
             user.save()
             messages.success(request,'Registeration Successful')
-            return redirect('signup')
+            return redirect('userauths:signup')
     else:
         form = UserSignupForm()
     context = {
@@ -32,32 +35,32 @@ def signup(request):
     }
     return render(request, 'userauths/signup.html', context)
 
-# def signup(request):
-#     if request.method == "POST":
-#         form  = UserSignupForm(request.POST)
-#         if form.is_valid():
-#             new_user = form.save(commit=False)
-#             new_user.username = form.cleaned_date['email']
-#             new_user.save()
-#             print('User registered')
-#             username = form.cleaned_data.get('email')
-#             messages.success(request,f'User {username} was Created')
-#             new_user  = authenticate(username=form.cleaned_data['email'],password = form.cleaned_data.get('password1'))
-#             if new_user is not None:
-#                 login(request,new_user)
-#                 return redirect('core:index')
-#             else:
-#                 messages.error(request,'Authentication failed. Please Try again.')
-#                 return redirect('signup')
-                
-#         else:
-#             print(form.errors)
+def signin(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        print(email,password)
+        user = authenticate(email=email,password=password)
+        print(user)
+        if user is None:
+            messages.error(request,'Invalid Credentials')
+            print('user is none')
+            return redirect('userauths:signin')
+        if user.is_blocked:
+            messages.error(request,'Your acccount has been blocked')
+            print('user blocked')
+            return redirect('userauths:signin')
+
+        login(request,user)
+        print('user logged in')
+        messages.success(request,'User Logged In')
+        if user.is_staff or user.role =='admin':
+            return redirect('userauths:dashboard')
         
-#     else:
-#         form  = UserSignupForm()
-#         print('User Cannot be registered')
-    
-#     context = {
-#         "form" : form
-#     }
-#     return render(request,'userauths/signup.html',context)
+        return redirect('userauths:dashboard')
+    return render(request,'userauths/signin.html')
+@login_required(login_url = '/login/')
+def signout(request):
+    logout(request)
+    messages.success(request,'You have Signed Out!')
+    return redirect('signin')
