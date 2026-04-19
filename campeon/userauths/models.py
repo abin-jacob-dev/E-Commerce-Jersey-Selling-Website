@@ -40,7 +40,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=250)
     email = models.EmailField(max_length=250, unique=True)
     username = models.CharField(max_length=250, unique=True)
-    # phone_number = models.CharField(max_length=50)
+    phone_number = models.CharField(max_length=50,null=True,blank=True)
     
     referral_code = models.CharField( max_length=50,null = True,blank=True)
     is_blocked = models.BooleanField(default=False)
