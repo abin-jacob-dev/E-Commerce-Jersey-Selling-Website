@@ -16,12 +16,12 @@
     <!-- Admin Sidebar -->
     <aside class="w-64 bg-[#f1f1f1] min-h-screen p-8 flex flex-col border-r border-gray-200">
         <div class="mb-12 text-center md:text-left">
-            <h1 class="text-xl font-black uppercase tracking-tighter italic tracking-tightest">Campeón</h1>
+            <h1 class="text-xl font-black uppercase tracking-tighter  tracking-tightest">Campeon</h1>
             <p class="text-[8px] font-black uppercase tracking-widest text-gray-400">Admin Panel</p>
         </div>
 
         <nav class="space-y-8 flex-1">
-            <a href="Admin Dashboard - Sales Report.html" class="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-black">
+            <a href="{% url "admin_panel:dashboard" %}" class="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-black">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 Dashboard
             </a>
@@ -37,7 +37,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                 Orders
             </a>
-            <a href="User Management.html" class="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-black">
+            <a href="{% url "admin_panel:users" %}" class="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-black">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 Users
             </a>
@@ -56,9 +56,9 @@
         </nav>
 
         <div class="pt-20">
-            <a href="Landing Page.html" class="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-red-500 hover:text-red-700">
+            <a href="{% url "userauths:signout_admin" %}" class="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-red-500 hover:text-red-700">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                Logout
+                Signout
             </a>
         </div>
     </aside>

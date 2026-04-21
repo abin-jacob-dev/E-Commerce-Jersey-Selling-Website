@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from userauths.models import Account
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 
 
 # Create your views here.
@@ -26,7 +28,7 @@ def user_management_search(request):
     return render(request, "admin/user_management.html", {"users": users,'sort_by':sort_by})
 
 
-def user_management(request):
+def users(request):
     users = Account.objects.all()
     return render(request, "admin/user_management.html", {"users": users})
 
@@ -34,4 +36,9 @@ def user_management(request):
 def block_user(request, pk):
     user = Account.objects.get(id=pk)
     return redirect("user-management")
+@login_required
+def dashboard(request):
+    return render(request,'admin/dashboard.html')
 
+
+    

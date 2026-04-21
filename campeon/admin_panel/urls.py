@@ -4,7 +4,8 @@ from . import views
 app_name = "admin_panel"
 
 urlpatterns = [
-    path("user-management/", views.user_management, name="user_management"),
+    path("dashboard/", views.dashboard, name="dashboard"),
+    path("users/", views.users, name="users"),
     path("user-management-search/", views.user_management_search, name="user_management_search"),
     path('block-user/<pk>/',views.block_user,name='block_user')
 ]

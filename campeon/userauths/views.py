@@ -191,3 +191,33 @@ def reset_password(request):  # only works with verification link because of uid
 
     else:
         return render(request, "userauths/reset_password.html")
+
+@never_cache
+def signin_admin(request):
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            login(request,user)
+            return redirect('admin_panel:dashboard')
+        else:
+            messages.error(request, 'You do not have admin access.')
+            return redirect('userauths:signin')
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(email =email,password = password)
+        print(user)
+        if user is None:
+            messages.error(request,'Invalid Credentials')
+            return render(request,'userauths/signin_admin.html')
+        if user.is_superuser:
+            login(request,user)
+            return redirect('admin_panel:dashboard')
+        else:
+            messages.error(request, 'You do not have admin access.')
+            return redirect('userauths:signin')
+    return render(request,'userauths/signin_admin.html')
+
+@never_cache
+def signout_admin(request):
+    logout(request)
+    return redirect('userauths:signin_admin')
