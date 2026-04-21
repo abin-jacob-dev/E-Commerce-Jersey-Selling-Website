@@ -1,0 +1,180 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+{% block content %}
+  <!-- Main Content -->
+  <main class="flex-1 p-12 overflow-y-auto">
+    <!-- Top Bar -->
+    <div class="flex justify-between items-center mb-12">
+      <div class="relative flex-1 max-w-xl">
+        <input type="text" placeholder="Global search..." class="w-full bg-white border border-gray-100 rounded-lg px-6 py-3 text-[10px] font-black uppercase tracking-widest focus:outline-none shadow-sm focus:ring-2 focus:ring-lime/20" />
+        <button class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="flex items-center gap-8">
+        <button class="text-gray-400 hover:text-black transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+          </svg>
+        </button>
+        <button class="text-gray-400 hover:text-black transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </button>
+        <a href="Landing Page.html" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black">Logout</a>
+      </div>
+    </div>
+
+    <div class="flex justify-between items-end mb-12">
+      <div>
+        <h2 class="text-6xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest">User Management</h2>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Manage elite athlete profiles, staff roles, and platform permissions.</p>
+      </div>
+      <button class="bg-[#006400] text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center gap-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>Add New User
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+      <div class="bg-[#e2ead8] p-8 rounded-[1.5rem] shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <svg class="w-5 h-5 text-lime-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+          <span class="text-[9px] font-black uppercase tracking-widest text-lime-dark">Total Members</span>
+        </div>
+        <div class="text-5xl font-black">1,284</div>
+      </div>
+      <div class="bg-black text-white p-8 rounded-[1.5rem] shadow-sm relative overflow-hidden">
+        <div class="flex items-center gap-3 mb-4 relative z-10">
+          <svg class="w-5 h-5 text-lime" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          <span class="text-[9px] font-black uppercase tracking-widest text-lime">Active Today</span>
+        </div>
+        <div class="text-5xl font-black relative z-10">42</div>
+        <div class="absolute inset-0 opacity-10">
+          <div class="w-full h-full" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+        </div>
+      </div>
+      <div class="bg-lime-bright p-8 rounded-[1.5rem] shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-[9px] font-black uppercase tracking-widest text-black">Verified Status</span>
+        </div>
+        <div class="text-5xl font-black">98%</div>
+      </div>
+      <div class="bg-[#fcd3d1] p-8 rounded-[1.5rem] shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+          </svg>
+          <span class="text-[9px] font-black uppercase tracking-widest text-red-500">Blocked Users</span>
+        </div>
+        <div class="text-5xl font-black">12</div>
+      </div>
+    </div>
+    <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm">
+      <form action="{% url 'admin_panel:user_management_search' %}" method="get">
+        <div class="p-8 flex justify-between items-center border-b border-gray-100">
+          <div class="flex gap-4">
+            <input type="text" placeholder="search..." name="search_user" class="w-full bg-white border border-gray-100 rounded-lg px-6 py-3 text-[10px] font-black uppercase tracking-widest focus:outline-none shadow-sm focus:ring-2 focus:ring-lime/20" />
+            <button type="submit" class="ml-2 bg-lime-500 text-white px-4 py-3 rounded-lg text-xs font-bold uppercase shadow-sm focus:outline-none hover:bg-lime-600">Search</button>
+
+            <button class="bg-black text-white px-6 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg">All Users</button>
+            <button class="bg-gray-50 text-gray-400 px-6 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-gray-100 transition-colors">Staff Only</button>
+          </div>
+          <button class="p-2 text-gray-300 hover:text-black">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+            </svg>
+          </button>
+        </div>
+      </form>
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-100">
+          <tr>
+            <th class="px-10 py-8">
+              <a href="?search_user={{ request.GET.search_user }}&sort_by=full_name" class="text-gray-400 hover:text-black">Name</a>
+            </th>
+            <th class="px-10 py-8">
+              <a href="?search_user={{ request.GET.search_user }}&sort_by=email" class="text-gray-400 hover:text-black">Email</a>
+            </th>
+            <th class="px-10 py-8">
+              <a href="?search_user={{ request.GET.search_user }}&sort_by=date_joined" class="text-gray-400 hover:text-black">Joined Date</a>
+            </th>
+            <th class="px-10 py-8">Status</th>
+            <th class="px-10 py-8 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="text-xs font-bold text-gray-600">
+          {% for user in users %}
+            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+              <td class="px-10 py-8 font-black text-black">{{ user.full_name }}</td>
+              <td class="px-10 py-8 text-[10px] opacity-60">{{ user.email }}</td>
+              <td class="px-6 py-8 text-gray-400">{{ user.date_joined }}</td>
+              <td class="px-10 py-8">
+                {% if user.is_blocked %}
+                  <span class="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-red-600"><div class="w-1.5 h-1.5 bg-red-600 rounded-full"></div>Blocked</span>
+                {% else %}
+                  <span class="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-green-600"><div class="w-1.5 h-1.5 bg-green-600 rounded-full"></div>Active</span>
+                {% endif %}
+              </td>
+              <td class="px-10 py-8 text-right flex justify-end gap-4">
+                <button class="text-gray-300 hover:text-black transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                  </svg>
+                </button>
+                <button class="text-gray-300 hover:text-red-500 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                  </svg>
+                </button>
+                <button class="text-gray-300 hover:text-red-500 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% for item in page %}{% endfor %}
+      <div class="p-10 flex justify-between items-center bg-gray-50/50">
+        <p class="text-[9px] font-black uppercase tracking-widest text-gray-400">Showing 1-10 of 1,284 users</p>
+        <div class="flex items-center gap-4">
+          <button class="p-2 text-gray-300 hover:text-black transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
+          <div class="flex gap-2">
+            <button class="w-8 h-8 bg-black text-white rounded-lg font-black text-[10px]">1</button>
+            <button class="w-8 h-8 bg-white border border-gray-100 rounded-lg font-black text-[10px] hover:bg-white shadow-sm">2</button>
+            <button class="w-8 h-8 bg-white border border-gray-100 rounded-lg font-black text-[10px] hover:bg-white shadow-sm">3</button>
+            <span class="px-2 text-gray-300">...</span>
+            <button class="w-8 h-8 bg-white border border-gray-100 rounded-lg font-black text-[10px] hover:bg-white shadow-sm">128</button>
+          </div>
+          <button class="p-2 text-gray-300 hover:text-black transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+
+    </div>
+  </main>
+{% endblock %}

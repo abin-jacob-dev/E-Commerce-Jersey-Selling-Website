@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*", "127.0.0.1"]
 
 
 # Application definition
@@ -43,9 +43,17 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # custom apps
     "core",
-    'userauths',
+    "userauths",
+    "user",
+    "admin_panel",
+    # AllAuth
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
-AUTH_USER_MODEL = 'userauths.Account'
+AUTH_USER_MODEL = "userauths.Account"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -55,6 +63,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    #allauth middleware
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "campeon.urls"
@@ -150,9 +160,26 @@ MESSAGE_TAGS = {
     50: "critical",
 }
 
-#SMTP Configuration
+# SMTP Configuration
 # EMAIL_HOST=os.getenv('EMAIL_HOST')
 # EMAIL_PORT=os.getenv('EMAIL_PORT')
 # EMAIL_HOST_USER=os.getenv('EMAIL_HOST_USER')
 # EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 # EMAIL_USE_TLS=os.getenv('EMAIL_USE_TLS')
+
+SITE_ID = 1
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "OAUTH_PKCE_ENABLED": True,
+    }
+}
+
+LOGIN_URL = 'userauths:signin'
+LOGOUT_URL = 'userauths:signout'
+LOGIN_REDIRECT_URL = "user:profile" #dashboard
+ACCOUNT_LOGOUT_REDIRECT_URL = "userauths:signin"
+ACCOUNT_LOGIN_REDIRECT_URL = "user:profile" #dashboard
+SOCIALACCOUNT_LOGIN_ON_GET=True
+SOCIALACCOUNT_ADAPTER = "userauths.adapters.MySocialAccountAdapter"

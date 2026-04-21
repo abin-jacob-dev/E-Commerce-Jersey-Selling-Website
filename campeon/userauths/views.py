@@ -20,11 +20,11 @@ from django.core.mail import EmailMessage
 
 
 # Create your views here.
-@never_cache
-@login_required(login_url="login")
-def dashboard(request):
-
-    return render(request, "userauths/dashboard.html")
+# @never_cache
+# @login_required(login_url="userauths:signin")
+# def dashboard(request):
+#     print(request.user.is_authenticated, request.user.is_active)
+#     return render(request, "userauths/dashboard.html")
 
 
 def signup(request):
@@ -72,6 +72,8 @@ def signup(request):
 
 @never_cache
 def signin(request):
+    if request.user.is_authenticated:
+        return redirect('user:profile')#dashboard
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
@@ -93,12 +95,12 @@ def signin(request):
         # if user.is_staff or user.role == "admin":
         #     return redirect("userauths:dashboard")
 
-        return redirect("userauths:dashboard")
+        return redirect("user:profile") #dashboard
     return render(request, "userauths/signin.html")
 
 
 @never_cache
-@login_required(login_url="userauths:signin")
+@login_required()
 def signout(request):
     logout(request)
     messages.success(request, "You have Signed Out!")
