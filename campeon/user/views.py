@@ -8,7 +8,7 @@ from .utility import OTP
 from django.http import HttpResponse
 from .forms import AddressesForm
 from user.models import Addresses
-
+import os
 
 # Create your views here.
 @never_cache
@@ -20,17 +20,87 @@ def profile(request):
         address = None
     return render(request, "user/profile.html", {"address": address})
 
+
 def edit_profile(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         full_name = request.POST.get("full_name", "")
         phone_number = request.POST.get("phone_number", "")
-        user = Account.objects.get(id = request.user.id)
-        # username
+        user = Account.objects.get(id=request.user.id)
+        if "photo" in request.FILES:
+            if user.profile_image:
+                if os.path.isfile(user.profile_image.path):
+                    os.remove(user.profile_image.path)
+            user.profile_image = request.FILES["photo"]
         user.full_name = full_name
-        user.phone_number=phone_number
-        
-        print(user)
-    return render(request,'user/edit_profile.html')
+        user.phone_number = phone_number
+        user.save()
+        return redirect("user:profile")
+    return render(request, "user/edit_profile.html")
+
+
+def remove_photo(request):
+    user = request.user
+
+    if user.profile_image:
+        if os.path.isfile(user.profile_image.path):
+            os.remove(user.profile_image.path)
+
+        user.profile_image = None
+        user.save()
+
+    return redirect("user:edit_profile")
+
+
+def change_email(request):
+    user = request.user
+    if request.method == "POST":
+        if "send_otp" in request.POST:
+            email = request.POST.get("email", "")
+            if user.email == email:
+                messages.error(request, "Please Enter a new mail")
+                return redirect("user:change_email")
+
+            if Account.objects.exclude(id=user.id).filter(email=email).exists():
+                messages.error(request, "Email is already in use.")
+                return redirect("user:change_email")
+            otp = OTP.objects.create(user=request.user)
+            otp.generate_otp()
+            otp.send_otp_email(email)
+            request.session["pending_email"] = (
+                email  # store temporarily to link with otp
+            )
+
+            messages.success(request, "OTP sent to your email.")
+
+            return redirect("user:change_email")
+        elif "verify_otp" in request.POST:
+            entered_otp = request.POST.get("otp", "").strip()
+            email = request.session.get("pending_email")
+
+            if not email:
+                messages.error(request, "Session expired.Please request OTP again.")
+                return redirect("user:change_email")
+            otp_obj = OTP.objects.filter(user=user).last()
+            if not otp_obj:
+                messages.error(request, "No OTP found. Please request again.")
+                return redirect("user:change_email")
+            if otp_obj.is_expired():
+                messages.error(request, "Your OTP has expired,Please request a new one")
+                return redirect("user:change_email")
+            if otp_obj.otp != entered_otp:
+                messages.error(request, "Invalid OTP.")
+                return redirect("user:change_email")
+            user.email = email
+            user.username = email.split("@")[0]
+            user.save()
+            otp_obj.delete()
+            request.session.pop("pending_email", None)
+            messages.success(request, "Email updated successfully")
+            return redirect("user:profile")
+
+    return render(request, "user/change_email.html")
+
+
 # def edit_profile(request):
 #     if request.method == "POST":
 

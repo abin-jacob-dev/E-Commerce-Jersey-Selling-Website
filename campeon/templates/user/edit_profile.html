@@ -14,16 +14,29 @@
       <!-- Avatar Upload -->
       <div class="flex items-center gap-10">
         <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl relative group">
-          <img src="{% static "assets/user/user_profile.jpg" %}" class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
+          <!-- Profile Image -->
+          <img src="{% if user.profile_image %}
+              {{ user.profile_image.url }}
+            {% else %}
+              {% static 'assets/user/user_profile.jpg' %}
+            {% endif %}"
+            class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
           <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
             <span class="text-white text-[8px] font-black uppercase tracking-widest">Change Photo</span>
           </div>
+
+          <!-- File Input (Hidden) -->
+          <input name="photo" type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewImage(event)" />
         </div>
         <div>
-          <h4 class="text-sm font-black uppercase tracking-widest mb-2 tracking-tightest">Alex Morgan</h4>
-          <p class="text-[9px] font-bold text-gray-300 uppercase tracking-widest leading-loose">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-sm font-black uppercase tracking-widest tracking-tightest">{{ user.email }}</h4>
+            <a href="{% url 'user:change_email' %}" class="text-green-900 text-[9px] font-black uppercase tracking-widest no-underline ml-4 hover:text-green-700 transition-colors">Change Email</a>
+          </div>
+          <p class="text-[9px] font-bold text-black-300 uppercase tracking-widest leading-loose">
             Square format recommended.<br />JPG or PNG, max 2MB.
           </p>
+          <a href="{% url "user:remove_photo" %}" class="text-[9px] font-black uppercase text-red-600 hover:text-red-800 mt-2">Remove Photo</a>
         </div>
       </div>
       <div class="bg-white p-12 rounded-sm shadow-sm">
@@ -33,10 +46,10 @@
             <input name="full_name" type="text" value="{{ user.full_name }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
           </div>
 
-          <div class="col-span-2 md:col-span-1 relative">
+          {% comment %} <div class="col-span-2 md:col-span-1 relative">
             <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Email Address</label>
             <input name="email" type="email" value="{{ user.email }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20 pr-14" />
-          </div>
+          </div> {% endcomment %}
 
           <div class="col-span-2 md:col-span-1">
             <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Phone Number</label>
@@ -44,18 +57,6 @@
           </div>
         </div>
 
-        <!-- OTP Section -->
-        <div class="mt-5">
-          <label for="otp" class="block text-xs font-semibold text-gray-300">Enter OTP</label>
-          <div class="relative">
-            <input id="otp" type="text" name="otp" placeholder="Enter OTP" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
-            <button type="submit" name="send_otp" class="absolute right-4 top-[80%] transform -translate-y-1/2 text-white text-xs font-bold bg-lime-500 px-3 py-2 rounded-md" 
-        {% if otp and not otp.is_expired %}
-          disabled
-        {% endif %}
-        >Send OTP</button>
-          </div>
-        </div>
         <div class="flex items-center gap-4 pt-12 border-t border-gray-50 mt-12">
           <button type="submit" class="bg-lime-dark text-white px-12 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-sm shadow-xl hover:bg-black transition-all">Save Changes</button>
           <button type="button" class="bg-white border border-gray-200 text-black px-12 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-sm shadow-sm hover:bg-gray-50 transition-all">Cancel</button>
