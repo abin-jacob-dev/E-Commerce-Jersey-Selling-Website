@@ -21,6 +21,9 @@ from . import views
 app_name = "core"
 
 urlpatterns = [
-    path("", views.index, name="home"),
-    
+    path("", views.home, name="home"),
+    path("shop/", views.shop, name="shop"),
+    path("contact/", views.contact, name="contact"),
+    path("about/", views.about, name="about"),
+
 ]

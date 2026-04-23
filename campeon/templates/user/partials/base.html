@@ -16,15 +16,15 @@
     <header class="border-b border-gray-100 sticky top-0 bg-white z-50">
       <div class="container mx-auto px-4 py-4 flex items-center justify-between">
         <nav class="hidden md:flex space-x-6 text-sm font-bold uppercase tracking-wider">
-          <a href="Landing Page.html" class="hover:text-lime transition-colors">Home</a>
-          <a href="#" class="hover:text-lime transition-colors">Shop</a>
-          <a href="Contact Us.html" class="hover:text-lime transition-colors">Contact</a>
-          <a href="About Us.html" class="hover:text-lime transition-colors">About us</a>
-          <a href="User Profile.html" class="text-lime border-b-2 border-lime">Account</a>
+          <a href="{% url "core:home" %}" class="hover:text-lime transition-colors">Home</a>
+          <a href="{% url "core:shop" %}" class="hover:text-lime transition-colors">Shop</a>
+          <a href="{% url "core:contact" %}" class="hover:text-lime transition-colors">Contact</a>
+          <a href="{% url "core:about" %}" class="hover:text-lime transition-colors">About us</a>
+          <a href="{% url "user:profile" %}" class="text-lime border-b-2 border-lime">Account</a>
         </nav>
 
         <div class="flex-1 flex justify-center">
-          <h1 class="text-2xl font-black uppercase  tracking-tighter tracking-tightest">campeon</h1>
+          <h1 class="text-2xl font-black uppercase tracking-tighter tracking-tightest">campeon</h1>
         </div>
 
         <div class="flex items-center space-x-4">
@@ -49,46 +49,58 @@
     </header>
 
     <div class="flex">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-100 min-h-[calc(100vh-80px)] p-8">
-            <nav class="space-y-8">
-                <a href="{% url "user:profile" %}" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    Profile
-                </a>
-                <a href="#" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                    Orders
-                </a>
-                <a href="#" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                    Wishlist
-                </a>
-                <a href="{% url "user:address" %}" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    Address Book
-                </a>
-                <a href="#" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                    Wallet
-                </a>
-                <a href="#" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-                    My Reviews
-                </a>
-                
-                <div class="pt-20">
-                    <a href="{% url "userauths:signout" %}" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-700">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        Signout
-                    </a>
-                </div>
-            </nav>
-        </aside>
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white border-r border-gray-100 min-h-[calc(100vh-80px)] p-8">
+        <nav class="space-y-8">
+          <a href="{% url 'user:profile' %}" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>Profile
+          </a>
+          <a href="#" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>Orders
+          </a>
+          <a href="#" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>Wishlist
+          </a>
+          <a href="{% url 'user:address' %}" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>Address Book
+          </a>
+          <a href="#" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+            </svg>Wallet
+          </a>
+          <a href="#" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+            </svg>My Reviews
+          </a>
 
-    {% block content %}
+          <div class="pt-20">
+            <a href="{% url 'userauths:signout' %}" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-700">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>Signout
+            </a>
+          </div>
+        </nav>
+      </aside>
 
-    {% endblock %}
+      {% block content %}
+
+      {% endblock %}
     </div>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
   </body>
 </html>

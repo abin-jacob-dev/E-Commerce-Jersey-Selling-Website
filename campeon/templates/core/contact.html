@@ -1,0 +1,60 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block content %}
+  <main class="flex-1 py-20">
+    <div class="container mx-auto px-4 text-center">
+      <span class="text-[10px] font-black uppercase tracking-[0.4em] text-lime-dark mb-4 inline-block">Get in Touch</span>
+      <h2 class="text-6xl md:text-8xl font-black uppercase mb-8 tracking-tightest">Contact Us</h2>
+      <p class="text-sm text-gray-600 max-w-xl mx-auto mb-16 leading-relaxed">We're here to help! Reach out to us with any questions, feedback, or concerns. Our team is dedicated to providing you with the best possible experience.</p>
+
+      <div class="max-w-2xl mx-auto bg-white p-12 shadow-sm relative">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-lime-bright"></div>
+
+        <form class="text-left space-y-8">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest mb-3">Full Name</label>
+            <input type="text" placeholder="E.G. J. DOE" class="w-full bg-lime-light border-none px-6 py-4 text-sm focus:outline-none placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest mb-3">Email Address</label>
+            <input type="email" placeholder="ATHLETE@CAMPEON.COM" class="w-full bg-lime-light border-none px-6 py-4 text-sm focus:outline-none placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest mb-3">Message</label>
+            <textarea rows="4" placeholder="DESCRIBE YOUR REQUEST..." class="w-full bg-lime-light border-none px-6 py-4 text-sm focus:outline-none placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20"></textarea>
+          </div>
+          <button class="w-full bg-lime-bright text-black font-black uppercase py-5 shadow-lg hover:bg-black hover:text-white transition-all transform hover:-translate-y-1">Send Message</button>
+        </form>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
+        <div class="bg-[#e2ead8] p-10 text-left">
+          <svg class="w-6 h-6 text-lime-dark mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <h4 class="font-black uppercase text-sm mb-4 tracking-tightest">Location</h4>
+          <p class="text-[10px] font-bold uppercase text-gray-600 leading-relaxed">
+            Madrid HQ<br />Calle de la Victoria, 12<br />Spain
+          </p>
+        </div>
+        <div class="bg-[#1a1f16] p-10 text-left text-white">
+          <svg class="w-6 h-6 text-lime mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+          <h4 class="font-black uppercase text-sm mb-4 tracking-tightest">Email Us</h4>
+          <p class="text-[10px] font-bold uppercase text-gray-400 leading-relaxed">
+            press@campeonsports.com<br />support@campeonsports.com
+          </p>
+        </div>
+        <div class="bg-[#e2ead8] p-10 text-left">
+          <svg class="w-6 h-6 text-lime-dark mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <h4 class="font-black uppercase text-sm mb-4 tracking-tightest">Operation</h4>
+          <p class="text-[10px] font-bold uppercase text-gray-600 leading-relaxed">Mon - Fri: 09:00 - 18:00</p>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}
