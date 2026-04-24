@@ -4,20 +4,22 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+from django.contrib.sessions.models import Session
+from django.utils.timezone import now
 
 
 # Create your views here.
 def user_management_search(request):
     search_user = request.GET.get("search_user")
-    sort_by = request.GET.get('sort_by','full_name')
+    sort_by = request.GET.get("sort_by", "full_name")
     if search_user:
         users = Account.objects.filter(
             Q(full_name__icontains=search_user) | Q(email__icontains=search_user)
         )
     else:
-        users = Account.objects.all()
+
         # users = Account.objects.filter(is_active=True)
-        # users = Account.objects.filter(is_superadmin=False)
+        users = Account.objects.filter(is_superadmin=False)
     # if sort_by in ['full_name','email','date_joined']:
     #     sort_by = users.order_by(sort_by)
     # else:
@@ -25,20 +27,39 @@ def user_management_search(request):
     users_paginator = Paginator(users, 100)
     page = request.GET.get("page")
     users = users_paginator.get_page(page)
-    return render(request, "admin/user_management.html", {"users": users,'sort_by':sort_by})
+    return render(
+        request, "admin/user_management.html", {"users": users, "sort_by": sort_by}
+    )
 
 
 def users(request):
-    users = Account.objects.all()
+    users = Account.objects.filter(is_superadmin=False)
     return render(request, "admin/user_management.html", {"users": users})
 
 
-def block_user(request, pk):
-    user = Account.objects.get(id=pk)
-    return redirect("user-management")
+def block_user(request, id):
+    user = Account.objects.get(id=id)
+    if "block_user_confimed" in request.POST:
+        user.is_blocked = not user.is_blocked
+        user.save()
+        for session in Session.objects.filter(expire_date__gte=now()):
+            data = session.get_decoded()
+            # print(data)
+            if data.get("_auth_user_id") == str(user.id):
+                # print(data.get('_auth_user_id'))
+                session.delete()
+        return redirect("admin_panel:users")
+    return render(request, "admin/block_user.html", {"user": user})
+
+
+def delete_user(request, id):
+    user = Account.objects.get(id=id)
+    if "delete_user_confirmed" in request.POST:
+        user.delete()
+        return redirect("admin_panel:users")
+    return render(request, "admin/delete_user.html")
+
+
 @login_required
 def dashboard(request):
-    return render(request,'admin/dashboard.html')
-
-
-    
+    return render(request, "admin/dashboard.html")
