@@ -1,4 +1,4 @@
-# Campeón Sports E-Commerce Platform
+# Campeon Sports E-Commerce Platform
 
 [![Django](https://img.shields.io/badge/Django-6.0.3-green)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
