@@ -27,7 +27,7 @@
         <!-- Email Field -->
         <div>
           <label for="{{ form.email.id_for_label }}" class="block text-[10px] font-black uppercase tracking-widest mb-2 text-gray-500">Email Address</label>
-          <input type="email" placeholder="striker@campeon.com" class="w-full input-field rounded-lg px-6 py-4 text-sm font-medium focus:outline-none placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" value="{{ form.email.value|default:'' }}" />
+          <input type="email" placeholder="striker@campeon.com" class="w-full input-field rounded-lg px-6 py-4 text-sm font-medium focus:outline-none placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" value="{{ request.session.verified_email|default:'' }}" {% if request.session.verified_email %}readonly{% endif %} />
           {% if form.email.errors %}
             <div class="text-red-500 text-xs mt-1">
               {% for error in form.email.errors %}

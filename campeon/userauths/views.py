@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
+from userauths.utility import OTP
 
 
 # verification email import
@@ -28,52 +29,103 @@ from django.core.mail import EmailMessage
 
 
 def signup(request):
+    if not request.session.get("is_email_verified"):
+        return redirect("userauths:activate_account")
+    verified_email = request.session.get("verified_email")
     if request.method == "POST":
         form = UserSignupForm(request.POST)
         if form.is_valid():
             full_name = form.cleaned_data.get("full_name")
-            email = form.cleaned_data.get("email")
+            email = verified_email
             username = email.split("@")[0]
             password = form.cleaned_data.get("password")
             referral_code = form.cleaned_data.get("referral_code")
+            if Account.objects.filter(email=verified_email).exists():
+                messages.error(request, "Email already Registered")
+                return redirect("userauths:activate_account")
             user = Account.objects.create_user(
                 full_name=full_name, email=email, password=password, username=username
             )
             user.referral_code = referral_code
+            user.is_active = True  # Active when sigin
             user.save()
+            del request.session["is_email_verified"]
+            del request.session["verified_email"]
+            messages.success(request, "Account Created successfully")
+            return redirect("userauths:signin")
 
             # User Activation
-            current_site = get_current_site(request)
-            mail_subject = "Please Activate your account"
-            message = render_to_string(
-                "userauths/account_verificaton_email.html",
-                {
-                    "user": user,
-                    "domain": current_site,
-                    "uid": urlsafe_base64_encode(
-                        force_bytes(user.pk)
-                    ),  # encoding the pk
-                    "token": default_token_generator.make_token(user),
-                },
-            )
-            to_email = email
-            send_email = EmailMessage(mail_subject, message, to=[to_email])
-            send_email.send()
+            # current_site = get_current_site(request)
+            # mail_subject = "Please Activate your account"
+            # message = render_to_string(
+            #     "userauths/account_verificaton_email.html",
+            #     {
+            #         "user": user,
+            #         "domain": current_site,
+            #         "uid": urlsafe_base64_encode(
+            #             force_bytes(user.pk)
+            #         ),  # encoding the pk
+            #         "token": default_token_generator.make_token(user),
+            #     },
+            # )
+            # to_email = email
+            # send_email = EmailMessage(mail_subject, message, to=[to_email])
+            # send_email.send()
 
-            # messages.success(request,'Thank you for registering with us . We have send the Verification email to your email address.Please Verify it.')
-            return redirect(
-                f"{reverse('userauths:signin')}?command=verification&email={email}"
-            )
+            # # messages.success(request,'Thank you for registering with us . We have send the Verification email to your email address.Please Verify it.')
+            # return redirect(
+            #     f"{reverse('userauths:signin')}?command=verification&email={email}"
+            # )
     else:
         form = UserSignupForm()
-    context = {"form": form}
-    return render(request, "userauths/signup.html", context)
+
+    return render(request, "userauths/signup.html", {"form": form})
+
+
+def activate_account(request):
+
+    if request.method == "POST":
+
+        if "send_otp" in request.POST:
+            email = request.POST.get("email")
+            request.session["verified_email"] = email
+            if Account.objects.filter(email=email).exists():
+                messages.error(request, "Email already Registered")
+                del request.session["verified_email"]
+                return redirect("userauths:activate_account")
+            
+            otp = OTP.objects.create(email=email)
+            otp.generate_otp()
+            otp.send_otp_email(email)
+            messages.success(request, "OTP has been sent to your email")
+            return redirect("userauths:activate_account")
+        if "verify_otp" in request.POST:
+            email = request.session.get("verified_email")
+            entered_otp = request.POST.get("otp", "")
+
+            otp_obj = OTP.objects.filter(email=email).order_by("-created_at").first()
+
+            if not otp_obj:
+                messages.error(request, "No OTP found!")
+                return redirect("userauths:activate_account")
+            if otp_obj.is_expired():
+                messages.error(request, "OTP expired!")
+                return redirect("userauths:activate_account")
+            if otp_obj.otp != entered_otp:
+                messages.error(request, "Invalid OTP")
+                return redirect("userauths:activate_account")
+            request.session["is_email_verified"] = True
+            otp_obj.delete()
+            messages.success(request, "Email Verified Successfully")
+            return redirect("userauths:signup")
+
+    return render(request, "userauths/activate_account.html")
 
 
 @never_cache
 def signin(request):
     if request.user.is_authenticated:
-        return redirect('user:profile')#dashboard
+        return redirect("user:profile")  # dashboard
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
@@ -95,7 +147,7 @@ def signin(request):
         # if user.is_staff or user.role == "admin":
         #     return redirect("userauths:dashboard")
 
-        return redirect("user:profile") #dashboard
+        return redirect("user:profile")  # dashboard
     return render(request, "userauths/signin.html")
 
 
@@ -192,32 +244,34 @@ def reset_password(request):  # only works with verification link because of uid
     else:
         return render(request, "userauths/reset_password.html")
 
+
 @never_cache
 def signin_admin(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
-            login(request,user)
-            return redirect('admin_panel:dashboard')
+            login(request, user)
+            return redirect("admin_panel:dashboard")
         else:
-            messages.error(request, 'You do not have admin access.')
-            return redirect('userauths:signin')
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        user = authenticate(email =email,password = password)
+            messages.error(request, "You do not have admin access.")
+            return redirect("userauths:signin")
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        user = authenticate(email=email, password=password)
         print(user)
         if user is None:
-            messages.error(request,'Invalid Credentials')
-            return render(request,'userauths/signin_admin.html')
+            messages.error(request, "Invalid Credentials")
+            return render(request, "userauths/signin_admin.html")
         if user.is_superuser:
-            login(request,user)
-            return redirect('admin_panel:dashboard')
+            login(request, user)
+            return redirect("admin_panel:dashboard")
         else:
-            messages.error(request, 'You do not have admin access.')
-            return redirect('userauths:signin')
-    return render(request,'userauths/signin_admin.html')
+            messages.error(request, "You do not have admin access.")
+            return redirect("userauths:signin")
+    return render(request, "userauths/signin_admin.html")
+
 
 @never_cache
 def signout_admin(request):
     logout(request)
-    return redirect('userauths:signin_admin')
+    return redirect("userauths:signin_admin")

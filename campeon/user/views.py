@@ -9,6 +9,8 @@ from django.http import HttpResponse
 from .forms import AddressesForm
 from user.models import Addresses
 import os
+from django.shortcuts import get_object_or_404
+
 
 # Create your views here.
 @never_cache
@@ -76,7 +78,9 @@ def change_email(request):
         elif "verify_otp" in request.POST:
             entered_otp = request.POST.get("otp", "").strip()
             email = request.session.get("pending_email")
-
+            if last_otp and not last_otp.is_expired():
+                messages.warning(request,'OTP already sent. Plesase wait. ')
+                return redirect('userauths:change_email')
             if not email:
                 messages.error(request, "Session expired.Please request OTP again.")
                 return redirect("user:change_email")
@@ -100,6 +104,12 @@ def change_email(request):
 
     return render(request, "user/change_email.html")
 
+def set_default_address(request,address_id):
+    address = get_object_or_404(Addresses,id =address_id,user = request.user)
+    Addresses.objects.filter(user = request.user).update(is_default=False)
+    address.is_default = True
+    address.save()
+    return redirect('user:address')
 
 # def edit_profile(request):
 #     if request.method == "POST":

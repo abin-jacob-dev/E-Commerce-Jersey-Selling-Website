@@ -14,46 +14,46 @@
         <div class="grid grid-cols-2 gap-10">
           <div class="col-span-2">
             <label  class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Full Name</label>
-            <input type="text" name="{{form.full_name.name}}" value="{{ form.full_name.value | default:"" }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
+            <input type="text" name="{{form.full_name.name}}" value="{{ form.full_name.value | default:"" }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
           </div>
           
           <div class="col-span-2">
             <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Phone Number</label>
-            <input type="text" name="{{form.phone_number.name}}" value="{{ form.phone_number.value | default:"" }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
+            <input type="text" name="{{form.phone_number.name}}" value="{{ form.phone_number.value | default:"" }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
           </div>
           
           
           <div>
             <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3"> Address Line 1</label>
-            <textarea type="text" name="{{form.address_line_1.name}}" value="{{ form.address_line_1.value | default:"" }}" class="leading-6 w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" cols="15" rows="5"></textarea>
+            <textarea type="text" name="{{form.address_line_1.name}}" value="{{ form.address_line_1.value | default:"" }}" class="leading-6 w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" cols="15" rows="5"></textarea>
             {% comment %} <input type="text" name="address_line_1" value="{{ address.address_line_1 }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" /> {% endcomment %}
           </div>
           
           <div>
             <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3"> Address Line 2</label>
-            <textarea type="text" name="{{form.address_line_2.name}}" value="{{ form.address_line_2.value | default:"" }}" class="leading-6 w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" cols="15" rows="5"></textarea>
+            <textarea type="text" name="{{form.address_line_2.name}}" value="{{ form.address_line_2.value | default:"" }}" class="leading-6 w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" cols="15" rows="5"></textarea>
             {% comment %} <input type="text" name="address_line_2" value="{{ address.address_line_2 }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" /> {% endcomment %}
           </div>
 
           <div>
             <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">State</label>
-            <input type="text" name="{{form.state.name}}" value="{{ form.state.value | default:"" }}"  class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
+            <input type="text" name="{{form.state.name}}" value="{{ form.state.value | default:"" }}"  class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
           </div>
 
           <div>
             <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">City</label>
-            <input type="text" name="{{form.city.name}}" value="{{ form.city.value | default:"" }}"  class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
+            <input type="text" name="{{form.city.name}}" value="{{ form.city.value | default:"" }}"  class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
           </div>
           <div>
             <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Place</label>
-            <input type="text" name="{{form.place.name}}" value="{{ form.place.value | default:"" }}"  class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
+            <input type="text" name="{{form.place.name}}" value="{{ form.place.value | default:"" }}"  class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
           </div>
           
           
           
           <div>
             <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Postal Code</label>
-            <input type="number" name="{{form.postal_code.name}}" value="{{ form.postal_code.value | default:"" }}"  class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
+            <input type="number" name="{{form.postal_code.name}}" value="{{ form.postal_code.value | default:"" }}"  class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
           </div>
           
           
@@ -61,7 +61,7 @@
           
           <div>
             <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Address Label</label>
-            <input type="text" name="{{form.address_label.name}}" value="{{ form.address_label.value | default:"" }}"  class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
+            <input type="text" name="{{form.address_label.name}}" value="{{ form.address_label.value | default:"" }}"  class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
           </div>
           
           <div>

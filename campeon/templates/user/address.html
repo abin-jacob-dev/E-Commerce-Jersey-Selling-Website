@@ -5,7 +5,7 @@
     <div class="flex justify-between items-start mb-12">
       <div>
         <h2 class="text-7xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest">ADDRESS<br /><span class="text-lime-dark">BOOK.</span></h2>
-        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest max-w-md leading-relaxed">Manage your delivery hubs with tactical precision. Optimized for high-speed checkout and logistical superiority.</p>
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest max-w-md leading-relaxed">Manage your delivery hubs with tactical precision. Optimized for high-speed checkout.</p>
       </div>
       <a href="{% url 'user:add_address' %}" class="bg-lime-dark text-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-black transition-all transform hover:-translate-y-1">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -13,18 +13,42 @@
         </svg>Add New Address
       </a>
     </div>
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       {% for address in address_list %}
         <!-- Address (Primary or Other) -->
         <div class="rounded-sm p-10 flex flex-col min-h-[450px] relative shadow-sm 
           {% if address.is_default %}
+            
+            
             bg-white border-b-8 border-lime
+
+
           {% else %}
-            bg-[#e2ead8] 
+            
+            
+            bg-[#e2ead8]
+
+
           {% endif %}
         ">
           <div class="flex justify-between items-start mb-8">
-            <svg class="w-8 h-8 {% if address.is_default %}text-lime-dark{% else %}text-gray-600{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-8 h-8 {% if address.is_default %}
+                
+                
+                text-lime-dark
+
+
+              {% else %}
+                
+                
+                text-gray-600
+
+
+              {% endif %}"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
             </svg>
             <div class="text-right">
@@ -44,9 +68,15 @@
             <p>{{ address.place }} OR {{ address.postal_code }}</p>
             <p class="text-[9px] text-gray-300 uppercase tracking-widest mt-2">{{ address.state }}</p>
           </div>
-          <div class="flex gap-4 mt-12">
-            <a href="{% url 'user:edit_address' address.id %}" class="flex-1 bg-gray-100 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 text-center block">Edit</a>
-            <a href="{% url 'user:delete_address' address.id %}" class="flex-1 bg-gray-100 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-red-50 hover:text-red-500 text-center block">Delete</a>
+          <div class="flex flex-col gap-4 mt-12">
+            {% if not address.is_default %}
+              <a href="{% url 'user:set_default_address' address.id %}" class="text-center w-full bg-white/50 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-white">Set as Default</a>
+            {% endif %}
+
+            <div class="flex gap-4">
+              <a href="{% url 'user:edit_address' address.id %}" class="flex-1 bg-gray-100 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 text-center block">Edit</a>
+              <a href="{% url 'user:delete_address' address.id %}" class="flex-1 bg-gray-100 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-red-50 hover:text-red-500 text-center block">Delete</a>
+            </div>
           </div>
         </div>
       {% endfor %}
