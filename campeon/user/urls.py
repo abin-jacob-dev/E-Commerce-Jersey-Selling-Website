@@ -1,9 +1,12 @@
 from django.urls import path
 from . import views
+from userauths.views import signin
 
 app_name = "user"
 
 urlpatterns = [
+   
+    path("", views.profile, name="profile"),
     path("profile/", views.profile, name="profile"),
     path("edit-profile/", views.edit_profile, name="edit_profile"),
     path("remove-photo/", views.remove_photo, name="remove_photo"),

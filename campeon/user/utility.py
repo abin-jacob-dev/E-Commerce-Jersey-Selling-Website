@@ -10,7 +10,7 @@ class OTP(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     otp = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(default=timezone.now())
+    expires_at = models.DateTimeField(default=timezone.now)
 
     def is_expired(self):
         return timezone.now() > self.expires_at

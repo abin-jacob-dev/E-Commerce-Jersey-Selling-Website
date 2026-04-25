@@ -1,6 +1,45 @@
 {% extends 'user/partials/base.html' %}
 {% load static %}
 {% block content %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const expiryTimestamp = "{{ otp_expiry|default:'' }}";
+
+  if (expiryTimestamp && !isNaN(expiryTimestamp)) {
+    const sendBtn = document.querySelector("button[name='send_otp']");
+    if (!sendBtn) return;
+
+    const timerDisplay = document.createElement("p");
+    timerDisplay.className = "text-[10px] text-red-500 mt-2 uppercase tracking-widest";
+    sendBtn.parentElement.parentElement.appendChild(timerDisplay);
+
+    function updateTimer() {
+      const now = new Date().getTime();
+      const expiryTime = parseFloat(expiryTimestamp) * 1000;
+      const remaining = expiryTime - now;
+
+      if (remaining <= 0) {
+        timerDisplay.innerText = "You can request a new OTP now.";
+        sendBtn.disabled = false;
+        sendBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        return;
+      }
+
+      const minutes = Math.floor(remaining / 1000 / 60);
+      const seconds = Math.floor((remaining / 1000) % 60);
+
+      timerDisplay.innerText = `Resend OTP in ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+      sendBtn.disabled = true;
+      sendBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+      setTimeout(updateTimer, 1000);
+    }
+
+    updateTimer();
+  }
+});
+</script>
   <div class="min-h-screen w-full bg-lime-light px-10 py-12">
     <div class="w-full max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-12 space-y-10">
       <form action="" method="post">

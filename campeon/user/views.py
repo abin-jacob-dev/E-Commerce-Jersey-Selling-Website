@@ -10,7 +10,8 @@ from .forms import AddressesForm
 from user.models import Addresses
 import os
 from django.shortcuts import get_object_or_404
-
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your views here.
 @never_cache
@@ -65,12 +66,18 @@ def change_email(request):
             if Account.objects.exclude(id=user.id).filter(email=email).exists():
                 messages.error(request, "Email is already in use.")
                 return redirect("user:change_email")
-            otp = OTP.objects.create(user=request.user)
+            last_otp = OTP.objects.filter(user=user).order_by("-created_at").first()
+            if last_otp and not last_otp.is_expired():
+                messages.error(request, "Please wait before requesting another OTP.")
+                return redirect("user:change_email")
+
+            otp = OTP.objects.create(user=user)
             otp.generate_otp()
             otp.send_otp_email(email)
-            request.session["pending_email"] = (
-                email  # store temporarily to link with otp
-            )
+            request.session["pending_email"] = email  # temporarily to link with otp
+            request.session["otp_expiry"] = (
+                timezone.now() + timedelta(minutes=5)
+            ).timestamp()
 
             messages.success(request, "OTP sent to your email.")
 
@@ -78,13 +85,12 @@ def change_email(request):
         elif "verify_otp" in request.POST:
             entered_otp = request.POST.get("otp", "").strip()
             email = request.session.get("pending_email")
-            if last_otp and not last_otp.is_expired():
-                messages.warning(request,'OTP already sent. Plesase wait. ')
-                return redirect('userauths:change_email')
+
             if not email:
                 messages.error(request, "Session expired.Please request OTP again.")
                 return redirect("user:change_email")
-            otp_obj = OTP.objects.filter(user=user).last()
+            otp_obj = OTP.objects.filter(user=user).order_by("-created_at").first()
+
             if not otp_obj:
                 messages.error(request, "No OTP found. Please request again.")
                 return redirect("user:change_email")
@@ -99,17 +105,24 @@ def change_email(request):
             user.save()
             otp_obj.delete()
             request.session.pop("pending_email", None)
+            request.session.pop("otp_expiry", None)
             messages.success(request, "Email updated successfully")
             return redirect("user:profile")
 
-    return render(request, "user/change_email.html")
+    return render(
+        request,
+        "user/change_email.html",
+        {"otp_expiry": request.session.get("otp_expiry")},
+    )
 
-def set_default_address(request,address_id):
-    address = get_object_or_404(Addresses,id =address_id,user = request.user)
-    Addresses.objects.filter(user = request.user).update(is_default=False)
+
+def set_default_address(request, address_id):
+    address = get_object_or_404(Addresses, id=address_id, user=request.user)
+    Addresses.objects.filter(user=request.user).update(is_default=False)
     address.is_default = True
     address.save()
-    return redirect('user:address')
+    return redirect("user:address")
+
 
 # def edit_profile(request):
 #     if request.method == "POST":
