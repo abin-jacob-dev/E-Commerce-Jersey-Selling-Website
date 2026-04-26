@@ -37,9 +37,21 @@ def user_management_search(request):
 
 
 def users(request):
-    users = Account.objects.filter(is_superadmin=False)
-    return render(request, "admin/user_management.html", {"users": users})
+    users = Account.objects.filter(is_superadmin=False).order_by('full_name')
 
+    paginator = Paginator(users, 10)  # same as search view
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "admin/user_management.html",
+        {
+            "users": page_obj,
+            "page_obj": page_obj,
+            "sort_by": "full_name"
+        }
+    )
 
 def block_user(request, id):
     user = Account.objects.get(id=id)

@@ -12,6 +12,9 @@ import os
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
+import re
+from user.utility import validate_password
+from user.utility import validate_name
 
 # Create your views here.
 @never_cache
@@ -28,6 +31,10 @@ def edit_profile(request):
     if request.method == "POST":
         full_name = request.POST.get("full_name", "")
         phone_number = request.POST.get("phone_number", "")
+        error = validate_name(full_name)
+        if error:
+            messages.error(request, error)
+            return redirect("user:edit_profile")
         user = Account.objects.get(id=request.user.id)
         if "photo" in request.FILES:
             if user.profile_image:
@@ -175,6 +182,10 @@ def change_password(request):
         print(current_password, new_password, confirm_password)
         email = request.user.email
         user = Account.objects.get(email=email)
+        error = validate_password(new_password)
+        if error:
+            messages.error(request, error)
+            return redirect("user:change_password")
         if new_password != confirm_password:
             messages.error(request, "New Passwords donot match")
             return redirect("user:change_password")
