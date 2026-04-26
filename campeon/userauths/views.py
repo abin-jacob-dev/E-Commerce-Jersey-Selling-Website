@@ -93,10 +93,14 @@ def activate_account(request):
                 messages.error(request, "Email already Registered")
                 del request.session["verified_email"]
                 return redirect("userauths:activate_account")
-            
+            existing_otp = OTP.objects.filter(email=email).order_by("-created_at").first()
+            if existing_otp and not existing_otp.is_expired():
+                messages.warning(request, "OTP already sent. Please wait.")
+                return redirect("userauths:activate_account")
             otp = OTP.objects.create(email=email)
             otp.generate_otp()
             otp.send_otp_email(email)
+            request.session["otp_expiry"] = int(otp.expires_at.timestamp())
             messages.success(request, "OTP has been sent to your email")
             return redirect("userauths:activate_account")
         if "verify_otp" in request.POST:
@@ -114,12 +118,21 @@ def activate_account(request):
             if otp_obj.otp != entered_otp:
                 messages.error(request, "Invalid OTP")
                 return redirect("userauths:activate_account")
+            if otp_obj.otp == entered_otp:
+                request.session["is_email_verified"] = True
+
+                
+                request.session.pop("otp_expiry", None)
+
+                otp_obj.delete()
+                messages.success(request, "Email Verified Successfully")
+                return redirect("userauths:signup")
             request.session["is_email_verified"] = True
             otp_obj.delete()
             messages.success(request, "Email Verified Successfully")
             return redirect("userauths:signup")
 
-    return render(request, "userauths/activate_account.html")
+    return render(request, "userauths/activate_account.html",{"otp_expiry": request.session.get("otp_expiry")})
 
 
 @never_cache

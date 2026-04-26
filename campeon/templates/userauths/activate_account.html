@@ -16,8 +16,13 @@ document.addEventListener("DOMContentLoaded", function () {
       let timeLeft = Math.floor(expiryTimestamp - now);
 
       if (timeLeft > 0) {
-        let minutes = Math.ceil(timeLeft / 60);
-        timerElement.textContent = `OTP expires in ${minutes} minute${minutes > 1 ? 's' : ''}`;
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+
+        // format like 05:09
+        let formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        timerElement.textContent = `OTP expires in ${formattedTime}`;
       } else {
         timerElement.textContent = "OTP expired";
       }
@@ -53,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
       </form>
       <form action="" method="post">
         {% csrf_token %}
-        {% if request.session.otp_expiry %}
+        {% if otp_expiry %}
         <div id="otp-section">
           <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Enter OTP</label>
 
@@ -64,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
         {% else %}
-<div id="otp-section" style="display:none;">
+<div id="otp-section">
           <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Enter OTP</label>
 
           <div class="flex items-stretch bg-gray-50 border border-gray-100 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-lime-200">

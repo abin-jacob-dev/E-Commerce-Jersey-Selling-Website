@@ -12,23 +12,27 @@ from django.utils.timezone import now
 def user_management_search(request):
     search_user = request.GET.get("search_user")
     sort_by = request.GET.get("sort_by", "full_name")
+    users = Account.objects.filter(is_superadmin=False)
     if search_user:
         users = Account.objects.filter(
             Q(full_name__icontains=search_user) | Q(email__icontains=search_user)
         )
+    if sort_by in ['full_name','email','date_joined'] :
+        users = users.order_by(sort_by)   
     else:
 
         # users = Account.objects.filter(is_active=True)
-        users = Account.objects.filter(is_superadmin=False)
+        users = users.order_by('-full_name')
     # if sort_by in ['full_name','email','date_joined']:
     #     sort_by = users.order_by(sort_by)
     # else:
     #     sort_by=user.order_by('-full_name')
-    users_paginator = Paginator(users, 100)
-    page = request.GET.get("page")
-    users = users_paginator.get_page(page)
+    paginator = Paginator(users, 1)  # Show 25 contacts per page.
+
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
     return render(
-        request, "admin/user_management.html", {"users": users, "sort_by": sort_by}
+        request, "admin/user_management.html", {"users": page_obj, "sort_by": sort_by,'page_obj':page_obj}
     )
 
 

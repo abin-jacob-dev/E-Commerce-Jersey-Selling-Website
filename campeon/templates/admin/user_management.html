@@ -116,7 +116,7 @@
           </tr>
         </thead>
         <tbody class="text-xs font-bold text-gray-600">
-          {% for user in users %}
+          {% for user in page_obj %}
             <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
               <td class="px-10 py-8 font-black text-black">{{ user.full_name }}</td>
               <td class="px-10 py-8 text-[10px] opacity-60">{{ user.email }}</td>
@@ -129,52 +129,105 @@
                 {% endif %}
               </td>
               <td class="px-10 py-8 text-right flex justify-end gap-4">
-                <a  class="text-gray-300 hover:text-black transition-colors">
+                <a class="text-gray-300 hover:text-black transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                   </svg>
                 </a>
-                <a href="{% url "admin_panel:block_user" user.id %}" class="text-gray-300 hover:text-red-500 transition-colors">
+                <a href="{% url 'admin_panel:block_user' user.id %}" class="text-gray-300 hover:text-red-500 transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
                   </svg>
                 </a>
-                <a href="{% url "admin_panel:delete_user" user.id %}" class="text-gray-300 hover:text-red-500 transition-colors">
+                <a href="{% url 'admin_panel:delete_user' user.id %}" class="text-gray-300 hover:text-red-500 transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                   </svg>
-                </a >
+                </a>
               </td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
 
-      {% for item in page %}{% endfor %}
+      {% comment %} <div class="pagination">
+        <span class="step-links">
+          {% if page_obj.has_previous %}
+            <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page=1">&laquo; first</a>
+            <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ page_obj.previous_page_number }}">previous</a>
+          {% endif %}
+
+          <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</span>
+
+          {% if page_obj.has_next %}
+            <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ page_obj.next_page_number }}">next</a>
+            <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+          {% endif %}
+        </span>
+      </div> {% endcomment %}
       <div class="p-10 flex justify-between items-center bg-gray-50/50">
-        <p class="text-[9px] font-black uppercase tracking-widest text-gray-400">Showing 1-10 of 1,284 users</p>
-        <div class="flex items-center gap-4">
-          <button class="p-2 text-gray-300 hover:text-black transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-          </button>
-          <div class="flex gap-2">
-            <button class="w-8 h-8 bg-black text-white rounded-lg font-black text-[10px]">1</button>
-            <button class="w-8 h-8 bg-white border border-gray-100 rounded-lg font-black text-[10px] hover:bg-white shadow-sm">2</button>
-            <button class="w-8 h-8 bg-white border border-gray-100 rounded-lg font-black text-[10px] hover:bg-white shadow-sm">3</button>
-            <span class="px-2 text-gray-300">...</span>
-            <button class="w-8 h-8 bg-white border border-gray-100 rounded-lg font-black text-[10px] hover:bg-white shadow-sm">128</button>
-          </div>
-          <button class="p-2 text-gray-300 hover:text-black transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </button>
+        <p class="text-[9px] font-black uppercase tracking-widest text-gray-400">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} users</p>
+        <div class="flex items-center gap-2">
+          {# FIRST PAGE #}
+          <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page=1"
+            class="w-8 h-8 flex items-center justify-center border rounded-lg text-[10px] font-black
+     {% if page_obj.number == 1 %}
+              
+              
+              bg-black text-white
+
+
+            {% else %}
+              
+              
+              bg-white
+
+
+            {% endif %}">
+            1
+          </a>
+
+          {# LEFT ELLIPSIS #}
+          {% if page_obj.number > 4 %}
+            <span class="px-2 text-gray-400">...</span>
+          {% endif %}
+
+          {# MIDDLE RANGE (current ±2) #}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' and num != 1 and num != page_obj.paginator.num_pages %}
+              {% if page_obj.number == num %}
+                <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ num }}" class="w-8 h-8 flex items-center justify-center bg-black text-white rounded-lg text-[10px] font-black">{{ num }}</a>
+              {% else %}
+                <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ num }}" class="w-8 h-8 flex items-center justify-center bg-white border rounded-lg text-[10px] font-black hover:bg-gray-100">{{ num }}</a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+
+          {# RIGHT ELLIPSIS #}
+          {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+            <span class="px-2 text-gray-400">...</span>
+          {% endif %}
+
+          {# LAST PAGE #}
+          <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ page_obj.paginator.num_pages }}"
+            class="w-8 h-8 flex items-center justify-center border rounded-lg text-[10px] font-black
+     {% if page_obj.number == page_obj.paginator.num_pages %}
+              
+              
+              bg-black text-white
+
+
+            {% else %}
+              
+              
+              bg-white
+
+
+            {% endif %}">
+            {{ page_obj.paginator.num_pages }}
+          </a>
         </div>
       </div>
-
-
     </div>
   </main>
 {% endblock %}
