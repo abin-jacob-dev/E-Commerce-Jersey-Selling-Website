@@ -13,7 +13,7 @@
 
         <!-- Full Name Field -->
         <div>
-          <label for="{{ form.full_name.id_for_label }}" class="block text-[10px] font-black uppercase tracking-widest mb-2 text-gray-500">Full Name</label>
+          <label for="{{ form.full_name.id_for_label }}" class="block text-[13px] font-black uppercase tracking-widest mb-2 text-gray-500">Full Name</label>
           <input type="text" placeholder="ERLING HAALAND" class="w-full input-field rounded-lg px-6 py-4 text-sm font-medium focus:outline-none placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20" name="{{ form.full_name.name }}" id="{{ form.full_name.id_for_label }}" value="{{ form.full_name.value|default:'' }}" />
           {% if form.full_name.errors %}
             <div class="text-red-500 text-xs mt-1">
@@ -26,7 +26,7 @@
 
         <!-- Email Field -->
         <div>
-          <label for="{{ form.email.id_for_label }}" class="block text-[10px] font-black uppercase tracking-widest mb-2 text-gray-500">Email Address</label>
+          <label for="{{ form.email.id_for_label }}" class="block text-[13px] font-black uppercase tracking-widest mb-2 text-gray-500">Email Address</label>
           <input type="email" placeholder="striker@campeon.com" class="w-full input-field rounded-lg px-6 py-4 text-sm font-medium focus:outline-none placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" value="{{ request.session.verified_email|default:'' }}" {% if request.session.verified_email %}readonly{% endif %} />
           {% if form.email.errors %}
             <div class="text-red-500 text-xs mt-1">
@@ -40,7 +40,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Password Field -->
           <div>
-            <label for="{{ form.password.id_for_label }}" class="block text-[10px] font-black uppercase tracking-widest mb-2 text-gray-500">Password</label>
+            <label for="{{ form.password.id_for_label }}" class="block text-[13px] font-black uppercase tracking-widest mb-2 text-gray-500">Password</label>
             <input type="password" placeholder="••••••••" class="w-full input-field rounded-lg px-6 py-4 text-sm font-medium focus:outline-none tracking-widest placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" value="{{ form.password.value|default:'' }}" />
             {% if form.password.errors %}
               <div class="text-red-500 text-xs mt-1">
@@ -53,7 +53,7 @@
 
           <!-- Confirm Password Field -->
           <div>
-            <label for="{{ form.confirm_password.id_for_label }}" class="block text-[10px] font-black uppercase tracking-widest mb-2 text-gray-500">Confirm Password</label>
+            <label for="{{ form.confirm_password.id_for_label }}" class="block text-[13px] font-black uppercase tracking-widest mb-2 text-gray-500">Confirm Password</label>
             <input type="password" placeholder="••••••••" class="w-full input-field rounded-lg px-6 py-4 text-sm font-medium focus:outline-none tracking-widest placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20" name="{{ form.confirm_password.name }}" id="{{ form.confirm_password.id_for_label }}" value="{{ form.confirm_password.value|default:'' }}" />
             {% if form.confirm_password.errors %}
               <div class="text-red-500 text-xs mt-1">
@@ -67,7 +67,7 @@
 
         <!-- Referral Code Field -->
         <div>
-          <label for="{{ form.referral_code.id_for_label }}" class="block text-[10px] font-black uppercase tracking-widest mb-2 text-gray-500">Referral Code (Optional)</label>
+          <label for="{{ form.referral_code.id_for_label }}" class="block text-[13px] font-black uppercase tracking-widest mb-2 text-gray-500">Referral Code (Optional)</label>
           <input type="text" placeholder="striker@campeon.com" class="w-full input-field rounded-lg px-6 py-4 text-sm font-medium focus:outline-none placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20" name="{{ form.referral_code.name }}" id="{{ form.referral_code.id_for_label }}" value="{{ form.referral_code.value|default:'' }}" />
         </div>
 
@@ -83,16 +83,16 @@
       <div class="mt-12">
         <div class="relative flex items-center justify-center mb-8">
           <div class="border-t border-gray-100 w-full"></div>
-          <span class="absolute bg-white px-4 text-[9px] font-black uppercase tracking-[0.3em] text-gray-300">Or continue with</span>
+          <span class="absolute bg-white px-4 text-[12px] font-black uppercase tracking-[0.3em] text-gray-300">Or continue with</span>
         </div>
         <a href="{% provider_login_url "google" %}" class="w-full border border-gray-100 py-4 rounded-lg flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors">
           <img src="https://www.google.com/favicon.ico" alt="Google" class="w-4 h-4 grayscale opacity-50" />
-          <span class="text-[10px] font-black uppercase tracking-widest">Google</span>
+          <span class="text-[13px] font-black uppercase tracking-widest">Google</span>
         </a>
       </div>
 
       <div class="text-center mt-10">
-        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">
+        <p class="text-[13px] font-black uppercase tracking-widest text-black-400">
           Already have an account? <a href="{% url 'userauths:signin' %}" class="text-[#00a300] hover:underline">Sign In</a>
         </p>
       </div>

@@ -19,6 +19,10 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+#Cloudinary imports
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -34,6 +38,7 @@ ALLOWED_HOSTS = ["*", "127.0.0.1"]
 # Application definition
 
 INSTALLED_APPS = [
+    "cloudinary",
     # "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -46,6 +51,7 @@ INSTALLED_APPS = [
     "userauths",
     "user",
     "admin_panel",
+    "products",
     # AllAuth
     "django.contrib.sites",
     "allauth",
@@ -55,6 +61,23 @@ INSTALLED_APPS = [
 ]
 AUTH_USER_MODEL = "userauths.Account"
 
+# Cloudinary Configuration
+# cloudinary.config(
+#     secure=True
+# )
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": os.getenv("CLOUD_NAME"),
+    "API_KEY": os.getenv("API_KEY"),
+    "API_SECRET": os.getenv("API_SECRET"),
+}
+
+print("CLOUDINARY:", os.getenv("CLOUD_NAME"))
+print("API KEY:", os.getenv("API_KEY"))
+print("API_SECRET:", os.getenv("API_SECRET"))
+# Set Cloudinary as the default storage for media files
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -63,7 +86,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    #allauth middleware
+    # allauth middleware
     "allauth.account.middleware.AccountMiddleware",
 ]
 
@@ -161,11 +184,11 @@ MESSAGE_TAGS = {
 }
 
 # SMTP Configuration
-EMAIL_HOST=os.getenv('EMAIL_HOST')
-EMAIL_PORT=os.getenv('EMAIL_PORT')
-EMAIL_HOST_USER=os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS=os.getenv('EMAIL_USE_TLS')
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
 
 
 SITE_ID = 1
@@ -177,12 +200,12 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-LOGIN_URL = 'userauths:signin'
-LOGOUT_URL = 'userauths:signout'
-LOGIN_REDIRECT_URL = "user:profile" #dashboard
+LOGIN_URL = "userauths:signin"
+LOGOUT_URL = "userauths:signout"
+LOGIN_REDIRECT_URL = "user:profile"  # dashboard
 ACCOUNT_LOGOUT_REDIRECT_URL = "userauths:signin"
-ACCOUNT_LOGIN_REDIRECT_URL = "user:profile" #dashboard
-SOCIALACCOUNT_LOGIN_ON_GET=True
+ACCOUNT_LOGIN_REDIRECT_URL = "user:profile"  # dashboard
+SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_ADAPTER = "userauths.adapters.MySocialAccountAdapter"
 
 # SESSION_COOKIE_AGE = 300 #(60*5) 5 MINUTES

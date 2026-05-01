@@ -20,12 +20,12 @@
     </div>
 
     <!-- Title -->
-    <h2 class="text-[28px] font-bold uppercase text-center mb-4 tracking-tighter leading-tight">
+    <h2 class="text-[212px] font-bold uppercase text-center mb-4 tracking-tighter leading-tight">
       DELETE THIS<br />ADDRESS
     </h2>
 
     <!-- Description -->
-    <p class="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed mb-8 px-4">
+    <p class="text-center text-[13px] font-bold text-black-400 uppercase tracking-widest leading-relaxed mb-8 px-4">
       Are you sure you want to delete this address? This action is
       <span class="text-[#c11d1d]">permanent</span> and cannot be reversed.
     </p>
@@ -35,13 +35,13 @@
       <form method="POST">
         {% csrf_token %}
         <button type="submit"
-          class="w-full bg-[#c11d1d] text-white py-4 rounded-md font-black uppercase text-[10px] tracking-widest hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2">
+          class="w-full bg-[#c11d1d] text-white py-4 rounded-md font-black uppercase text-[13px] tracking-widest hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2">
           DELETE PERMANENTLY
         </button>
       </form>
 
       <a href="{% url 'user:address' %}"
-        class="w-full bg-white border border-[#006400] text-black py-4 rounded-md font-black uppercase text-[10px] tracking-widest hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
+        class="w-full bg-white border border-[#006400] text-black py-4 rounded-md font-black uppercase text-[13px] tracking-widest hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
         GO BACK
       </a>
     </div>

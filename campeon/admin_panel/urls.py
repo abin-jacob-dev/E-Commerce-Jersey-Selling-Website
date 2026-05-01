@@ -16,4 +16,5 @@ urlpatterns = [
     ),
     path("block-user/<id>/", views.block_user, name="block_user"),
     path("delete-user/<id>/", views.delete_user, name="delete_user"),
+    
 ]

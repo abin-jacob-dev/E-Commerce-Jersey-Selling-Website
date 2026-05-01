@@ -27,6 +27,23 @@ from django.core.mail import EmailMessage
 #     print(request.user.is_authenticated, request.user.is_active)
 #     return render(request, "userauths/dashboard.html")
 
+def superuser_required(func):
+    def wrapper(request,*args,**kwargs):
+        if request.user.is_authenticated and request.user.is_superuser:
+            return func(request,*args,**kwargs)
+        return redirect('userauths:signin')
+    return wrapper
+
+def user_login_required(func):
+    def wrapper(request,*args,**kwargs):
+        if request.user.is_authenticated and request.user.is_blocked:
+            logout(request)
+            messages.error(request,'Your Account is blocked!')
+            return redirect('userauths:signin')
+        if request.user.is_authenticated and not request.user.is_blocked:
+            return func(request,*args,**kwargs)
+        return redirect('userauths:signin')
+    return wrapper
 
 def signup(request):
     if not request.session.get("is_email_verified"):
@@ -142,9 +159,9 @@ def signin(request):
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
-        print(email, password)
+        
         user = authenticate(email=email, password=password)
-        print(user)
+        
         if user is None:
             messages.error(request, "Invalid Credentials")
             print("user is none")
@@ -155,7 +172,7 @@ def signin(request):
             return redirect("userauths:signin")
 
         login(request, user)
-        print("user logged in")
+        
         messages.success(request, "You are now logged in.")
         # if user.is_staff or user.role == "admin":
         #     return redirect("userauths:dashboard")
@@ -285,6 +302,7 @@ def signin_admin(request):
 
 
 @never_cache
+@login_required()
 def signout_admin(request):
     logout(request)
     return redirect("userauths:signin_admin")

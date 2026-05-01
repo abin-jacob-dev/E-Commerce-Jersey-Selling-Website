@@ -15,10 +15,11 @@ from datetime import timedelta
 import re
 from user.utility import validate_password
 from user.utility import validate_name
+from userauths.views import user_login_required
 
 # Create your views here.
 @never_cache
-@login_required(login_url="userauths:signin")
+@user_login_required
 def profile(request):
     try:
         address = Addresses.objects.get(user=request.user, is_default=True)
@@ -26,7 +27,7 @@ def profile(request):
         address = None
     return render(request, "user/profile.html", {"address": address})
 
-
+@user_login_required
 def edit_profile(request):
     if request.method == "POST":
         full_name = request.POST.get("full_name", "")
@@ -47,7 +48,7 @@ def edit_profile(request):
         return redirect("user:profile")
     return render(request, "user/edit_profile.html")
 
-
+@user_login_required
 def remove_photo(request):
     user = request.user
 
@@ -60,7 +61,7 @@ def remove_photo(request):
 
     return redirect("user:edit_profile")
 
-
+@user_login_required
 def change_email(request):
     user = request.user
     if request.method == "POST":
@@ -122,7 +123,7 @@ def change_email(request):
         {"otp_expiry": request.session.get("otp_expiry")},
     )
 
-
+@user_login_required
 def set_default_address(request, address_id):
     address = get_object_or_404(Addresses, id=address_id, user=request.user)
     Addresses.objects.filter(user=request.user).update(is_default=False)
@@ -173,7 +174,7 @@ def set_default_address(request, address_id):
 #     return render(request, "user/edit_profile.html")
 
 
-@login_required
+@user_login_required
 def change_password(request):
     if request.method == "POST":
         current_password = request.POST.get("current_password")
@@ -200,14 +201,14 @@ def change_password(request):
                 return redirect("user:change_password")
     return render(request, "user/change_password.html")
 
-
+@user_login_required
 def address(request):
     user_id = request.user.id
     # user_account = Account.objects.get(id = user_id)
     address_list = Addresses.objects.filter(user=request.user.id)
     return render(request, "user/address.html", {"address_list": address_list})
 
-
+@user_login_required
 def add_address(request):
     if request.method == "POST":
         form = AddressesForm(request.POST)
@@ -238,7 +239,7 @@ def add_address(request):
         form = AddressesForm()
     return render(request, "user/add_address.html", {"form": form})
 
-
+@user_login_required
 def edit_address(request, id):
     address = Addresses.objects.get(id=id)
     if request.method == "POST":
@@ -255,7 +256,7 @@ def edit_address(request, id):
         form = AddressesForm(instance=address)
     return render(request, "user/edit_address.html", {"form": form, "address": address})
 
-
+@user_login_required
 def delete_address(request, id):
     address = Addresses.objects.get(id=id)
     if request.method == "POST":

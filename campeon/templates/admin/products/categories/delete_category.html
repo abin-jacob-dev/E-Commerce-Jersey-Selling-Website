@@ -1,0 +1,57 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+    <div class="w-full max-w-2xl">
+      <form action="" method="POST">
+        {% csrf_token %}
+
+        <!-- Modal Container -->
+        <div class="bg-white w-full max-w-2xl rounded-sm shadow-2xl relative overflow-hidden">
+          <!-- Top Accent Bar -->
+          <div class="absolute top-0 left-0 w-full h-1 bg-[#c11d1d]"></div>
+
+          <div class="p-10 md:p-12">
+            <!-- Header Section -->
+            <div class="flex items-start gap-6 mb-10">
+              <div class="w-16 h-16 bg-[#fde7e7] rounded-xl flex items-center justify-center shrink-0">
+                <svg class="w-8 h-8 text-[#c11d1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+
+              <div>
+                <h2 class="text-4xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest text-black">CRITICAL ACTION</h2>
+                <p class="text-lg text-gray-700 font-medium">
+                  You are about to delete the category
+                  <span class="border-b-2 border-black font-bold">'{{category.name}}'</span>. This action is <span class="text-[#c11d1d] font-bold">irreversible</span>.
+                </p>
+              </div>
+            </div>
+
+            <!-- Impact Grid -->
+            <div class="grid grid-cols-1 gap-4 mb-10">
+              <div class="bg-[#f9fafb] border-l-4 border-gray-200 p-6">
+                <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Product Impact</span>
+                <div class="text-2xl font-black mb-1 text-black">112 Items</div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Will become uncategorized</p>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col md:flex-row gap-4">
+              <a href="{% url 'products:categories' %}" class="flex-1 bg-[#121212] text-white py-5 px-8 rounded-sm font-black uppercase text-xs tracking-widest hover:bg-gray-800 transition-all flex items-center justify-center">GO BACK</a>
+
+              <button type="submit" class="flex-[2] bg-[#c11d1d] text-white py-5 px-8 rounded-sm font-black uppercase text-xs tracking-widest hover:bg-black transition-all flex items-center justify-center gap-3 shadow-lg">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>DELETE CATEGORY
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

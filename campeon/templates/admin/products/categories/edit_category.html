@@ -1,0 +1,138 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  let cropper
+
+  const input = document.getElementById('imageInput')
+  const cropImage = document.getElementById('cropImage')
+  const cropBtn = document.getElementById('cropBtn')
+  const finalPreview = document.getElementById('finalPreview')
+
+  if (!input) return
+
+  input.addEventListener('change', function (e) {
+
+    const file = e.target.files[0]
+    if (!file) return
+
+    const url = URL.createObjectURL(file)
+
+    cropImage.src = url
+    cropImage.classList.remove('hidden')
+    cropBtn.classList.remove('hidden')
+
+    if (cropper) cropper.destroy()
+
+    cropImage.onload = function () {
+      cropper = new Cropper(cropImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        autoCropArea: 1
+      })
+    }
+  })
+
+  cropBtn.addEventListener('click', function () {
+
+    if (!cropper) return
+
+    cropper.getCroppedCanvas({
+      width: 400,
+      height: 400
+    }).toBlob(function (blob) {
+
+      // Convert blob → file
+      const file = new File([blob], "cropped.jpg", {
+        type: "image/jpeg"
+      })
+
+      // Replace real input file
+      const dt = new DataTransfer()
+      dt.items.add(file)
+      input.files = dt.files
+
+      // Preview
+      finalPreview.src = URL.createObjectURL(file)
+      finalPreview.classList.remove('hidden')
+
+      // Hide crop UI
+      cropImage.classList.add('hidden')
+      cropBtn.classList.add('hidden')
+
+    }, "image/jpeg")
+
+  })
+
+})
+</script>
+  <main class="flex-1 p-12 overflow-y-auto">
+    <!-- Top Bar -->
+    <div class="flex justify-between items-center mb-12">
+      <div class="flex items-center gap-4">
+        <a href="{% url 'products:categories' %}" class="p-2 bg-white rounded-lg shadow-sm hover:bg-black-50 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </a>
+        <h2 class="text-4xl font-black uppercase tracking-tighter leading-none tracking-tightest">EDIT CATEGORY</h2>
+      </div>
+    </div>
+
+    <form class="max-w-4xl" method="POST" enctype="multipart/form-data">
+      <div class="bg-white p-12 rounded-[2rem] border border-balckbg-black-100 shadow-sm space-y-12">
+        <!-- Form Fields -->
+
+        {% csrf_token %}
+        <div class="grid grid-cols-2 gap-10">
+          <div class="col-span-2">
+            <label class="block text-[12px] font-black uppercase tracking-widest text-balckbg-black-400 mb-3">Category Name</label>
+            <input type="text" name="name" value="{{ form.name.value }}" placeholder="e.g. Retro Legends" class="w-full bg-black-50 border border-balckbg-black-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
+          </div>
+          <div class="mb-6">
+            {% if category.image %}
+              <p class="text-xs font-bold mb-2">Current Image</p>
+              <img src="{{ category.image.url }}" class="w-40 h-40 object-cover rounded-lg border" />
+            {% endif %}
+            <label class="block text-[12px] font-black uppercase tracking-widest mb-3">
+  Change Image
+</label>
+
+<input type="file" id="imageInput" name="image" accept="image/*" />
+
+<img id="cropImage" class="hidden max-w-full rounded-lg mt-4" />
+
+<button type="button" id="cropBtn" class="hidden mt-4 bg-black text-white px-4 py-2 rounded">
+  Apply Crop
+</button>
+
+<img id="finalPreview" class="hidden w-40 h-40 object-cover mt-4 rounded-lg border" />
+
+
+          </div>
+          <div class="col-span-2">
+            <label class="block text-[12px] font-black uppercase tracking-widest text-balckbg-black-400 mb-3">Description</label>
+            <textarea rows="4" name="description" placeholder="Brief overview of what this collection represents..." class="w-full bg-black-50 border border-balckbg-black-100 rounded-lg px-6 py-4 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-lime/20">{{ form.description.value }}</textarea>
+          </div>
+
+          <div>
+            <label class="block text-[12px] font-black uppercase tracking-widest text-balckbg-black-400 mb-3">Status</label>
+            <select name="is_active" class="w-full bg-black-50 border border-balckbg-black-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20 appearance-none">
+                <option value="True" {% if form.is_active.value %}selected{% endif %}>Active</option>
+                <option value="False" {% if form.is_active.value == False %}selected{% endif %}>Inactive</option>
+            </select>
+            
+          </div>
+        </div>
+        <div class="flex items-center gap-4 pt-6">
+          <button type="submit" class="bg-[#006400] text-white px-12 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl hover:bg-black transition-all">Update Category</button>
+          <a href="{% url 'products:categories' %}" type="button" class="bg-white border border-balckbg-black-200 text-black px-12 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-sm hover:bg-black-50 transition-all">Cancel</a>
+        </div>
+      </div>
+      {{ form.non_field_errors }}
+    </form>
+  </main>
+{% endblock %}

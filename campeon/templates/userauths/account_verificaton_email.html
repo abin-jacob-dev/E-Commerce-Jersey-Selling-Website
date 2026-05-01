@@ -1,5 +1,20 @@
-{% autoescape off %}
+{% comment %} {% autoescape off %}
   Hi {{ user.full_name }},
   Please Click on below link to confirm your Registration. <br />
   http://{{ domain }}{% url 'userauths:activate' uidb64=uid token=token %}
-{% endautoescape %}
+{% endautoescape %} {% endcomment %}
+
+Hi {{ user.full_name }},
+
+Welcome to Campeon!
+
+Thanks for signing up. To complete your registration and activate your account, please confirm your email address by clicking the link below:
+
+http://{{ domain }}{% url 'userauths' uidb64=uid token=token %}
+
+If you didn’t create an account on Campeon, you can safely ignore this email.
+
+We’re excited to have you on board!
+
+Best regards,
+The Campeon Team

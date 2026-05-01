@@ -7,8 +7,8 @@
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-6xl font-black uppercase tracking-tighter tracking-tightest">User Profile</h2>
       <div class="flex gap-4">
-        <a href="{% url 'user:edit_profile' %}" class="button bg-lime-dark text-white px-8 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-black transition-colors">Edit Profile</a>
-        <a href="{% url 'user:change_password' %}" class="bg-gray-200 text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-gray-300 transition-colors">Change Password</a>
+        <a href="{% url 'user:edit_profile' %}" class="button bg-lime-dark text-white px-8 py-3 text-[13px] font-black uppercase tracking-widest hover:bg-black transition-colors">Edit Profile</a>
+        <a href="{% url 'user:change_password' %}" class="bg-gray-200 text-black px-8 py-3 text-[13px] font-black uppercase tracking-widest hover:bg-gray-300 transition-colors">Change Password</a>
       </div>
     </div>
     <p class="text-xs font-bold text-lime-dark uppercase tracking-widest mb-12">Quick access to core identification and contact information.</p>
@@ -19,18 +19,18 @@
       </div>
       <div>
         <h3 class="text-4xl font-black uppercase tracking-tighter tracking-tightest">{{ user.full_name }}</h3>
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{{ user.email }}</p>
+        <p class="text-xs font-bold text-black-400 uppercase tracking-widest mt-1">{{ user.email }}</p>
       </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div class="space-y-4">
         <div class="bg-[#e2ead8] p-8 rounded-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest text-lime-dark block mb-2">Full Name</span>
+          <span class="text-[13px] font-black uppercase tracking-widest text-lime-dark block mb-2">Full Name</span>
           <p class="text-lg font-bold">{{ user.full_name }}</p>
         </div>
         <div class="bg-[#e2ead8] p-8 rounded-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest text-lime-dark block mb-2">Phone</span>
+          <span class="text-[13px] font-black uppercase tracking-widest text-lime-dark block mb-2">Phone</span>
           {% if user.phone_number %}
             <p class="text-lg font-bold">{{ user.phone_number }}</p>
           {% else %}
@@ -38,14 +38,14 @@
           {% endif %}
         </div>
         <div class="bg-[#e2ead8] p-8 rounded-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest text-lime-dark block mb-2">Email</span>
+          <span class="text-[13px] font-black uppercase tracking-widest text-lime-dark block mb-2">Email</span>
           <p class="text-lg font-bold">{{ user.email }}</p>
         </div>
       </div>
 
       <div class="bg-[#e2ead8] p-8 rounded-sm relative">
-        <span class="text-[10px] font-black uppercase tracking-widest text-lime-dark block mb-4">Address</span>
-        <div class="absolute top-8 right-8 bg-lime text-black px-8 py-1 text-[10px] font-black uppercase tracking-widest rounded-sm">Default</div>
+        <span class="text-[13px] font-black uppercase tracking-widest text-lime-dark block mb-4">Address</span>
+        <div class="absolute top-8 right-8 bg-lime text-black px-8 py-1 text-[13px] font-black uppercase tracking-widest rounded-sm">Default</div>
         {% if address %}
           <div class="space-y-1 text-sm font-bold text-gray-700">
             
@@ -62,15 +62,15 @@
         {% endif %}
 
         <div class="mt-12">
-          <a href="{% url "user:address" %}" class="bg-lime text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors">Manage Addresses</a>
+          <a href="{% url "user:address" %}" class="bg-lime text-black px-8 py-3 text-[13px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors">Manage Addresses</a>
         </div>
       </div>
     </div>
 
     <div class="mt-20 bg-black text-white p-12 rounded-sm relative overflow-hidden">
       <div class="relative z-10">
-        <span class="text-[10px] font-black uppercase tracking-[0.3em] text-lime block mb-4">Referral Code</span>
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-8">
+        <span class="text-[13px] font-black uppercase tracking-[0.3em] text-lime block mb-4">Referral Code</span>
+        <p class="text-xs font-bold text-black-400 uppercase tracking-widest mb-8">
           Share the passion. Get <span class="text-white">500 Elite Points</span> for every friend who joins.
         </p>
 

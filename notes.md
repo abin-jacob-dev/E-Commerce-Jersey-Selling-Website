@@ -89,7 +89,7 @@ Now, modify your template (edit_profile.html) to show the OTP field and allow th
   <main class="flex-1 bg-lime-light p-12">
     <div class="flex justify-between items-center mb-12">
       <h2 class="text-6xl font-black uppercase tracking-tighter leading-none tracking-tightest">EDIT PROFILE</h2>
-      <a href="{% url "user:profile" %}" class="text-[10px] font-black uppercase tracking-widest hover:underline transition-all">Back to Profile</a>
+      <a href="{% url "user:profile" %}" class="text-[13px] font-black uppercase tracking-widest hover:underline transition-all">Back to Profile</a>
     </div>
 
     <form class="max-w-4xl space-y-12" method="POST">
@@ -100,7 +100,7 @@ Now, modify your template (edit_profile.html) to show the OTP field and allow th
       <div class="flex items-center gap-10">
         <div>
           <h4 class="text-sm font-black uppercase tracking-widest mb-2 tracking-tightest">Enter OTP</h4>
-          <p class="text-[9px] font-bold text-black-300 uppercase tracking-widest leading-loose">
+          <p class="text-[12px] font-bold text-black-300 uppercase tracking-widest leading-loose">
             Please check your email for the OTP.
           </p>
           <input name="otp" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
@@ -115,8 +115,8 @@ Now, modify your template (edit_profile.html) to show the OTP field and allow th
 
         <div class="flex items-center gap-4 pt-12 border-t border-gray-50 mt-12">
           <!-- Save Changes Button (only visible after OTP is verified) -->
-          <button type="submit" name="save_changes" class="bg-lime-dark text-white px-12 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-sm shadow-xl hover:bg-black transition-all">Save Changes</button>
-          <button type="submit" name="send_otp" class="bg-lime-dark text-white px-12 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-sm shadow-xl hover:bg-black transition-all">Send OTP</button>
+          <button type="submit" name="save_changes" class="bg-lime-dark text-white px-12 py-5 text-[13px] font-black uppercase tracking-[0.2em] rounded-sm shadow-xl hover:bg-black transition-all">Save Changes</button>
+          <button type="submit" name="send_otp" class="bg-lime-dark text-white px-12 py-5 text-[13px] font-black uppercase tracking-[0.2em] rounded-sm shadow-xl hover:bg-black transition-all">Send OTP</button>
         </div>
       </div>
     </form>

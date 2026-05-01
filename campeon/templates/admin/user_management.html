@@ -6,9 +6,9 @@
     <div class="flex justify-between items-end mb-12">
       <div>
         <h2 class="text-6xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest">User Management</h2>
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Manage userprofiles, staff roles, and platform permissions.</p>
+        <p class="text-xs font-bold text-black-400 uppercase tracking-widest">Manage userprofiles, staff roles, and platform permissions.</p>
       </div>
-      <button class="bg-[#006400] text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center gap-3">
+      <button class="bg-[#006400] text-white px-10 py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center gap-3">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>Add New User
@@ -21,7 +21,7 @@
           <svg class="w-5 h-5 text-lime-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
           </svg>
-          <span class="text-[9px] font-black uppercase tracking-widest text-lime-dark">Total Members</span>
+          <span class="text-[12px] font-black uppercase tracking-widest text-lime-dark">Total Members</span>
         </div>
         <div class="text-5xl font-black">1,284</div>
       </div>
@@ -30,7 +30,7 @@
           <svg class="w-5 h-5 text-lime" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
           </svg>
-          <span class="text-[9px] font-black uppercase tracking-widest text-lime">Active Today</span>
+          <span class="text-[12px] font-black uppercase tracking-widest text-lime">Active Today</span>
         </div>
         <div class="text-5xl font-black relative z-10">42</div>
         <div class="absolute inset-0 opacity-10">
@@ -42,7 +42,7 @@
           <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <span class="text-[9px] font-black uppercase tracking-widest text-black">Verified Status</span>
+          <span class="text-[12px] font-black uppercase tracking-widest text-black">Verified Status</span>
         </div>
         <div class="text-5xl font-black">98%</div>
       </div>
@@ -51,22 +51,23 @@
           <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
           </svg>
-          <span class="text-[9px] font-black uppercase tracking-widest text-red-500">Blocked Users</span>
+          <span class="text-[12px] font-black uppercase tracking-widest text-red-500">Blocked Users</span>
         </div>
         <div class="text-5xl font-black">12</div>
       </div>
     </div>
     <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm">
       <form action="{% url 'admin_panel:user_management_search' %}" method="get">
-        <div class="p-8 flex justify-between items-center border-b border-gray-100">
+        <div class="p-8 flex justify-between items-center border-b border-black-100">
           <div class="flex gap-4">
-            <input type="text" placeholder="search..." name="search_user" class="w-full bg-white border border-gray-100 rounded-lg px-6 py-3 text-[10px] font-black uppercase tracking-widest focus:outline-none shadow-sm focus:ring-2 focus:ring-lime/20" />
+            <input type="text" placeholder="search..." name="search_user" class="w-full bg-white border border-black-100 rounded-lg px-6 py-3 text-[13px] font-black uppercase tracking-widest focus:outline-none shadow-sm focus:ring-2 focus:ring-lime/20" />
             <button type="submit" class="ml-2 bg-lime-500 text-white px-4 py-3 rounded-lg text-xs font-bold uppercase shadow-sm focus:outline-none hover:bg-lime-600">Search</button>
+            <a href="{% url 'admin_panel:users' %}" class="bg-black text-white px-4 py-3 text-[13px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center">Clear</a>
 
-            {% comment %} <button class="bg-black text-white px-6 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg">All Users</button>
-            <button class="bg-gray-50 text-gray-400 px-6 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-gray-100 transition-colors">Staff Only</button> {% endcomment %}
+            {% comment %} <button class="bg-black text-white px-6 py-2 text-[12px] font-black uppercase tracking-widest rounded-lg">All Users</button>
+            <button class="bg-black-50 text-black-400 px-6 py-2 text-[12px] font-black uppercase tracking-widest rounded-lg hover:bg-black-100 transition-colors">Staff Only</button> {% endcomment %}
           </div>
-          <button class="p-2 text-gray-300 hover:text-black">
+          <button class="p-2 text-black-300 hover:text-black">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
             </svg>
@@ -74,46 +75,41 @@
         </div>
       </form>
       <table class="w-full text-left">
-        <thead class="bg-gray-50 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-100">
+        <thead class="bg-black-50 text-[12px] font-black uppercase tracking-[0.2em] text-black-400 border-b border-black-100">
           <tr>
             <th class="px-10 py-8">
-              <a href="?search_user={{ request.GET.search_user }}&sort_by=full_name" class="text-gray-400 hover:text-black">Name</a>
+              <a href="?search_user={{ request.GET.search_user }}&sort_by=full_name" class="text-black-400 hover:text-black">Name</a>
             </th>
             <th class="px-10 py-8">
-              <a href="?search_user={{ request.GET.search_user }}&sort_by=email" class="text-gray-400 hover:text-black">Email</a>
+              <a href="?search_user={{ request.GET.search_user }}&sort_by=email" class="text-black-400 hover:text-black">Email</a>
             </th>
             <th class="px-10 py-8">
-              <a href="?search_user={{ request.GET.search_user }}&sort_by=date_joined" class="text-gray-400 hover:text-black">Joined Date</a>
+              <a href="?search_user={{ request.GET.search_user }}&sort_by=date_joined" class="text-black-400 hover:text-black">Joined Date</a>
             </th>
             <th class="px-10 py-8">Status</th>
             <th class="px-10 py-8 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody class="text-xs font-bold text-gray-600">
+        <tbody class="text-xs font-bold text-black-600">
           {% for user in page_obj %}
-            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+            <tr class="border-b border-black-50 hover:bg-black-50/50 transition-colors group">
               <td class="px-10 py-8 font-black text-black">{{ user.full_name }}</td>
-              <td class="px-10 py-8 text-[10px] opacity-60">{{ user.email }}</td>
-              <td class="px-6 py-8 text-gray-400">{{ user.date_joined }}</td>
+              <td class="px-10 py-8 text-[13px]">{{ user.email }}</td>
+              <td class="px-6 py-8 text-black-400">{{ user.date_joined }}</td>
               <td class="px-10 py-8">
                 {% if user.is_blocked %}
-                  <span class="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-red-600"><div class="w-1.5 h-1.5 bg-red-600 rounded-full"></div>Blocked</span>
+                  <span class="flex items-center gap-2 text-[12px] font-black uppercase tracking-widest text-red-600"><div class="w-1.5 h-1.5 bg-red-600 rounded-full"></div>Blocked</span>
                 {% else %}
-                  <span class="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-green-600"><div class="w-1.5 h-1.5 bg-green-600 rounded-full"></div>Active</span>
+                  <span class="flex items-center gap-2 text-[12px] font-black uppercase tracking-widest text-green-600"><div class="w-1.5 h-1.5 bg-green-600 rounded-full"></div>Active</span>
                 {% endif %}
               </td>
               <td class="px-10 py-8 text-right flex justify-end gap-4">
-                <a class="text-gray-300 hover:text-black transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                  </svg>
-                </a>
-                <a href="{% url 'admin_panel:block_user' user.id %}" class="text-gray-300 hover:text-red-500 transition-colors">
+                <a href="{% url 'admin_panel:block_user' user.id %}" class="text-black-300 hover:text-red-500 transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
                   </svg>
                 </a>
-                <a href="{% url 'admin_panel:delete_user' user.id %}" class="text-gray-300 hover:text-red-500 transition-colors">
+                <a href="{% url 'admin_panel:delete_user' user.id %}" class="text-black-300 hover:text-red-500 transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                   </svg>
@@ -139,22 +135,58 @@
           {% endif %}
         </span>
       </div> {% endcomment %}
-      <div class="p-10 flex justify-between items-center bg-gray-50/50">
-        <p class="text-[9px] font-black uppercase tracking-widest text-gray-400">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} users</p>
+
+      <div class="flex justify-end items-center p-10 bg-black-50/50">
+        <div class="flex items-center gap-2">
+          {# PREVIOUS #}
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&search_user={{ request.GET.search_user|default:'' }}&sort_by={{ request.GET.sort_by|default:'' }}" class="px-2">Prev</a>
+          {% endif %}
+
+          {# PAGES #}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+              <span class="px-2 font-bold bg-black text-white">{{ num }}</span>
+            {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+              <a href="?page={{ num }}&search_user={{ request.GET.search_user|default:'' }}&sort_by={{ request.GET.sort_by|default:'' }}" class="px-2 border">{{ num }}</a>
+            {% endif %}
+          {% endfor %}
+
+          {# NEXT #}
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&search_user={{ request.GET.search_user|default:'' }}&sort_by={{ request.GET.sort_by|default:'' }}" class="px-2">Next</a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% comment %} <div class="p-10 flex justify-between items-center bg-black-50/50">
+        <p class="text-[12px] font-black uppercase tracking-widest text-black-400">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} users</p>
         <div class="flex items-center gap-2">
           {# FIRST PAGE #}
           <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page=1"
-            class="w-8 h-8 flex items-center justify-center border rounded-lg text-[10px] font-black
-     {% if page_obj.number == 1 %}
+            class="w-8 h-8 flex items-center justify-center border rounded-lg text-[13px] font-black
+            {% if page_obj.number == 1 %}
+              
+              
+              
               
               
               bg-black text-white
 
 
+
+
+
             {% else %}
               
               
+              
+              
+              
               bg-white
+
+
+
 
 
             {% endif %}">
@@ -163,45 +195,57 @@
 
           {# LEFT ELLIPSIS #}
           {% if page_obj.number > 4 %}
-            <span class="px-2 text-gray-400">...</span>
+            <span class="px-2 text-black-400">...</span>
           {% endif %}
 
           {# MIDDLE RANGE (current ±2) #}
           {% for num in page_obj.paginator.page_range %}
             {% if num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' and num != 1 and num != page_obj.paginator.num_pages %}
               {% if page_obj.number == num %}
-                <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ num }}" class="w-8 h-8 flex items-center justify-center bg-black text-white rounded-lg text-[10px] font-black">{{ num }}</a>
+                <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ num }}" class="w-8 h-8 flex items-center justify-center bg-black text-white rounded-lg text-[13px] font-black">{{ num }}</a>
               {% else %}
-                <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ num }}" class="w-8 h-8 flex items-center justify-center bg-white border rounded-lg text-[10px] font-black hover:bg-gray-100">{{ num }}</a>
+                <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ num }}" class="w-8 h-8 flex items-center justify-center bg-white border rounded-lg text-[13px] font-black hover:bg-black-100">{{ num }}</a>
               {% endif %}
             {% endif %}
           {% endfor %}
 
           {# RIGHT ELLIPSIS #}
           {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
-            <span class="px-2 text-gray-400">...</span>
+            <span class="px-2 text-black-400">...</span>
           {% endif %}
 
           {# LAST PAGE #}
           <a href="?search_user={{ request.GET.search_user }}&sort_by={{ sort_by }}&page={{ page_obj.paginator.num_pages }}"
-            class="w-8 h-8 flex items-center justify-center border rounded-lg text-[10px] font-black
-     {% if page_obj.number == page_obj.paginator.num_pages %}
+            class="w-8 h-8 flex items-center justify-center border rounded-lg text-[13px] font-black
+            {% if page_obj.number == page_obj.paginator.num_pages %}
+              
+              
+              
               
               
               bg-black text-white
 
 
+
+
+
             {% else %}
               
               
+              
+              
+              
               bg-white
+
+
+
 
 
             {% endif %}">
             {{ page_obj.paginator.num_pages }}
           </a>
         </div>
-      </div>
+      </div> {% endcomment %}
     </div>
   </main>
 {% endblock %}

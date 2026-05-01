@@ -6,22 +6,22 @@
   <div class="bg-white rounded-3xl p-12 w-full max-w-lg shadow-sm border border-white">
       {% comment %} {% if request.GET.command == 'verification' %}
         <div class="container mx-auto bg-green-100 text-green-800 p-4 rounded-lg shadow-md border-l-4 border-green-500 mb-4">
-          <strong>Thank you for registering with us. We have sent the verification email to your email address <span class="font-semibold">{{ request.GET.email }}</span>. Please verify it.</strong>
+          <strong>Thank you for registering with us. We have sent the verification email to your email address <span class="font-semiblack">{{ request.GET.email }}</span>. Please verify it.</strong>
         </div>
         <br /><br />
         Already Verified? <a href="{% url 'userauths:signin' %}" class="text-green-600 hover:text-blue-800 font-medium">Login</a>
       {% else %} {% endcomment %}
       <div class="text-center mb-10">
         <h2 class="text-4xl font-black mb-2 tracking-tightest">Welcome Back</h2>
-        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Enter your credentials.</p>
+        <p class="text-xs text-400 font-black uppercase tracking-widest">Enter your credentials.</p>
       </div>
       {% include 'partials/alert.html' %}
       <form class="space-y-6" method="POST">
         {% csrf_token %}
         <div>
-          <label class="block text-[10px] font-black uppercase tracking-widest mb-2 text-gray-500">Email Address</label>
+          <label class="block text-[13px] font-black uppercase tracking-widest mb-2 text-500">Email Address</label>
           <div class="input-field rounded-lg flex items-center px-4 py-3">
-            <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
             </svg>
             <input type="email" placeholder="name@campeon.com" class="bg-transparent w-full focus:outline-none text-sm font-medium focus:ring-2 focus:ring-lime/20" name ='email'>
@@ -29,9 +29,9 @@
         </div>
 
         <div>
-          <label class="block text-[10px] font-black uppercase tracking-widest mb-2 text-gray-500">Password</label>
+          <label class="block text-[13px] font-black uppercase tracking-widest mb-2 text-500">Password</label>
           <div class="input-field rounded-lg flex items-center px-4 py-3">
-            <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
             </svg>
             <input type="password" placeholder="••••••••" class="bg-transparent w-full focus:outline-none text-sm font-medium tracking-widest focus:ring-2 focus:ring-lime/20" name="password" />
@@ -39,27 +39,27 @@
         </div>
 
         {% comment %} <div class="text-right">
-          <a href="{% url "userauths:forgot_password" %}" class="text-[10px] font-black uppercase tracking-widest text-[#00a300] hover:underline">Forgot Password?</a>
+          <a href="{% url "userauths:forgot_password" %}" class="text-[13px] font-black uppercase tracking-widest text-[#00a300] hover:underline">Forgot Password?</a>
         </div> {% endcomment %}
 
         <button class="w-full bg-lime-bright text-black font-black uppercase py-5 rounded-lg shadow-lg hover:bg-black hover:text-white transition-all transform hover:-translate-y-1 tracking-[0.2em] text-sm">Sign In</button>
       </form>
 
       {% comment %} <div class="text-center mt-10">
-        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">
+        <p class="text-[13px] font-black uppercase tracking-widest text-400">
           Don't have an account? <a href="{% url "userauths:signup" %}" class="text-[#00a300] hover:underline">Sign Up</a>
         </p>
       </div> {% endcomment %}
 
       {% comment %} <div class="mt-12">
         <div class="relative flex items-center justify-center mb-8">
-          <div class="border-t border-gray-100 w-full"></div>
-          <span class="absolute bg-white px-4 text-[9px] font-black uppercase tracking-[0.3em] text-gray-300">Or continue with</span>
+          <div class="border-t border-100 w-full"></div>
+          <span class="absolute bg-white px-4 text-[12px] font-black uppercase tracking-[0.3em] text-300">Or continue with</span>
         </div>
 
-        <a href="{% provider_login_url "google" %}" class="w-full border border-gray-100 py-4 rounded-lg flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors">
-          <img src="https://www.google.com/favicon.ico" alt="Google" class="w-4 h-4 grayscale opacity-50" />
-          <span class="text-[10px] font-black uppercase tracking-widest">Google</span>
+        <a href="{% provider_login_url "google" %}" class="w-full border border-100 py-4 rounded-lg flex items-center justify-center gap-3 hover:bg-50 transition-colors">
+          <img src="https://www.google.com/favicon.ico" alt="Google" class="w-4 h-4scale opacity-50" />
+          <span class="text-[13px] font-black uppercase tracking-widest">Google</span>
         </a>
       </div> {% endcomment %}
       {% comment %} {% endif %} {% endcomment %}

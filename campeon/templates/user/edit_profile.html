@@ -4,7 +4,7 @@
   <main class="flex-1 bg-lime-light p-12">
     <div class="flex justify-between items-center mb-12">
       <h2 class="text-6xl font-black uppercase tracking-tighter leading-none tracking-tightest">EDIT PROFILE</h2>
-      <a href="{% url 'user:profile' %}" class="text-[10px] font-black uppercase tracking-widest hover:underline transition-all">Back to Profile</a>
+      <a href="{% url 'user:profile' %}" class="text-[13px] font-black uppercase tracking-widest hover:underline transition-all">Back to Profile</a>
     </div>
 
     <form action="{% url 'user:edit_profile' %}" method="POST" enctype="multipart/form-data" class="max-w-4xl space-y-12">
@@ -22,7 +22,7 @@
             {% endif %}"
             class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
           <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-            <span class="text-white text-[8px] font-black uppercase tracking-widest">Change Photo</span>
+            <span class="text-white text-[12px] font-black uppercase tracking-widest">Change Photo</span>
           </div>
 
           <!-- File Input (Hidden) -->
@@ -31,35 +31,35 @@
         <div>
           <div class="flex items-center justify-between mb-2">
             <h4 class="text-sm font-black uppercase tracking-widest tracking-tightest">{{ user.email }}</h4>
-            <a href="{% url 'user:change_email' %}" class="text-green-900 text-[9px] font-black uppercase tracking-widest no-underline ml-4 hover:text-green-700 transition-colors">Change Email</a>
+            <a href="{% url 'user:change_email' %}" class="text-green-900 text-[12px] font-black uppercase tracking-widest no-underline ml-4 hover:text-green-700 transition-colors">Change Email</a>
           </div>
-          <p class="text-[9px] font-bold text-black-300 uppercase tracking-widest leading-loose">
+          <p class="text-[12px] font-bold text-black-300 uppercase tracking-widest leading-loose">
             Square format recommended.<br />JPG or PNG, max 2MB.
           </p>
-          <a href="{% url "user:remove_photo" %}" class="text-[9px] font-black uppercase text-red-600 hover:text-red-800 mt-2">Remove Photo</a>
+          <a href="{% url "user:remove_photo" %}" class="text-[12px] font-black uppercase text-red-600 hover:text-red-800 mt-2">Remove Photo</a>
         </div>
       </div>
       <div class="bg-white p-12 rounded-sm shadow-sm">
         <div class="grid grid-cols-2 gap-10">
           <div class="col-span-2 md:col-span-1">
-            <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Full Name</label>
+            <label class="block text-[12px] font-black uppercase tracking-widest text-black-400 mb-3">Full Name</label>
             <input name="full_name" type="text" value="{{ user.full_name }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
           </div>
 
           {% comment %} <div class="col-span-2 md:col-span-1 relative">
-            <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Email Address</label>
+            <label class="block text-[12px] font-black uppercase tracking-widest text-black-400 mb-3">Email Address</label>
             <input name="email" type="email" value="{{ user.email }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20 pr-14" />
           </div> {% endcomment %}
 
           <div class="col-span-2 md:col-span-1">
-            <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Phone Number</label>
+            <label class="block text-[12px] font-black uppercase tracking-widest text-black-400 mb-3">Phone Number</label>
             <input name="phone_number" type="number" value="{{ user.phone_number }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
           </div>
         </div>
 
         <div class="flex items-center gap-4 pt-12 border-t border-gray-50 mt-12">
-          <button type="submit" class="bg-lime-dark text-white px-12 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-sm shadow-xl hover:bg-black transition-all">Save Changes</button>
-          <button type="button" class="bg-white border border-gray-200 text-black px-12 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-sm shadow-sm hover:bg-gray-50 transition-all">Cancel</button>
+          <button type="submit" class="bg-lime-dark text-white px-12 py-5 text-[13px] font-black uppercase tracking-[0.2em] rounded-sm shadow-xl hover:bg-black transition-all">Save Changes</button>
+          <button type="button" class="bg-white border border-gray-200 text-black px-12 py-5 text-[13px] font-black uppercase tracking-[0.2em] rounded-sm shadow-sm hover:bg-gray-50 transition-all">Cancel</button>
         </div>
       </div>
     </form>
