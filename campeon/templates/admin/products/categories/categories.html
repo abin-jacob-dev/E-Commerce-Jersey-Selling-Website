@@ -19,8 +19,7 @@
         <a href="{% url 'products:add_new_category' %}" class="bg-[#006400] text-white px-6 md:px-10 py-3 md:py-4 text-[12px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center gap-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-          </svg>Add New Category
-        </a>
+          </svg>Add Category</a>
       </div>
     </div>
 
@@ -37,7 +36,7 @@
     </div>
     <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm">
       <div class="overflow-x-auto">
-        <table class="w-full text-left min-w-[950px]">
+        <table class="w-full text-left">
           <!-- HEAD -->
           <thead class="bg-black-50 text-[12px] font-black uppercase tracking-[0.2em] text-balckbg-black-400 border-b border-balckbg-black-100">
             <tr>
@@ -139,7 +138,7 @@
         <p class="text-[12px] font-black uppercase tracking-widest text-black">Showing {{ categories.start_index }}-{{ categories.end_index }} of {{ categories.paginator.count }} categories</p>
 
         <!-- Pagination controls -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 flex-wrap justify-center">
           <!-- Previous button -->
           {% if categories.has_previous %}
             <a href="?page={{ categories.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}
@@ -160,11 +159,11 @@
           <!-- Page numbers -->
           {% for num in categories.paginator.page_range %}
             {% if categories.number == num %}
-              <span class="w-8 h-8 bg-black text-white rounded-lg text-[10px] font-black flex items-center justify-center">{{ num }}</span>
+              <span class="min-w-[32px] h-8 px-2 bg-black text-white rounded-lg text-[10px] font-black flex items-center justify-center">{{ num }}</span>
             {% else %}
               <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}
                 {% endif %}"
-                class="w-8 h-8 bg-white border rounded-lg text-[10px] font-black flex items-center justify-center hover:bg-black hover:text-white">
+                class="min-w-[32px] h-8 px-2 bg-white border rounded-lg text-[10px] font-black flex items-center justify-center hover:bg-black hover:text-white">
                 {{ num }}
               </a>
             {% endif %}

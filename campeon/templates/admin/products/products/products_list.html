@@ -1,0 +1,194 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+{% block content %}
+  <main class="flex-1 p-12 overflow-y-auto">
+    <div class="flex justify-between items-end mb-12">
+      <div>
+        <h2 class="text-6xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest text-black">PRODUCTS</h2>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Manage your products and stock availability across all jersey collections.</p>
+      </div>
+      <a href="{% url 'products:add_product' %}" class="bg-lime-dark text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center justify-center gap-3">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+
+        <span class="text-center">Add New Product</span>
+      </a>
+    </div>
+
+    <div class="bg-white/50 p-8 rounded-[2rem] border border-gray-100 mb-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="md:col-span-2">
+          <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Search</label>
+          <div class="flex gap-2">
+            <div class="bg-white rounded-lg flex items-center px-4 py-3 border w-full">
+              <input type="text" name="search" placeholder="Search..." class="w-full text-[10px] font-black uppercase focus:outline-none" />
+            </div>
+
+            <button type="submit" class="bg-lime-500 text-white px-4 py-3 rounded-lg text-xs font-bold hover:bg-lime-600">Search</button>
+
+            <a href="" class="bg-black text-white px-4 py-3 rounded-lg text-xs font-bold hover:bg-gray-800">Clear</a>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Category</label>
+          <select class="w-full bg-white rounded-lg px-4 py-3 text-[10px] font-black uppercase tracking-widest shadow-sm border border-gray-50 focus:outline-none appearance-none focus:ring-2 focus:ring-lime/20">
+            <option>All Categories</option>
+            <option>Elite Performance</option>
+            <option>Retro</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Status</label>
+          <div class="flex gap-4">
+            <select class="flex-1 bg-white rounded-lg px-4 py-3 text-[10px] font-black uppercase tracking-widest shadow-sm border border-gray-50 focus:outline-none appearance-none focus:ring-2 focus:ring-lime/20">
+              <option>All Items</option>
+              <option>Active</option>
+              <option>Draft</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Table Header -->
+      <div class="grid grid-cols-12 px-10 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">
+        <div class="col-span-3">Product</div>
+        <div class="col-span-2">Category</div>
+        <div class="col-span-2">Varients</div>
+        <div class="col-span-2 text-center">Stock</div>
+        <div class="col-span-2 text-center">Status</div>
+        <div class="col-span-1 text-right">Actions</div>
+      </div>
+
+      <!-- Product 1 -->
+      {% for product in products %}
+      <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow grid grid-cols-12 items-center px-10 relative overflow-hidden">
+        <div class="col-span-3 flex items-center gap-6">
+          {% comment %} <div class="w-16 h-16 bg-black rounded-xl overflow-hidden flex items-center justify-center">
+            <img src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=150&h=150&auto=format&fit=crop" class="w-full h-full object-cover grayscale opacity-80" />
+          </div> {% endcomment %}
+          <div>
+            <h4 class="text-sm font-black uppercase tracking-tighter tracking-tightest">{{product.name}}</h4>
+            
+          </div>
+        </div>
+        <div class="col-span-2">
+          <span class="bg-black-50 text-black text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-sm">{{product.category}}</span>
+        </div>
+        <div class="col-span-2">
+          <span class="bg-gray-100 px-3 py-1 rounded text-[10px] font-bold">4 Variants</span>
+        </div>
+        <div class="col-span-2 text-center font-black text-black">42 Items</div>
+        <div class="col-span-2 flex justify-center">
+          <span class="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-green-600"><div class="w-1.5 h-1.5 bg-green-600 rounded-full"></div>Active</span>
+        </div>
+        <div class="col-span-1 text-right flex justify-end gap-4">
+          <button class="text-gray-300 hover:text-black">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+            </svg>
+          </button>
+          <button class="text-gray-300 hover:text-red-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+
+      <!-- Product 2 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow grid grid-cols-12 items-center px-10 relative overflow-hidden">
+        <div class="col-span-3 flex items-center gap-6">
+          {% comment %} <div class="w-16 h-16 bg-black rounded-xl overflow-hidden flex items-center justify-center">
+            <img src="https://images.unsplash.com/photo-1541033514767-27e742845011?q=80&w=150&h=150&auto=format&fit=crop" class="w-full h-full object-cover grayscale opacity-80" />
+          </div> {% endcomment %}
+          <div>
+            <h4 class="text-sm font-black uppercase tracking-tighter tracking-tightest">Paris Elite 24/25 Away</h4>
+            <p class="text-[8px] font-bold text-gray-300 uppercase tracking-widest mt-1">PSG-A-24-ELITE</p>
+          </div>
+        </div>
+        <div class="col-span-2">
+          <span class="text-black-dark text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-sm">Club</span>
+        </div>
+        <div class="col-span-2">
+          <span class="bg-gray-100 px-3 py-1 rounded text-[10px] font-bold">1 Variants</span>
+        </div>
+        <div class="col-span-2 text-center font-black text-red-500">0 Items</div>
+        <div class="col-span-2 flex justify-center">
+          <span class="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-red-500"><div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>Out of Stock</span>
+        </div>
+        <div class="col-span-1 text-right flex justify-end gap-4">
+          <button class="text-gray-300 hover:text-black">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+            </svg>
+          </button>
+          <button class="text-gray-300 hover:text-red-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Product 3 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow grid grid-cols-12 items-center px-10 relative overflow-hidden">
+        <div class="col-span-3 flex items-center gap-6">
+          {% comment %} <div class="w-16 h-16 bg-black rounded-xl overflow-hidden flex items-center justify-center">
+            <img src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=150&h=150&auto=format&fit=crop" class="w-full h-full object-cover grayscale opacity-80" />
+          </div> {% endcomment %}
+          <div>
+            <h4 class="text-sm font-black uppercase tracking-tighter tracking-tightest">Milan Noir Limited Edition</h4>
+            <p class="text-[8px] font-bold text-gray-300 uppercase tracking-widest mt-1">MIL-X-NOIR-LE</p>
+          </div>
+        </div>
+        <div class="col-span-2">
+          <span class="text-black-dark text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-sm">Club</span>
+        </div>
+        <div class="col-span-2">
+          <span class="bg-gray-100 px-3 py-1 rounded text-[10px] font-bold">2 Variants</span>
+        </div>
+        <div class="col-span-2 text-center font-black text-black">12 Items</div>
+        <div class="col-span-2 flex justify-center">
+          <span class="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-gray-400"><div class="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>Draft</span>
+        </div>
+        <div class="col-span-1 text-right flex justify-end gap-4">
+          <button class="text-gray-300 hover:text-black">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+            </svg>
+          </button>
+          <button class="text-gray-300 hover:text-red-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-10 flex justify-between items-center mt-8">
+      <p class="text-[9px] font-black uppercase tracking-widest text-gray-400">Showing 1-3 of 24 products</p>
+      <div class="flex items-center gap-4">
+        <button class="p-2 text-gray-300 hover:text-black transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <div class="flex gap-2">
+          <button class="w-8 h-8 bg-black text-white rounded-lg font-black text-[10px]">1</button>
+          <button class="w-8 h-8 bg-white border border-gray-100 rounded-lg font-black text-[10px] hover:bg-white shadow-sm">2</button>
+          <button class="w-8 h-8 bg-white border border-gray-100 rounded-lg font-black text-[10px] hover:bg-white shadow-sm">3</button>
+        </div>
+        <button class="p-2 text-gray-300 hover:text-black transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </main>
+{% endblock %}

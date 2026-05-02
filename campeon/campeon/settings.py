@@ -38,7 +38,8 @@ ALLOWED_HOSTS = ["*", "127.0.0.1"]
 # Application definition
 
 INSTALLED_APPS = [
-    "cloudinary",
+    'cloudinary',
+    'cloudinary_storage',
     # "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -70,10 +71,6 @@ CLOUDINARY_STORAGE = {
     "API_KEY": os.getenv("API_KEY"),
     "API_SECRET": os.getenv("API_SECRET"),
 }
-
-print("CLOUDINARY:", os.getenv("CLOUD_NAME"))
-print("API KEY:", os.getenv("API_KEY"))
-print("API_SECRET:", os.getenv("API_SECRET"))
 # Set Cloudinary as the default storage for media files
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 

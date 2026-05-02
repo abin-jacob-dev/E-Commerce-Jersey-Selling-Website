@@ -1,0 +1,266 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+{% block content %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const container = document.getElementById('variantsContainer')
+      const addBtn = document.getElementById('addVariantBtn')
+    
+      // 🔹 ADD VARIANT
+      addBtn.addEventListener('click', function () {
+        const variants = document.querySelectorAll('.variant-item')
+        const clone = variants[0].cloneNode(true)
+    
+        // reset inputs
+        clone.querySelectorAll('input').forEach((i) => (i.value = ''))
+        clone.querySelectorAll('select').forEach((s) => (s.selectedIndex = 0))
+    
+        container.appendChild(clone)
+        updateIndexes()
+      })
+    
+      // 🔹 DELETE VARIANT
+      document.addEventListener('click', function (e) {
+        if (e.target.closest('.deleteVariantBtn')) {
+          const variants = document.querySelectorAll('.variant-item')
+    
+          if (variants.length === 1) {
+            alert('At least one variant is required')
+            return
+          }
+    
+          e.target.closest('.variant-item').remove()
+          updateIndexes()
+        }
+      })
+    
+      // 🔹 UPDATE IMAGE INPUT INDEX
+      function updateIndexes() {
+        document.querySelectorAll('.variant-item').forEach((item, index) => {
+          item.querySelectorAll('.variantImages').forEach((input) => {
+            input.name = `images_${index}[]`
+          })
+        })
+      }
+      // 🔹 VALIDATION (min 3 images)
+      document.querySelector('form').addEventListener('submit', function (e) {
+        let valid = true
+    
+        document.querySelectorAll('.variant-item').forEach((item, index) => {
+          const input = item.querySelector('.variantImages')
+    
+          if (!input || input.files.length < 3) {
+            alert(`Variant ${index + 1} must have at least 3 images`)
+            valid = false
+          }
+        })
+    
+        if (!valid) e.preventDefault()
+      })
+    })
+  </script>
+  <main class="flex-1 overflow-y-auto">
+    <div class="p-12 space-y-12">
+      <form class="space-y-12" id="productForm" method="POST">
+        {% csrf_token %}
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
+          <div>
+            <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4">ADD PRODUCT</h2>
+          </div>
+          <div class="flex flex-wrap items-center gap-6">
+            <!-- Main Actions (Moved to Top as requested) -->
+            <div class="flex gap-4">
+              <button type="button" class="bg-white border border-gray-100 text-black-400 px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-black-50 transition-all shadow-sm">Cancel</button>
+
+              <button type="submit" class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-4 group">
+                <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>Save Product
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Content -->
+
+        <!-- General Information Card -->
+        <section class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-50">
+          <!-- HEADER ROW WITH GLOBAL STATUS -->
+          <div class="flex justify-between items-start mb-12">
+            <h3 class="text-2xl font-black uppercase tracking-tightest">General Information</h3>
+
+            <!-- GLOBAL STATUS -->
+            <div class="bg-[#121212] text-white pl-8 pr-6 py-4 rounded-2xl flex items-center gap-6 shadow-2xl">
+              <div class="text-right">
+                <p class="text-[8px] font-black uppercase tracking-widest text-gray-500 mb-0.5">Status</p>
+                <p class="text-[10px] font-black uppercase tracking-widest">Active</p>
+              </div>
+
+              <button class="w-10 h-6 bg-lime-bright rounded-full p-1 relative transition-all"><span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></span></button>
+            </div>
+          </div>
+
+          <!-- ROW 1: PRODUCT NAME + CATEGORY -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+            <div>
+              <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Product Name</label>
+              <input type="text" name="name" placeholder="e.g. Apex Strike Pro Jersey" class="w-full bg-[#f4fce3] border-none rounded-xl px-8 py-6 text-sm font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-lime/10 transition-all" />
+            </div>
+
+            <div>
+              <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Category</label>
+              <div class="relative">
+                <select name="category" class="w-full bg-[#f4fce3] border-none rounded-xl px-8 py-6 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
+                  <option>Performance Apparel</option>
+                  <option>Retro Classics</option>
+                </select>
+
+                <svg class="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- ROW 2: DESCRIPTION + KEY HIGHLIGHTS -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+              <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Description</label>
+              <textarea name="description" rows="6" placeholder="Detailed product story and features..." class="w-full bg-[#f4fce3] border-none rounded-2xl px-8 py-6 text-sm font-medium placeholder:text-gray-300 focus:ring-4 focus:ring-lime/10 transition-all"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Key Highlights</label>
+              <textarea name="highlights" rows="6" placeholder="Bullet points: Material, Breathability, Durability..." class="w-full bg-[#f4fce3] border-none rounded-2xl px-8 py-6 text-sm font-medium placeholder:text-gray-300 focus:ring-4 focus:ring-lime/10 transition-all"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Product Variants Card -->
+        <section class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-50">
+          <div class="flex justify-between items-center mb-12">
+            <h3 class="text-2xl font-black uppercase tracking-tightest">Product Variants</h3>
+            <button type="button" id="addVariantBtn" class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-3 group">
+              <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-90 transition-transform">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+              </div>Add Variant
+            </button>
+          </div>
+
+          <!-- Variant Entry -->
+          <div id="variantsContainer">
+            <div class="variant-item bg-gray-50/30 p-10 rounded-[2.5rem] border border-gray-100 relative mb-10">
+              <button type="button" class="deleteVariantBtn absolute top-8 right-8 text-gray-200 hover:text-red-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+
+              <div class="space-y-10">
+                <!-- Row 1: Primary Data -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                  <div>
+                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Size</label>
+                    <div class="relative">
+                      <select name="size" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
+                        <option>S</option>
+                        <option>M</option>
+                        <option>L</option>
+                        <option>XL</option>
+                        <option>XXL</option>
+                      </select>
+                      <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Color</label>
+                    <div class="relative">
+                      <select name="color" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
+                        <option>Black</option>
+                        <option>White</option>
+                        <option>Red</option>
+                        <option>Blue</option>
+                        <option>Green</option>
+                        <option>Yellow</option>
+                        <option>Neon Lime</option>
+                      </select>
+                      <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">SKU</label>
+                    <input type="text" name="sku" value="APX-001-BLK-S" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 transition-all" />
+                  </div>
+                </div>
+
+                <!-- Row 2: Numerical Data (Moved to separate row to avoid truncation) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
+                  <div>
+                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Price ($)</label>
+                    <input type="number" name="price" value="850.00" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
+                  </div>
+                  <div>
+                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Disc %</label>
+                    <input type="number" name="discount" value="0" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
+                  </div>
+                  <div>
+                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Stock</label>
+                    <input type="number" name="stock" value="100" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
+                  </div>
+                  <div>
+                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Status</label>
+                    <div class="relative">
+                      <select name="status" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
+                        <option>Active</option>
+                        <option>Inactive</option>
+                      </select>
+                      <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Row 3: Variant Assets -->
+                <div>
+                  <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-6">Variant Assets <span class="text-[7px] lowercase font-medium ml-2 text-gray-300">Limit 3 per variant</span></label>
+                  <div class="flex flex-wrap gap-6 items-center">
+                    <div class="w-24 h-24 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex items-center justify-center cursor-pointer hover:border-lime-bright hover:bg-white transition-all group/asset">
+                      <svg class="w-6 h-6 text-gray-200 group-hover/asset:text-lime-bright transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        <input type="file" class="variantImages hidden" multiple accept="image/*" />
+                      </svg>
+                    </div>
+                    <div class="w-24 h-24 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex items-center justify-center cursor-pointer hover:border-lime-bright transition-all group/asset">
+                      <svg class="w-6 h-6 text-gray-200 group-hover/asset:text-lime-bright transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        <input type="file" name="images_0[]" class="variantImages hidden" multiple />
+                      </svg>
+                    </div>
+                    <div class="w-24 h-24 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex items-center justify-center cursor-pointer hover:border-lime-bright transition-all group/asset">
+                      <svg class="w-6 h-6 text-gray-200 group-hover/asset:text-lime-bright transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        <input type="file" name="images_0[]" class="variantImages hidden" multiple />
+                      </svg>
+                    </div>
+                    <div class="ml-4">
+                      <p class="text-[8px] font-black uppercase tracking-widest text-gray-300">
+                        Drop variant<br />images here
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </form>
+    </div>
+  </main>
+{% endblock %}
