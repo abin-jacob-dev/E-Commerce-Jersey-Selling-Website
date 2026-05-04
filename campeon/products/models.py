@@ -1,7 +1,9 @@
 from django.db import models
+
 # from cloudinary.models import CloudinaryField  # Removed CloudinaryField; using URLField for image URLs
 from django.core.validators import MaxValueValidator
 from django.db.models import Sum
+
 
 # Create your models here.
 class Category(models.Model):
@@ -36,7 +38,6 @@ class Product(models.Model):
         null=True,
         blank=True,
         related_name="products",
-        
     )
     description = models.TextField(blank=True)
     highlights = models.TextField(blank=True)
@@ -44,6 +45,14 @@ class Product(models.Model):
     is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def get_primary_image(self):
+        variant = self.variants.first()
+        if variant:
+            image = variant.images.first()
+            if image:
+                return image.image.url
+        return None
 
     def total_stock(self):
         return self.variants.aggregate(total=Sum("stock"))["total"] or 0
@@ -96,7 +105,7 @@ class Variant(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.product.name} - {self.size} - {self.color}"
+        return f"{self.product.name} - {self.size} - {self.color or 'No Color'}"
 
 
 class VariantImage(models.Model):
@@ -110,5 +119,3 @@ class VariantImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.variant.sku}"
-
-

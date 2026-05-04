@@ -4,6 +4,8 @@ from django.db import transaction
 from django.contrib import messages
 from products.forms import CategoryForm, ProductForm, ColorForm
 from .models import Category, Product, Variant, Color, VariantImage
+from django.db.models import Prefetch
+from django.db.models import Min, Q
 
 
 # Create your views here.
@@ -70,9 +72,7 @@ def delete_category(request, id):
 
 def colors(request):
     colors_list = Color.objects.all().order_by("name")
-    return render(
-        request, "admin/products/colors/colors.html", {"colors": colors_list}
-    )
+    return render(request, "admin/products/colors/colors.html", {"colors": colors_list})
 
 
 def add_color(request):
@@ -111,18 +111,22 @@ def delete_color(request, id):
 
 
 def products_list(request):
-    products = Product.objects.all()
-    return render(request, "admin/products/products/products_list.html",{'products':products})
-
-
+    products = (
+        Product.objects.prefetch_related("variants")
+        .filter(is_deleted=False)
+        .order_by("-updated_at")
+    )
+    return render(
+        request, "admin/products/products/products_list.html", {"products": products}
+    )
 
 
 def add_product(request):
-    
+
     if request.method == "POST":
         try:
             with transaction.atomic():
-                
+
                 is_active = request.POST.get("is_active", "true") == "true"
 
                 product = Product.objects.create(
@@ -139,16 +143,14 @@ def add_product(request):
                 prices = request.POST.getlist("price")
                 discounts = request.POST.getlist("discount")
                 stocks = request.POST.getlist("stock")
-                variant_statuses = request.POST.getlist("variant_is_active")
+                variant_status = request.POST.getlist("variant_is_active")
 
                 for i in range(len(sizes)):
-                    
+
                     discount = discounts[i] if i < len(discounts) else 0
                     stock = stocks[i] if i < len(stocks) else 0
                     variant_active = (
-                        variant_statuses[i] == "true"
-                        if i < len(variant_statuses)
-                        else True
+                        variant_status[i] == "true" if i < len(variant_status) else True
                     )
 
                     color = Color.objects.get(id=colors[i])
@@ -173,12 +175,11 @@ def add_product(request):
             return redirect("products:products_list")
 
         except Exception as e:
-           
+
             print("ERROR adding product:", str(e))
             messages.error(request, f"Failed to save product: {e}")
             return redirect("products:add_product")
 
-    
     categories = Category.objects.filter(is_active=True)
     colors = Color.objects.all()
     return render(
@@ -192,5 +193,190 @@ def add_product(request):
     )
 
 
-def edit_product(request):
-    return render(request, "admin/products/products/edit_product.html")
+def edit_product(request, id):
+    product = get_object_or_404(Product, id=id)
+
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+                # Update main product
+                product.name = request.POST.get("name")
+                product.category_id = request.POST.get("category")
+                product.description = request.POST.get("description")
+                product.highlights = request.POST.get("highlights")
+                product.is_active = request.POST.get("is_active") == "true"
+                product.save()
+
+                # Process variants
+                variant_ids = request.POST.getlist("variant_id")
+                sizes = request.POST.getlist("size")
+                colors = request.POST.getlist("color")
+                skus = request.POST.getlist("sku")
+                prices = request.POST.getlist("price")
+                discounts = request.POST.getlist("discount")
+                stocks = request.POST.getlist("stock")
+                variant_statuses = request.POST.getlist("variant_is_active")
+
+                # Image deletions
+                delete_image_ids = request.POST.getlist("delete_images")
+                if delete_image_ids:
+                    VariantImage.objects.filter(id__in=delete_image_ids).delete()
+
+                processed_variant_ids = []
+
+                for i in range(len(sizes)):
+                    # Get or create color
+                    color_id = colors[i] if i < len(colors) else None
+                    color = (
+                        Color.objects.filter(id=color_id).first() if color_id else None
+                    )
+
+                    variant_id = variant_ids[i] if i < len(variant_ids) else None
+
+                    variant_data = {
+                        "size": sizes[i],
+                        "color": color,
+                        "sku": skus[i],
+                        "price": prices[i],
+                        "discount": discounts[i] if i < len(discounts) else 0,
+                        "stock": stocks[i] if i < len(stocks) else 0,
+                        "is_active": (
+                            variant_statuses[i] == "true"
+                            if i < len(variant_statuses)
+                            else True
+                        ),
+                    }
+
+                    if variant_id:
+                        # Update existing
+                        variant = Variant.objects.get(id=variant_id, product=product)
+                        for attr, value in variant_data.items():
+                            setattr(variant, attr, value)
+                        variant.save()
+                    else:
+                        # Create new
+                        variant = Variant.objects.create(
+                            product=product, **variant_data
+                        )
+
+                    processed_variant_ids.append(variant.id)
+
+                    # Handle new image uploads for this variant
+                    new_images = request.FILES.getlist(f"images_{i}[]")
+                    for img in new_images:
+                        VariantImage.objects.create(variant=variant, image=img)
+
+                # Delete variants not present in the form
+                Variant.objects.filter(product=product).exclude(
+                    id__in=processed_variant_ids
+                ).delete()
+
+            messages.success(request, "Product updated successfully")
+            return redirect("products:products_list")
+
+        except Exception as e:
+            print(f"ERROR editing product: {str(e)}")
+            messages.error(request, f"Failed to update product: {str(e)}")
+            return redirect("products:edit_product", id=id)
+
+    categories = Category.objects.filter(is_active=True)
+    colors = Color.objects.all()
+    variants = product.variants.all()
+    return render(
+        request,
+        "admin/products/products/edit_product.html",
+        {
+            "product": product,
+            "categories": categories,
+            "colors": colors,
+            "variants": variants,
+        },
+    )
+
+
+def delete_product(request, id):
+    product = get_object_or_404(Product, id=id)
+    if request.method == "POST":
+        product.is_deleted = True
+        product.save()
+        messages.success(request, f"Product '{product.name}' deleted successfully.")
+        return redirect("products:products_list")
+
+    return render(
+        request, "admin/products/products/delete_product.html", {"product": product}
+    )
+
+
+def all_products(request):
+    products = Product.objects.filter(
+        is_deleted=False, is_active=True, variants__is_active=True, variants__stock__gt=0
+    ).annotate(min_price=Min("variants__price"))
+
+    search_query = request.GET.get("search_query")
+    if search_query:
+        products = products.filter(
+            Q(name__icontains=search_query) | Q(category__name__icontains=search_query)
+        )
+    selected_categories = request.GET.getlist("category")
+    if selected_categories:
+        products = products.filter(category__id__in=selected_categories)
+
+    min_price = request.GET.get("min_price")
+    max_price = request.GET.get("max_price")
+
+    # normalize first
+    try:
+        if min_price and max_price:
+            if float(min_price) > float(max_price):
+                min_price, max_price = max_price, min_price
+    except ValueError:
+        pass
+
+    # apply filters after normalization
+    if min_price:
+        try:
+            products = products.filter(min_price__gte=float(min_price))
+        except ValueError:
+            pass
+
+    if max_price:
+        try:
+            products = products.filter(min_price__lte=float(max_price))
+        except ValueError:
+            pass
+    sort = request.GET.get("sort")
+    if sort == "name_asc":
+        products = products.order_by("name")
+
+    elif sort == "name_desc":
+        products = products.order_by("-name")
+
+    elif sort == "price_asc":
+        products = products.order_by("min_price")
+
+    elif sort == "price_desc":
+        products = products.order_by("-min_price")
+
+    else:
+        products = products.order_by("-created_at")
+
+    paginator = Paginator(products, 3)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    # Preserve other query parameters for pagination links
+    query_params = request.GET.copy()
+    if "page" in query_params:
+        del query_params["page"]
+
+    category = Category.objects.filter(is_deleted=False, is_active=True)
+    products = products.prefetch_related('variants__images')
+    context = {
+        "products": page_obj,
+        "category": category,
+        "search_query": search_query,
+        "selected_categories": selected_categories,
+        "page_obj": page_obj,
+        "query_params": query_params.urlencode(),
+    }
+    return render(request, "core/shop.html", context)

@@ -1,0 +1,44 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+
+{% block content %}
+  <main class="flex-1 p-12 overflow-y-auto flex items-center justify-center">
+    <div class="max-w-xl w-full bg-white p-12 rounded-[3rem] border border-black-100 shadow-2xl text-center">
+      
+      <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-8">
+        <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 
+               1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 
+               0L3.34 16c-.77 1.333.192 3 1.732 3z">
+          </path>
+        </svg>
+      </div>
+
+      <h2 class="text-3xl font-black uppercase tracking-tightest mb-4">
+        Delete Product?
+      </h2>
+
+      <p class="text-sm font-bold text-black-400 uppercase tracking-widest mb-10 leading-relaxed">
+        Are you sure you want to delete 
+        <span class="text-black">"{{ product.name }}"</span>? <br />
+        This action cannot be undone.
+      </p>
+
+      <form method="POST" class="flex flex-col gap-4">
+        {% csrf_token %}
+
+        <button type="submit"
+          class="bg-red-500 text-white px-12 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl hover:bg-red-600 transition-all">
+          Yes, Delete Product
+        </button>
+
+        <a href="{% url 'products:products_list' %}"
+          class="bg-white border border-black-200 text-black px-12 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-sm hover:bg-black-50 transition-all">
+          No, Keep It
+        </a>
+      </form>
+
+    </div>
+  </main>
+{% endblock %}

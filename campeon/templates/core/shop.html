@@ -1,25 +1,19 @@
 {% extends 'partials/base.html' %}
 {% load static %}
 {% block content %}
-  <main class="container mx-auto px-4 py-12">
-    <div class="text-[13px] font-black uppercase tracking-widest text-black-400 mb-8">
+<main class="container mx-auto px-4">
+  <form action="" method="get">
+    {% comment %} <div class="text-[13px] font-black uppercase tracking-widest text-black-400 mb-8">
       <a href="Landing Page.html">Home</a> <span class="mx-2">/</span> ALL JERSEYS
-    </div>
+    </div> {% endcomment %}
 
     <div class="flex flex-col md:flex-row justify-between items-end mb-12">
-      <div>
-        <h2 class="text-7xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest">THE PITCH<br /><span class="text-lime-dark">EDITION</span></h2>
-        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest max-w-md leading-relaxed">Browse our exclusive collection of high-performance authentic kits.</p>
-      </div>
-      <div class="flex flex-col items-end gap-2">
-        <label class="text-[12px] text-black-400 font-black uppercase tracking-widest">SORT BY:</label>
-
-        <select class="w-full max-w-[200px] text-[13px] font-black uppercase tracking-widest text-black border-b border-gray-200 pb-2 bg-transparent outline-none cursor-pointer">
-          <option value="popularity">Popularity</option>
-          <option value="high-to-low">Higher to Lower</option>
-          <option value="low-to-high">Lower to Higher</option>
-        </select>
-      </div>
+      {% comment %} <div>
+        <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest">THE
+          PITCH<br /><span class="text-lime-dark">EDITION</span></h2>
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest max-w-md leading-relaxed">Browse our
+          exclusive collection of high-performance authentic kits.</p>
+      </div> {% endcomment %}
     </div>
 
     <div class="flex flex-col lg:flex-row gap-16">
@@ -29,17 +23,27 @@
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-sm font-black uppercase tracking-widest tracking-tightest">CATEGORY</h3>
             <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
+              </path>
             </svg>
           </div>
           <div class="space-y-4">
-            <label class="flex items-center gap-3 text-[13px] font-black uppercase tracking-widest cursor-pointer"><input type="checkbox" checked class="w-4 h-4 accent-dark-lime focus:outline-none focus:ring-2 focus:ring-lime/20" />MEN</label>
-            <label class="flex items-center gap-3 text-[13px] font-black uppercase tracking-widest cursor-pointer text-black-400"><input type="checkbox" class="w-4 h-4 accent-dark-lime focus:outline-none focus:ring-2 focus:ring-lime/20" />WOMEN</label>
-            <label class="flex items-center gap-3 text-[13px] font-black uppercase tracking-widest cursor-pointer text-black-400"><input type="checkbox" class="w-4 h-4 accent-dark-lime focus:outline-none focus:ring-2 focus:ring-lime/20" />KIDS</label>
+            {% for cat in category %}
+            <label class="flex items-center gap-3 text-[13px] font-black uppercase tracking-widest cursor-pointer">
+              <input type="checkbox" name="category" value="{{ cat.id }}" 
+              {% if cat.id|stringformat:"s" in selected_categories %}
+               checked 
+              {% endif %}
+              class="w-4 h-4 accent-dark-lime" />
+
+              {{ cat.name }}
+            </label>
+            {% endfor %}
           </div>
         </div>
 
-        <div>
+        {% comment %} <div>
           <h3 class="text-sm font-black uppercase tracking-widest mb-6 tracking-tightest">SIZE</h3>
           <div class="grid grid-cols-3 gap-2">
             <button class="border border-gray-200 py-3 text-[13px] font-black hover:bg-white">S</button>
@@ -48,140 +52,147 @@
             <button class="border border-gray-200 py-3 text-[13px] font-black hover:bg-white">XL</button>
             <button class="border border-gray-200 py-3 text-[13px] font-black hover:bg-white">XXL</button>
           </div>
-        </div>
+        </div> {% endcomment %}
 
         <div>
           <h3 class="text-sm font-black uppercase tracking-widest mb-6 tracking-tightest">PRICE RANGE</h3>
-          <div class="h-1 bg-gray-200 rounded-full relative mb-4">
-            <div class="absolute left-0 right-1/2 h-full bg-lime-dark rounded-full"></div>
-            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-dark-lime rounded-full"></div>
-            <div class="absolute right-1/2 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-dark-lime rounded-full"></div>
-          </div>
-          <div class="flex justify-between text-[13px] font-black uppercase tracking-widest text-black-400">
-            <span>$50</span>
-            <span>$250+</span>
+
+          <div class="flex gap-4">
+            <input type="number" value="{{request.GET.min_price}}" name="min_price" placeholder="Min"
+              class="w-1/2 border border-gray-200 px-3 py-2 text-[13px] font-black outline-none focus:border-black" />
+
+            <input type="number" value="{{request.GET.max_price}}" name="max_price" placeholder="Max"
+              class="w-1/2 border border-gray-200 px-3 py-2 text-[13px] font-black outline-none focus:border-black" />
           </div>
         </div>
 
-        <div>
+        {% comment %} <div>
           <h3 class="text-sm font-black uppercase tracking-widest mb-6 tracking-tightest">COLORS</h3>
           <div class="flex gap-2">
-            <div class="w-8 h-8 rounded-full bg-white border border-gray-100 cursor-pointer ring-2 ring-dark-lime ring-offset-2"></div>
+            <div
+              class="w-8 h-8 rounded-full bg-white border border-gray-100 cursor-pointer ring-2 ring-dark-lime ring-offset-2">
+            </div>
             <div class="w-8 h-8 rounded-full bg-black cursor-pointer"></div>
             <div class="w-8 h-8 rounded-full bg-red-500 cursor-pointer"></div>
             <div class="w-8 h-8 rounded-full bg-yellow-400 cursor-pointer"></div>
             <div class="w-8 h-8 rounded-full bg-lime-bright cursor-pointer"></div>
           </div>
-        </div>
+        </div> {% endcomment %}
 
         <div class="flex gap-4 pt-6">
-          <button class="flex-1 bg-lime-dark text-white py-4 text-[13px] font-black uppercase tracking-widest hover:bg-black transition-colors">Apply</button>
-          <button class="flex-1 bg-[#222222] text-white py-4 text-[13px] font-black uppercase tracking-widest hover:bg-gray-800 transition-colors">Clear All</button>
+          <button type="submit"
+            class="flex-1 bg-lime-dark text-white py-4 text-[13px] font-black uppercase tracking-widest hover:bg-black transition-colors">Apply</button>
+          <a href="{% url 'products:all_products' %}"
+            class="flex-1 bg-[#222222] text-white py-4 text-[13px] font-black uppercase tracking-widest hover:bg-gray-800 transition-colors text-center">
+            Clear All
+          </a>
         </div>
       </aside>
 
       <!-- Product Grid -->
       <div class="flex-1">
-        <p class="text-[12px] font-black uppercase tracking-widest text-black-400 mb-8">SHOWING 12 OF 84 PRODUCTS</p>
+        <div class="mb-6 flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-black transition">
+          <!-- Input -->
+          <input type="text" name="search_query" value="{{ search_query|default:'' }}" placeholder="Search products..."
+            class="w-full text-[13px] font-black uppercase tracking-widest text-black placeholder-black-300 bg-transparent outline-none"
+            id="searchInput" />
+
+          <!-- Clear Button -->
+          <a href="{% url 'products:all_products' %}" type="button"
+            onclick="document.getElementById('searchInput').value=''"
+            class="text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition">Clear</a>
+
+          <!-- Search Button -->
+          <button type="submit"
+            class="text-[11px] font-black uppercase tracking-widest bg-lime-dark text-white px-4 py-2 hover:bg-gray-800 transition">Search</button>
+        </div>
+
+        <div class="flex items-center justify-between gap-4 mb-8 flex-wrap">
+          <!-- Left: Showing text -->
+          <p class="text-[12px] font-black uppercase tracking-widest text-black-400">SHOWING {{ page_obj.start_index }} - {{ page_obj.end_index }} OF {{ page_obj.paginator.count }} PRODUCTS</p>
+
+          <!-- Right: Sort -->
+          <div class="flex items-center gap-3">
+            <label class="text-[12px] text-black-400 font-black uppercase tracking-widest whitespace-nowrap">SORT BY:</label>
+
+            <select name="sort" class="w-full max-w-[200px] text-[13px] font-black uppercase tracking-widest text-black border-b border-gray-200 pb-2 bg-transparent outline-none cursor-pointer">
+              <option value="">All Items</option>
+              <option value="name_asc" {% if request.GET.sort == "name_asc" %}selected{% endif %}>A-Z</option>
+              <option value="name_desc" {% if request.GET.sort == "name_desc" %}selected{% endif %}>Z-A</option>
+              <option value="price_asc" {% if request.GET.sort == "price_asc" %}selected{% endif %}>Price Low → High</option>
+              <option value="price_desc" {% if request.GET.sort == "price_desc" %}selected{% endif %}>Price High → Low</option>
+            </select>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <!-- Product 1 -->
-          <div class="group">
-            <div class="bg-gray-50 aspect-[4/5] rounded-sm relative overflow-hidden mb-6">
-              <img src="https://cdn-ikpjlgj.nitrocdn.com/fwXzhfyYpwreYKlutFjxWJhCdVXIhjlh/assets/images/optimized/rev-02d3e20/zealevince.in/wp-content/uploads/2026/04/Real-Madrid-Special-Edition-Jersey-25-26-Season.jpg?q=80&w=400&h=500&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-              <button class="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                </svg>
-              </button>
-              <div class="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                <button class="w-full bg-lime-bright text-black font-black uppercase py-4 flex items-center justify-center gap-3 text-[13px] tracking-widest shadow-xl">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                  </svg>ADD TO CART
+          {% for product in products %}
+            <div class="group">
+              <div class="bg-gray-50 aspect-[4/5] rounded-sm relative overflow-hidden mb-6">
+                <img src="{{ product.get_primary_image }}" class="w-full h-full object-cover group-hover:grayscale-0 transition-all duration-500" />
+                <button class="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                  </svg>
                 </button>
+                <div class="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                  <button class="w-full bg-lime-bright text-black font-black uppercase py-4 flex items-center justify-center gap-3 text-[13px] tracking-widest shadow-xl">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>ADD TO CART
+                  </button>
+                </div>
+              </div>
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="text-[12px] font-black uppercase tracking-widest text-gray-300 block mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-lime-dark rounded-full"></div>{{ product.category }}</span>
+                  <h4 class="text-xl font-black uppercase tracking-tighter leading-tight group-hover:text-lime-dark transition-colors tracking-tightest">{{ product.name }}</h4>
+                </div>
+                <span class="text-xl font-black">{{ product.min_price }}</span>
               </div>
             </div>
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[12px] font-black uppercase tracking-widest text-gray-300 block mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-lime-dark rounded-full"></div>ULTRA LIGHTWEIGHT</span>
-                <h4 class="text-xl font-black uppercase tracking-tighter leading-tight group-hover:text-lime-dark transition-colors tracking-tightest">NEON VELOCITY KIT</h4>
-              </div>
-              <span class="text-xl font-black">$120.00</span>
-            </div>
-          </div>
-
-          <!-- Repeat Products... -->
-          <div class="group">
-            <div class="bg-gray-50 aspect-[4/5] rounded-sm relative overflow-hidden mb-6">
-              <img src="https://cdn-ikpjlgj.nitrocdn.com/fwXzhfyYpwreYKlutFjxWJhCdVXIhjlh/assets/images/optimized/rev-02d3e20/zealevince.in/wp-content/uploads/2026/04/Real-Madrid-Special-Edition-Jersey-25-26-Season.jpg?q=80&w=400&h=500&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-              <button class="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                </svg>
-              </button>
-              <div class="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                <button class="w-full bg-lime-bright text-black font-black uppercase py-4 flex items-center justify-center gap-3 text-[13px] tracking-widest shadow-xl">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                  </svg>ADD TO CART
-                </button>
-              </div>
-            </div>
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[12px] font-black uppercase tracking-widest text-gray-300 block mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-lime-dark rounded-full"></div>ULTRA LIGHTWEIGHT</span>
-                <h4 class="text-xl font-black uppercase tracking-tighter leading-tight group-hover:text-lime-dark transition-colors tracking-tightest">NEON VELOCITY KIT</h4>
-              </div>
-              <span class="text-xl font-black">$120.00</span>
-            </div>
-          </div>
-          <div class="group">
-            <div class="bg-gray-50 aspect-[4/5] rounded-sm relative overflow-hidden mb-6">
-              <img src="https://cdn-ikpjlgj.nitrocdn.com/fwXzhfyYpwreYKlutFjxWJhCdVXIhjlh/assets/images/optimized/rev-02d3e20/zealevince.in/wp-content/uploads/2026/04/Real-Madrid-Special-Edition-Jersey-25-26-Season.jpg?q=80&w=400&h=500&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-              <button class="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                </svg>
-              </button>
-              <div class="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                <button class="w-full bg-lime-bright text-black font-black uppercase py-4 flex items-center justify-center gap-3 text-[13px] tracking-widest shadow-xl">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                  </svg>ADD TO CART
-                </button>
-              </div>
-            </div>
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[12px] font-black uppercase tracking-widest text-gray-300 block mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-lime-dark rounded-full"></div>ULTRA LIGHTWEIGHT</span>
-                <h4 class="text-xl font-black uppercase tracking-tighter leading-tight group-hover:text-lime-dark transition-colors tracking-tightest">NEON VELOCITY KIT</h4>
-              </div>
-              <span class="text-xl font-black">$120.00</span>
-            </div>
-          </div>
+          {% endfor %}
         </div>
 
         <!-- Pagination -->
-        <div class="mt-20 flex justify-center items-center gap-4">
-          <button class="p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-          </button>
-          <div class="flex gap-2">
-            <button class="w-12 h-12 bg-lime-dark text-white rounded-lg font-black text-sm">1</button>
-            <button class="w-12 h-12 bg-white text-black rounded-lg font-black text-sm hover:bg-gray-50 shadow-sm transition-colors">2</button>
-            <button class="w-12 h-12 bg-white text-black rounded-lg font-black text-sm hover:bg-gray-50 shadow-sm transition-colors">3</button>
-            <span class="w-12 h-12 flex items-center justify-center font-black">...</span>
-            <button class="w-12 h-12 bg-white text-black rounded-lg font-black text-sm hover:bg-gray-50 shadow-sm transition-colors">14</button>
-          </div>
-          <button class="p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </button>
+        <div class="mt-16 flex justify-center border-t border-gray-100 pt-12">
+          <nav class="flex items-center gap-2">
+            {% if page_obj.has_previous %}
+              <a href="?{{ query_params }}&page={{ page_obj.previous_page_number }}" class="w-12 h-12 flex items-center justify-center border border-gray-200 text-black hover:bg-black hover:text-white transition-all duration-300 group">
+                <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </a>
+            {% endif %}
+
+            {% for i in page_obj.paginator.page_range %}
+              {% if page_obj.number == i %}
+                <span class="w-12 h-12 flex items-center justify-center bg-lime-dark text-white font-black text-[13px] shadow-lg shadow-lime-900/20">{{ i }}</span>
+              {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                <a href="?{{ query_params }}&page={{ i }}" class="w-12 h-12 flex items-center justify-center border border-gray-200 text-black hover:bg-black hover:text-white transition-all duration-300 font-black text-[13px]">{{ i }}</a>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <a href="?{{ query_params }}&page={{ page_obj.next_page_number }}" class="w-12 h-12 flex items-center justify-center border border-gray-200 text-black hover:bg-black hover:text-white transition-all duration-300 group">
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </a>
+            {% endif %}
+          </nav>
         </div>
       </div>
     </div>
-  </main>
+  </form>
+</main>
+
+<script>
+  document.querySelectorAll('input[name="category"], select[name="sort"]').forEach((el) => {
+    el.addEventListener('change', () => {
+      el.closest('form').submit()
+    })
+  })
+</script>
 {% endblock %}
