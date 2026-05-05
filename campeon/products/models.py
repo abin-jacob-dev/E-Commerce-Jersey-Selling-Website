@@ -1,8 +1,9 @@
 from django.db import models
 
 # from cloudinary.models import CloudinaryField  # Removed CloudinaryField; using URLField for image URLs
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import Sum
+from userauths.models import Account
 
 
 # Create your models here.
@@ -122,3 +123,48 @@ class VariantImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.variant.sku}"
+
+
+class Cart(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name="cart")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Cart of {self.user.username}"
+
+    @property
+    def total_price(self):
+        return sum(item.subtotal for item in self.items.all())
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("cart", "variant")
+
+    def __str__(self):
+        return f"{self.quantity} x {self.variant.product.name}"
+
+    @property
+    def subtotal(self):
+        return self.variant.price * self.quantity
+
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="wishlist")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "product")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name}"

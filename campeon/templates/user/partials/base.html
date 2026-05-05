@@ -4,23 +4,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Profile - Campeon</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
+    <title>Campeon</title>
     <script src="{% static 'vendor/tailwind.min.js' %}"></script>
     <script src="{% static 'js/tailwind-config.js' %}"></script>
-    <script src="{% static 'js/script.js' %}"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+    {% comment %} <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" /> {% endcomment %}
   </head>
-  <body class="bg-white text-black min-h-screen font-montserrat antialiased">
+  <body class="bg-white text-black font-montserrat antialiased">
     <!-- Header -->
-     <header class="border-b border-gray-100 sticky top-0 bg-white z-50">
+    <header class="border-b border-gray-100 sticky top-0 bg-white z-50">
       <div class="container mx-auto px-4 py-4 flex items-center justify-between">
         <nav class="hidden md:flex space-x-6 text-sm font-bold uppercase tracking-wider">
-          <a href="{% url "core:home" %}" class="hover:text-lime transition-colors">Home</a>
-          <a href="{% url "core:shop" %}" class="hover:text-lime transition-colors">Shop</a>
-          <a href="{% url "core:contact" %}" class="hover:text-lime transition-colors">Contact</a>
-          <a href="{% url "core:about" %}" class="hover:text-lime transition-colors">About us</a>
-          <a href="{% url "user:profile" %}" class="hover:text-lime transition-colors">Account</a>
+          <a href="{% url 'core:home' %}" class="hover:text-lime transition-colors">Home</a>
+          <a href="{% url 'products:all_products' %}" class="hover:text-lime transition-colors">Shop</a>
+          <a href="{% url 'core:contact' %}" class="hover:text-lime transition-colors">Contact</a>
+          <a href="{% url 'core:about' %}" class="hover:text-lime transition-colors">About us</a>
+          <a href="{% url 'user:profile' %}" class="hover:text-lime transition-colors">Account</a>
         </nav>
 
         <div class="flex-1 flex justify-center">
@@ -47,7 +47,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
               </svg>
             </a>
-            <a href="#" class="relative">
+            <a href="{% url 'products:cart' %}" class="relative">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
               </svg>

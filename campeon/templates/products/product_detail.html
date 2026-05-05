@@ -89,9 +89,9 @@
 
           <div class="flex gap-4">
             <div class="bg-white border border-gray-100 rounded-lg flex items-center px-6 py-4 shadow-sm">
-              <button class="text-xl px-4">-</button>
-              <span class="px-6 font-black">1</span>
-              <button class="text-xl px-4">+</button>
+              <button onclick="decrementQty()" class="text-xl px-4">-</button>
+              <span id="qtyDisplay" class="px-6 font-black">1</span>
+              <button onclick="incrementQty()" class="text-xl px-4">+</button>
             </div>
             <button onclick="addToCart()" class="flex-1 bg-lime-dark text-white font-black uppercase py-4 rounded-lg shadow-xl hover:bg-black transition flex items-center justify-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -390,6 +390,28 @@
       el.parentElement.classList.add('border-dark-lime');
     }
 
+    let quantity = 1;
+
+    function incrementQty() {
+      if (quantity < 5) {
+        if (selectedVariant && quantity >= selectedVariant.stock) {
+           alert("Cannot exceed available stock");
+           return;
+        }
+        quantity++;
+        document.getElementById('qtyDisplay').innerText = quantity;
+      } else {
+        alert("Maximum 5 items allowed");
+      }
+    }
+
+    function decrementQty() {
+      if (quantity > 1) {
+        quantity--;
+        document.getElementById('qtyDisplay').innerText = quantity;
+      }
+    }
+
     function addToCart() {
       if (!selectedColor) return alert('Please select a color');
       if (!selectedSize) return alert('Please select a size');
@@ -402,25 +424,22 @@
         return alert('This item is out of stock');
       }
 
-      const csrf = document.cookie.split('; ').find(row => row.startsWith('csrftoken'))?.split('=')[1];
+      const formData = new FormData();
+      formData.append('variant_id', selectedVariant.id);
+      formData.append('quantity', quantity);
+      formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-      fetch('/cart/add/', {
+      fetch('{% url "products:add_to_cart" %}', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json', 
-          'X-CSRFToken': csrf 
-        },
-        body: JSON.stringify({ 
-          variant_id: selectedVariant.id, 
-          quantity: 1 
-        })
+        body: formData
       })
       .then(res => res.json())
       .then(data => {
-        if (data.error) {
-          alert(data.error);
+        if (data.status === 'error') {
+          alert(data.message);
         } else {
-          alert('Added to cart!');
+          alert('Added to cart successfully!');
+          window.location.href = "{% url 'products:cart' %}";
         }
       })
       .catch(() => alert('Something went wrong'));

@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.contrib import messages
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 from products.forms import CategoryForm, ProductForm, ColorForm
-from .models import Category, Product, Variant, Color, VariantImage
+from .models import Category, Product, Variant, Color, VariantImage, Cart, CartItem, Wishlist
 from django.db.models import Prefetch
 from django.db.models import Min, Q
 
@@ -420,3 +422,106 @@ def product_detail(request, id):
         "unique_colors": unique_colors,
     }
     return render(request, "products/product_detail.html", context)
+
+
+def cart(request):
+    cart_obj, created = Cart.objects.get_or_create(user=request.user)
+    items = cart_obj.items.select_related('variant__product', 'variant__color').prefetch_related('variant__images').all()
+    
+    # Check for unavailable or out of stock items
+    checkout_disabled = False
+    for item in items:
+        if item.variant.stock < item.quantity or not item.variant.is_active or not item.variant.product.is_active or item.variant.product.is_deleted:
+            item.error = "Unavailable or Out of stock"
+            checkout_disabled = True
+    
+    context = {
+        'cart': cart_obj,
+        'items': items,
+        'checkout_disabled': checkout_disabled
+    }
+    return render(request, 'products/cart.html', context)
+
+
+def add_to_cart(request):
+    if request.method == "POST":
+        variant_id = request.POST.get("variant_id")
+        quantity = int(request.POST.get("quantity", 1))
+
+        variant = get_object_or_404(Variant, id=variant_id)
+        
+        # Prevent adding blocked/unlisted products
+        if not variant.product.is_active or variant.product.is_deleted or not variant.is_active:
+            return JsonResponse({"status": "error", "message": "This product is currently unavailable."})
+
+        # Max quantity limit
+        if quantity > 5:
+             return JsonResponse({"status": "error", "message": "Maximum 5 items allowed per product."})
+
+        # Stock validation
+        if variant.stock < quantity:
+            return JsonResponse({"status": "error", "message": f"Only {variant.stock} items left in stock."})
+
+        cart_obj, created = Cart.objects.get_or_create(user=request.user)
+        cart_item, item_created = CartItem.objects.get_or_create(cart=cart_obj, variant=variant)
+
+        if not item_created:
+            # Increase quantity if already in cart
+            new_quantity = cart_item.quantity + quantity
+            if new_quantity > 5:
+                cart_item.quantity = 5
+                cart_item.save()
+                return JsonResponse({"status": "error", "message": "Total quantity in cart reached the limit of 5."})
+            
+            if variant.stock < new_quantity:
+                return JsonResponse({"status": "error", "message": "Not enough stock to add more."})
+            
+            cart_item.quantity = new_quantity
+        else:
+            cart_item.quantity = quantity
+        
+        cart_item.save()
+
+        # Remove from wishlist if added to cart
+        Wishlist.objects.filter(user=request.user, product=variant.product).delete()
+
+        return JsonResponse({"status": "success", "message": "Product added to cart!"})
+    return JsonResponse({"status": "error", "message": "Invalid request."})
+
+
+def remove_from_cart(request, item_id):
+    cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    cart_item.delete()
+    messages.success(request, "Product removed from cart.")
+    return redirect('products:cart')
+
+
+def update_cart_quantity(request):
+    if request.method == "POST":
+        item_id = request.POST.get("item_id")
+        action = request.POST.get("action")
+        
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+        
+        if action == 'inc':
+            if cart_item.quantity < 5:
+                if cart_item.variant.stock > cart_item.quantity:
+                    cart_item.quantity += 1
+                else:
+                    return JsonResponse({"status": "error", "message": "No more stock available."})
+            else:
+                return JsonResponse({"status": "error", "message": "Maximum limit of 5 reached."})
+        elif action == 'dec':
+            if cart_item.quantity > 1:
+                cart_item.quantity -= 1
+            else:
+                return JsonResponse({"status": "error", "message": "Minimum quantity is 1."})
+        
+        cart_item.save()
+        return JsonResponse({
+            "status": "success", 
+            "quantity": cart_item.quantity, 
+            "subtotal": float(cart_item.subtotal),
+            "total_price": float(cart_item.cart.total_price)
+        })
+    return JsonResponse({"status": "error", "message": "Invalid request."})
