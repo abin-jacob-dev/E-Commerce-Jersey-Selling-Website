@@ -6,7 +6,7 @@
     {% comment %} <div class="text-[13px] font-black uppercase tracking-widest text-black-400 mb-8">
       <a href="Landing Page.html">Home</a> <span class="mx-2">/</span> ALL JERSEYS
     </div> {% endcomment %}
-
+    {% include "partials/alert.html" %}
     <div class="flex flex-col md:flex-row justify-between items-end mb-12">
       {% comment %} <div>
         <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest">THE
@@ -147,7 +147,7 @@
               <div class="flex justify-between items-start">
                 <div>
                   <span class="text-[12px] font-black uppercase tracking-widest text-gray-300 block mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-lime-dark rounded-full"></div>{{ product.category }}</span>
-                  <h4 class="text-xl font-black uppercase tracking-tighter leading-tight group-hover:text-lime-dark transition-colors tracking-tightest">{{ product.name }}</h4>
+                  <h4 class="text-xl font-black uppercase tracking-tighter leading-tight group-hover:text-lime-dark transition-colors tracking-tightest"><a href="{% url "products:product_detail" product.id %}">{{ product.name }}</a></h4>
                 </div>
                 <span class="text-xl font-black">{{ product.min_price }}</span>
               </div>

@@ -309,7 +309,10 @@ def delete_product(request, id):
 
 def all_products(request):
     products = Product.objects.filter(
-        is_deleted=False, is_active=True, variants__is_active=True, variants__stock__gt=0
+        is_deleted=False,
+        is_active=True,
+        variants__is_active=True,
+        variants__stock__gt=0,
     ).annotate(min_price=Min("variants__price"))
 
     search_query = request.GET.get("search_query")
@@ -370,7 +373,7 @@ def all_products(request):
         del query_params["page"]
 
     category = Category.objects.filter(is_deleted=False, is_active=True)
-    products = products.prefetch_related('variants__images')
+    products = products.prefetch_related("variants__images")
     context = {
         "products": page_obj,
         "category": category,
@@ -380,3 +383,40 @@ def all_products(request):
         "query_params": query_params.urlencode(),
     }
     return render(request, "core/shop.html", context)
+
+
+def product_detail(request, id):
+    product = Product.objects.filter(
+        id=id,
+        is_deleted=False,
+        is_active=True
+    ).prefetch_related(
+        Prefetch(
+            "variants",
+            queryset=Variant.objects.filter(is_active=True).prefetch_related("images")
+        )
+    ).first()
+
+    if not product:
+        messages.warning(request, "Product not found or unavailable.")
+        return redirect('products:all_products')
+    
+    # Check if product has any active variants with stock
+    has_stock = any(variant.stock > 0 for variant in product.variants.all())
+    if not has_stock:
+        messages.warning(request, "This product is currently out of stock.")
+        return redirect('products:all_products')
+
+    # Get unique colors for the UI selection
+    unique_colors = []
+    seen_color_ids = set()
+    for variant in product.variants.all():
+        if variant.color and variant.color.id not in seen_color_ids:
+            unique_colors.append(variant.color)
+            seen_color_ids.add(variant.color.id)
+            
+    context = {
+        "product": product,
+        "unique_colors": unique_colors,
+    }
+    return render(request, "products/product_detail.html", context)

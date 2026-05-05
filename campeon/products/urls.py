@@ -23,6 +23,7 @@ urlpatterns = [
     path("edit-color/<id>", views.edit_color, name="edit_color"),
     path("delete-color/<id>", views.delete_color, name="delete_color"),
 
-    path('all-products',views.all_products,name='all_products')
+    path('all-products',views.all_products,name='all_products'),
+    path('product-detail/<id>',views.product_detail,name='product_detail'),
 
 ]

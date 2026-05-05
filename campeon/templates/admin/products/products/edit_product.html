@@ -34,7 +34,7 @@
                 <p class="text-[8px] font-black uppercase tracking-widest text-gray-500 mb-0.5">Status</p>
                 <p class="text-[10px] font-black uppercase tracking-widest" id="statusLabel">{% if product.is_active %}Active{% else %}Inactive{% endif %}</p>
               </div>
-              <input type="checkbox" name="is_active" id="isActiveInput" class="hidden" {% if product.is_active %}checked{% endif %} value="true">
+              <input type="hidden" name="is_active" id="isActiveInput" value="{% if product.is_active %}true{% else %}false{% endif %}">
               <button type="button" onclick="toggleProductStatus()" id="statusToggle" class="w-10 h-6 {% if product.is_active %}bg-lime-bright{% else %}bg-gray-600{% endif %} rounded-full p-1 relative transition-all">
                 <span class="absolute {% if product.is_active %}right-1{% else %}left-1{% endif %} top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all"></span>
               </button>
@@ -226,16 +226,21 @@
       const dot = toggle.querySelector('span');
       
       const isActive = input.value === 'true';
-      input.value = isActive ? 'false' : 'true';
+      const newState = !isActive;
+      input.value = newState ? 'true' : 'false';
       
-      if (isActive) {
-        toggle.classList.replace('bg-lime-bright', 'bg-gray-600');
-        dot.classList.replace('right-1', 'left-1');
-        label.textContent = 'Inactive';
-      } else {
-        toggle.classList.replace('bg-gray-600', 'bg-lime-bright');
-        dot.classList.replace('left-1', 'right-1');
+      if (newState) {
+        toggle.classList.remove('bg-gray-600');
+        toggle.classList.add('bg-lime-bright');
+        dot.classList.remove('left-1');
+        dot.classList.add('right-1');
         label.textContent = 'Active';
+      } else {
+        toggle.classList.remove('bg-lime-bright');
+        toggle.classList.add('bg-gray-600');
+        dot.classList.remove('right-1');
+        dot.classList.add('left-1');
+        label.textContent = 'Inactive';
       }
     }
 

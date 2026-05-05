@@ -25,9 +25,12 @@ class Category(models.Model):
         return self.name
 
 
-def get_default_category():
-    category = Category.objects.first()
-    return category.id if category else None
+def get_primary_image(self):
+    for variant in self.variants.all():
+        image = variant.images.first()
+        if image:
+            return image.image.url
+    return ""
 
 
 class Product(models.Model):
