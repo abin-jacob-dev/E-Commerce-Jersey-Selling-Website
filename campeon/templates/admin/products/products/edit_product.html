@@ -1,266 +1,298 @@
 {% extends 'admin/partials/base.html' %}
 {% load static %}
 {% block content %}
-  <main class="flex-1 overflow-y-auto">
-    <div class="p-12 space-y-12">
-      <form class="space-y-12" id="productForm" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
-          <div>
-            <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4">EDIT PRODUCT</h2>
-          </div>
-          <div class="flex flex-wrap items-center gap-6">
-            <!-- Main Actions -->
-            <div class="flex gap-4">
-              <a href="{% url 'products:products_list' %}" class="bg-white border border-gray-100 text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-50 transition-all shadow-sm flex items-center">Cancel</a>
+<main class="flex-1 overflow-y-auto">
+  <div class="p-12 space-y-12">
+    <form class="space-y-12" id="productForm" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
+        <div>
+          <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4">EDIT PRODUCT</h2>
+        </div>
+        <div class="flex flex-wrap items-center gap-6">
+          <!-- Main Actions -->
+          <div class="flex gap-4">
+            <a href="{% url 'products:products_list' %}"
+              class="bg-white border border-gray-100 text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-50 transition-all shadow-sm flex items-center">Cancel</a>
 
-              <button type="submit" class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-4 group">
-                <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>Save Product
-              </button>
+            <button type="submit"
+              class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-4 group">
+              <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>Save Product
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- General Information Card -->
+      <section class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-50">
+        <div class="flex justify-between items-center mb-12">
+          <h3 class="text-2xl font-black uppercase tracking-tightest">General Information</h3>
+
+          <!-- GLOBAL STATUS -->
+          <div class="bg-[#121212] text-white pl-8 pr-6 py-4 rounded-2xl flex items-center gap-6 shadow-2xl">
+            <div class="text-right">
+              <p class="text-[8px] font-black uppercase tracking-widest text-gray-500 mb-0.5">Status</p>
+              <p class="text-[10px] font-black uppercase tracking-widest" id="statusLabel">{% if product.is_active %}Active{% else %}Inactive{% endif %}</p>
+            </div>
+            <input type="hidden" name="is_active" id="isActiveInput"
+              value="{% if product.is_active %}true{% else %}false{% endif %}">
+            <button type="button" onclick="toggleProductStatus()" id="statusToggle"
+              class="w-10 h-6 {% if product.is_active %}bg-lime-bright{% else %}bg-gray-600{% endif %} rounded-full p-1 relative transition-all">
+              <span
+                class="absolute {% if product.is_active %}right-1{% else %}left-1{% endif %} top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ROW 1: PRODUCT NAME + CATEGORY -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+          <div>
+            <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Product Name</label>
+            <input type="text" name="name" value="{{ product.name }}" required
+              class="w-full bg-[#f4fce3] border-none rounded-xl px-8 py-6 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10"
+              placeholder="Product Name">
+          </div>
+
+          <div>
+            <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Category</label>
+            <div class="relative">
+              <select name="category"
+                class="w-full bg-[#f4fce3] border-none rounded-xl px-8 py-6 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if product.category.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+              </select>
+              <svg class="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
             </div>
           </div>
         </div>
 
-        <!-- General Information Card -->
-        <section class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-50">
-          <div class="flex justify-between items-start mb-12">
-            <h3 class="text-2xl font-black uppercase tracking-tightest">General Information</h3>
-
-            <!-- GLOBAL STATUS -->
-            <div class="bg-[#121212] text-white pl-8 pr-6 py-4 rounded-2xl flex items-center gap-6 shadow-2xl">
-              <div class="text-right">
-                <p class="text-[8px] font-black uppercase tracking-widest text-gray-500 mb-0.5">Status</p>
-                <p class="text-[10px] font-black uppercase tracking-widest" id="statusLabel">{% if product.is_active %}Active{% else %}Inactive{% endif %}</p>
-              </div>
-              <input type="hidden" name="is_active" id="isActiveInput" value="{% if product.is_active %}true{% else %}false{% endif %}">
-              <button type="button" onclick="toggleProductStatus()" id="statusToggle" class="w-10 h-6 {% if product.is_active %}bg-lime-bright{% else %}bg-gray-600{% endif %} rounded-full p-1 relative transition-all">
-                <span class="absolute {% if product.is_active %}right-1{% else %}left-1{% endif %} top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all"></span>
-              </button>
-            </div>
+        <!-- ROW 2: DESCRIPTION + KEY HIGHLIGHTS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div>
+            <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Description</label>
+            <textarea name="description" rows="6" placeholder="Detailed product story and features..."
+              class="w-full bg-[#f4fce3] border-none rounded-2xl px-8 py-6 text-sm font-medium placeholder:text-gray-300 focus:ring-4 focus:ring-lime/10 transition-all">{{ product.description }}</textarea>
           </div>
 
-          <!-- ROW 1: PRODUCT NAME + CATEGORY -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
-            <div>
-              <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Product Name</label>
-              <input type="text" name="name" value="{{ product.name }}" required class="w-full bg-[#f4fce3] border-none rounded-xl px-8 py-6 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10" placeholder="Product Name">
-            </div>
-
-            <div>
-              <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Category</label>
-              <div class="relative">
-                <select name="category" class="w-full bg-[#f4fce3] border-none rounded-xl px-8 py-6 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
-                  {% for cat in categories %}
-                    <option value="{{ cat.id }}" {% if product.category.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
-                  {% endfor %}
-                </select>
-                <svg class="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-              </div>
-            </div>
+          <div>
+            <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Key
+              Highlights</label>
+            <textarea name="highlights" rows="6" placeholder="Bullet points: Material, Breathability, Durability..."
+              class="w-full bg-[#f4fce3] border-none rounded-2xl px-8 py-6 text-sm font-medium placeholder:text-gray-300 focus:ring-4 focus:ring-lime/10 transition-all">{{ product.highlights }}</textarea>
           </div>
+        </div>
+      </section>
 
-          <!-- ROW 2: DESCRIPTION + KEY HIGHLIGHTS -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div>
-              <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Description</label>
-              <textarea name="description" rows="6" placeholder="Detailed product story and features..." class="w-full bg-[#f4fce3] border-none rounded-2xl px-8 py-6 text-sm font-medium placeholder:text-gray-300 focus:ring-4 focus:ring-lime/10 transition-all">{{ product.description }}</textarea>
-            </div>
+      <!-- Product Variants Card -->
+      <section class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-50">
+        <div class="flex justify-between items-center mb-12">
+          <h3 class="text-2xl font-black uppercase tracking-tightest">Product Variants</h3>
+          <button type="button" id="addVariantBtn"
+            class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-3 group">
+            <div
+              class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-90 transition-transform">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+            </div>Add Variant
+          </button>
+        </div>
 
-            <div>
-              <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Key Highlights</label>
-              <textarea name="highlights" rows="6" placeholder="Bullet points: Material, Breathability, Durability..." class="w-full bg-[#f4fce3] border-none rounded-2xl px-8 py-6 text-sm font-medium placeholder:text-gray-300 focus:ring-4 focus:ring-lime/10 transition-all">{{ product.highlights }}</textarea>
-            </div>
-          </div>
-        </section>
-
-        <!-- Product Variants Card -->
-        <section class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-50">
-          <div class="flex justify-between items-center mb-12">
-            <h3 class="text-2xl font-black uppercase tracking-tightest">Product Variants</h3>
-            <button type="button" id="addVariantBtn" class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-3 group">
-              <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-90 transition-transform">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-              </div>Add Variant
+        <div id="variantsContainer">
+          {% for variant in variants %}
+          <div class="variant-item bg-gray-50/30 p-10 rounded-[2.5rem] border border-gray-100 relative mb-10">
+            <input type="hidden" name="variant_id" value="{{ variant.id }}" />
+            <button type="button"
+              class="deleteVariantBtn absolute top-8 right-8 text-gray-200 hover:text-red-500 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                </path>
+              </svg>
             </button>
-          </div>
 
-          <div id="variantsContainer">
-            {% for variant in variants %}
-            <div class="variant-item bg-gray-50/30 p-10 rounded-[2.5rem] border border-gray-100 relative mb-10">
-              <input type="hidden" name="variant_id" value="{{ variant.id }}" />
-              <button type="button" class="deleteVariantBtn absolute top-8 right-8 text-gray-200 hover:text-red-500 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-              </button>
-
-              <div class="space-y-10">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                  <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Size</label>
-                    <div class="relative">
-                      <select name="size" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest appearance-none">
-                        {% for s_val, s_name in variant.SIZE_CHOICES %}
-                          <option value="{{ s_val }}" {% if variant.size == s_val %}selected{% endif %}>{{ s_name }}</option>
-                        {% endfor %}
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Color</label>
-                    <select name="color" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest">
-                      {% for color in colors %}
-                        <option value="{{ color.id }}" {% if variant.color.id == color.id %}selected{% endif %}>{{ color.name }}</option>
+            <div class="space-y-10">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div>
+                  <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Size</label>
+                  <div class="relative">
+                    <select name="size" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest appearance-none focus:ring-4 focus:ring-lime/10">
+                      {% for s_val, s_name in variant.SIZE_CHOICES %}
+                      <option value="{{ s_val }}" {% if variant.size == s_val %}selected{% endif %}>{{ s_name }}</option>
                       {% endfor %}
                     </select>
-                  </div>
-                  <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">SKU</label>
-                    <input type="text" name="sku" value="{{ variant.sku }}" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest" />
+                    <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
                   </div>
                 </div>
+                <div>
+                  <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Color</label>
+                  <div class="relative">
+                    <select name="color" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest appearance-none focus:ring-4 focus:ring-lime/10">
+                      {% for color in colors %}
+                      <option value="{{ color.id }}" {% if variant.color.id == color.id %}selected{% endif %}>{{ color.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">SKU</label>
+                  <input type="text" name="sku" value="{{ variant.sku }}" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10" />
+                </div>
+              </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
-                  <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Price ($)</label>
-                    <input type="number" name="price" value="{{ variant.price }}" step="0.01" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black" />
-                  </div>
-                  <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Disc %</label>
-                    <input type="number" name="discount" value="{{ variant.discount }}" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black" />
-                  </div>
-                  <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Stock</label>
-                    <input type="number" name="stock" value="{{ variant.stock }}" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black" />
-                  </div>
-                  <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Status</label>
-                    <select name="variant_is_active" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
+                <div>
+                  <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Price (₹)</label>
+                  <input type="number" name="price" value="{{ variant.price }}" step="0.01" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
+                </div>
+                <div>
+                  <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Disc %</label>
+                  <input type="number" name="discount" value="{{ variant.discount }}" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
+                </div>
+                <div>
+                  <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Stock</label>
+                  <input type="number" name="stock" value="{{ variant.stock }}" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
+                </div>
+                <div>
+                  <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Status</label>
+                  <div class="relative">
+                    <select name="variant_is_active" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest appearance-none focus:ring-4 focus:ring-lime/10">
                       <option value="true" {% if variant.is_active %}selected{% endif %}>Active</option>
                       <option value="false" {% if not variant.is_active %}selected{% endif %}>Inactive</option>
                     </select>
+                    <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
                   </div>
                 </div>
+              </div>
 
-                <div>
-                  <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-6">Variant Images <span class="text-[7px] lowercase font-medium ml-2 text-gray-300">Min 3 images total</span></label>
-                  <div class="flex flex-wrap gap-6 items-start variantImageContainer">
-                    <!-- Existing Images -->
-                    {% for img in variant.images.all %}
-                    <div class="relative w-32 h-32 group/img-slot image-slot">
-                      <img src="{{ img.image.url }}" class="w-full h-full object-cover rounded-2xl border border-gray-100 cursor-pointer hover:opacity-75 transition-opacity" 
-                           onclick="this.parentElement.querySelector('.replace-input').click()">
-                      
-                      <!-- Overlay 'Replace' text on hover -->
-                      <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img-slot:opacity-100 pointer-events-none transition-opacity">
-                        <span class="bg-black/60 text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur-sm">Replace</span>
-                      </div>
-
-                      <div class="absolute">
-                        <label hidden class="bg-red-500 text-white p-1 rounded-lg cursor-pointer shadow-lg hover:bg-red-600 transition-colors">
-                          <input type="checkbox" name="delete_images" value="{{ img.id }}" class="hidden delete-checkbox">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </label>
-                      </div>
-                      <!-- Hidden input for replacement -->
-                      <input type="file" class="variantImages hidden replace-input" accept="image/*" 
-                             onchange="this.closest('.image-slot').querySelector('.delete-checkbox').checked = true">
-                    </div>
-                    {% endfor %}
+              <div>
+                <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-6">Variant Images <span class="text-[7px] lowercase font-medium ml-2 text-gray-300">Min 3 images total</span></label>
+                <div class="flex flex-wrap gap-6 items-start variantImageContainer">
+                  <!-- Existing Images -->
+                  {% for img in variant.images.all %}
+                  <div class="relative w-32 h-32 group/img-slot image-slot">
+                    <img src="{{ img.image.url }}" class="w-full h-full object-cover rounded-2xl border border-gray-100 cursor-pointer hover:opacity-75 transition-opacity" 
+                         onclick="this.parentElement.querySelector('.replace-input').click()">
                     
-                    <!-- New Image Upload Slots (Show at least enough to reach 3, or at least 1) -->
-                    <div class="flex flex-wrap gap-6 newImageSlots">
-                      <!-- New images will be appended here dynamically or we can have fixed slots -->
-                      <div class="image-slot relative w-32 h-32">
-                        <div onclick="this.querySelector('input').click()" class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all relative group/slot">
-                          <svg class="w-8 h-8 text-gray-200 group-hover/slot:text-lime-bright transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                          <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add New</span>
-                          <input type="file" name="images_{{ forloop.counter0 }}[]" class="variantImages hidden" accept="image/*">
-                        </div>
-                      </div>
+                    <!-- Overlay 'Replace' text on hover -->
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img-slot:opacity-100 pointer-events-none transition-opacity">
+                      <span class="bg-black/60 text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur-sm">Replace</span>
+                    </div>
+
+                    <div class="absolute top-2 right-2">
+                      <label hidden class="bg-red-500/80 text-white p-1.5 rounded-lg cursor-pointer shadow-lg hover:bg-red-600 transition-colors backdrop-blur-sm">
+                        <input type="checkbox" name="delete_images" value="{{ img.id }}" class="hidden delete-checkbox">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      </label>
+                    </div>
+                    <!-- Hidden input for replacement -->
+                    <input type="file" class="variantImages hidden replace-input" accept="image/*" 
+                           onchange="this.closest('.image-slot').querySelector('.delete-checkbox').checked = true">
+                  </div>
+                  {% endfor %}
+                  
+                  <!-- New Image Upload Slots -->
+                  <div class="image-slot relative w-32 h-32">
+                    <div onclick="this.querySelector('input').click()" class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all relative group/slot">
+                      <svg class="w-8 h-8 text-gray-200 group-hover/slot:text-lime-bright transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                      <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add New</span>
+                      <input type="file" name="images_{{ forloop.counter0 }}[]" class="variantImages hidden" accept="image/*">
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            {% endfor %}
           </div>
-        </section>
-      </form>
-    </div>
+          {% endfor %}
+        </div>
+      </section>
+    </form>
+  </div>
 
-    <!-- Crop Modal -->
-    <div id="cropModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[100] backdrop-blur-sm">
-      <div class="bg-white p-8 rounded-[2rem] max-w-2xl w-full mx-4 shadow-2xl">
-        <div class="flex justify-between items-center mb-6">
-          <h4 class="text-xl font-black uppercase tracking-widest">Crop Image</h4>
-          <button onclick="closeCrop()" class="text-gray-400 hover:text-black transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
-        </div>
-        <div class="max-h-[60vh] overflow-hidden rounded-2xl bg-gray-50 flex items-center justify-center">
-          <img id="cropImage" class="max-w-full" alt="Crop preview" />
-        </div>
-        <div class="flex gap-4 mt-8">
-          <button type="button" onclick="applyCrop()" class="flex-1 bg-lime-bright text-black py-4 rounded-xl font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">Apply Crop</button>
-          <button type="button" onclick="closeCrop()" class="px-8 py-4 border border-gray-100 rounded-xl font-black uppercase tracking-widest hover:bg-gray-50 transition-all">Cancel</button>
-        </div>
+  <!-- Crop Modal -->
+  <div id="cropModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[100] backdrop-blur-sm">
+    <div class="bg-white p-8 rounded-[2rem] max-w-2xl w-full mx-4 shadow-2xl">
+      <div class="flex justify-between items-center mb-6">
+        <h4 class="text-xl font-black uppercase tracking-widest">Crop Image</h4>
+        <button onclick="closeCrop()" class="text-gray-400 hover:text-black transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="max-h-[60vh] overflow-hidden rounded-2xl bg-gray-50 flex items-center justify-center">
+        <img id="cropImage" class="max-w-full" alt="Crop preview" />
+      </div>
+      <div class="flex gap-4 mt-8">
+        <button type="button" onclick="applyCrop()"
+          class="flex-1 bg-lime-bright text-black py-4 rounded-xl font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">Apply
+          Crop</button>
+        <button type="button" onclick="closeCrop()"
+          class="px-8 py-4 border border-gray-100 rounded-xl font-black uppercase tracking-widest hover:bg-gray-50 transition-all">Cancel</button>
       </div>
     </div>
-  </main>
+  </div>
+</main>
 
-  <script>
-    let cropper = null;
-    let currentInput = null;
+<script>
+  let cropper = null;
+  let currentInput = null;
 
-    function toggleProductStatus() {
-      const input = document.getElementById('isActiveInput');
-      const toggle = document.getElementById('statusToggle');
-      const label = document.getElementById('statusLabel');
-      const dot = toggle.querySelector('span');
-      
-      const isActive = input.value === 'true';
-      const newState = !isActive;
-      input.value = newState ? 'true' : 'false';
-      
-      if (newState) {
-        toggle.classList.remove('bg-gray-600');
-        toggle.classList.add('bg-lime-bright');
-        dot.classList.remove('left-1');
-        dot.classList.add('right-1');
-        label.textContent = 'Active';
-      } else {
-        toggle.classList.remove('bg-lime-bright');
-        toggle.classList.add('bg-gray-600');
-        dot.classList.remove('right-1');
-        dot.classList.add('left-1');
-        label.textContent = 'Inactive';
-      }
+  function toggleProductStatus() {
+    const input = document.getElementById('isActiveInput');
+    const toggle = document.getElementById('statusToggle');
+    const label = document.getElementById('statusLabel');
+    const dot = toggle.querySelector('span');
+
+    const isActive = input.value === 'true';
+    const newState = !isActive;
+    input.value = newState ? 'true' : 'false';
+
+    if (newState) {
+      toggle.classList.remove('bg-gray-600');
+      toggle.classList.add('bg-lime-bright');
+      dot.classList.remove('left-1');
+      dot.classList.add('right-1');
+      label.textContent = 'Active';
+    } else {
+      toggle.classList.remove('bg-lime-bright');
+      toggle.classList.add('bg-gray-600');
+      dot.classList.remove('right-1');
+      dot.classList.add('left-1');
+      label.textContent = 'Inactive';
     }
+  }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      const container = document.getElementById('variantsContainer')
-      const addBtn = document.getElementById('addVariantBtn')
-    
-      addBtn.addEventListener('click', function () {
-        const variants = document.querySelectorAll('.variant-item')
-        const clone = variants[0].cloneNode(true)
-    
-        // Reset values
-        clone.querySelectorAll('input:not([type="hidden"])').forEach(i => i.value = '')
-        clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0)
-        clone.querySelector('input[name="variant_id"]')?.remove()
-        
-        // Remove existing images and extra new slots
-        clone.querySelectorAll('.group').forEach(el => el.remove())
-        const newSlotsContainer = clone.querySelector('.newImageSlots')
-        newSlotsContainer.innerHTML = `
+  document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('variantsContainer')
+    const addBtn = document.getElementById('addVariantBtn')
+
+    addBtn.addEventListener('click', function () {
+      const variants = document.querySelectorAll('.variant-item')
+      const clone = variants[0].cloneNode(true)
+
+      // Reset values
+      clone.querySelectorAll('input:not([type="hidden"])').forEach(i => i.value = '')
+      clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0)
+      clone.querySelector('input[name="variant_id"]')?.remove()
+
+      // Reset image container to a single fresh slot
+      const imageContainer = clone.querySelector('.variantImageContainer')
+      imageContainer.innerHTML = `
           <div class="image-slot relative w-32 h-32">
             <div onclick="this.querySelector('input').click()" class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all relative group/slot">
               <svg class="w-8 h-8 text-gray-200 group-hover/slot:text-lime-bright transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -269,150 +301,150 @@
             </div>
           </div>
         `;
-    
-        container.appendChild(clone)
+
+      container.appendChild(clone)
+      updateIndexes()
+    })
+
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('.deleteVariantBtn')) {
+        if (document.querySelectorAll('.variant-item').length === 1) {
+          alert('At least one variant is required')
+          return
+        }
+        e.target.closest('.variant-item').remove()
         updateIndexes()
-      })
-    
-      document.addEventListener('click', function (e) {
-        if (e.target.closest('.deleteVariantBtn')) {
-          if (document.querySelectorAll('.variant-item').length === 1) {
-            alert('At least one variant is required')
-            return
-          }
-          e.target.closest('.variant-item').remove()
-          updateIndexes()
-        }
-      })
-    
-      // Cropper change listener
-      document.addEventListener('change', function(e) {
-        if (e.target.classList.contains('variantImages')) {
-          const file = e.target.files[0];
-          if (!file) return;
-          if (file.name === 'cropped.jpg') return;
-
-          currentInput = e.target;
-          const reader = new FileReader();
-          reader.onload = function(event) {
-            const img = document.getElementById('cropImage');
-            img.src = event.target.result;
-            
-            const modal = document.getElementById('cropModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-
-            if (cropper) cropper.destroy();
-            cropper = new Cropper(img, {
-              aspectRatio: 1,
-              viewMode: 1,
-              background: false
-            });
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-
-      function updateIndexes() {
-        document.querySelectorAll('.variant-item').forEach((item, index) => {
-          item.querySelectorAll('.variantImages').forEach((input) => {
-            input.name = `images_${index}[]`
-          })
-        })
       }
+    })
 
-      document.getElementById('productForm').addEventListener('submit', function (e) {
-        let valid = true
-        document.querySelectorAll('.variant-item').forEach((item, index) => {
-          const existingImages = item.querySelectorAll('img:not(#cropImage)').length
-          const newImages = Array.from(item.querySelectorAll('.variantImages')).filter(i => i.files.length > 0).length
-          const deletedImages = item.querySelectorAll('input.delete-checkbox:checked').length
-          
-          if ((existingImages + newImages - deletedImages) < 3) {
-            alert(`Variant ${index + 1} must have at least 3 images total`)
-            valid = false
-          }
-        })
-        if (!valid) e.preventDefault()
-      })
+    // Cropper change listener
+    document.addEventListener('change', function (e) {
+      if (e.target.classList.contains('variantImages')) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.name === 'cropped.jpg') return;
+
+        currentInput = e.target;
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const img = document.getElementById('cropImage');
+          img.src = event.target.result;
+
+          const modal = document.getElementById('cropModal');
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+
+          if (cropper) cropper.destroy();
+          cropper = new Cropper(img, {
+            aspectRatio: 1,
+            viewMode: 1,
+            background: false
+          });
+        };
+        reader.readAsDataURL(file);
+      }
     });
 
-    function closeCrop() {
-      const modal = document.getElementById('cropModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      if (cropper) {
-        cropper.destroy();
-        cropper = null;
-      }
-      if (currentInput && currentInput.files.length > 0 && currentInput.files[0].name !== 'cropped.jpg') {
-          currentInput.value = ''; // Clear if not applied
-      }
+    function updateIndexes() {
+      document.querySelectorAll('.variant-item').forEach((item, index) => {
+        item.querySelectorAll('.variantImages').forEach((input) => {
+          input.name = `images_${index}[]`
+        })
+      })
     }
 
-    function applyCrop() {
-      if (!cropper) return;
-      const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
-      canvas.toBlob((blob) => {
-        const croppedFile = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(croppedFile);
-        currentInput.files = dataTransfer.files;
+    document.getElementById('productForm').addEventListener('submit', function (e) {
+      let valid = true
+      document.querySelectorAll('.variant-item').forEach((item, index) => {
+        const existingImages = item.querySelectorAll('img:not(#cropImage)').length
+        const newImages = Array.from(item.querySelectorAll('.variantImages')).filter(i => i.files.length > 0).length
+        const deletedImages = item.querySelectorAll('input.delete-checkbox:checked').length
 
-        // Preview
-        const dataURL = canvas.toDataURL('image/jpeg');
-        const slot = currentInput.closest('.image-slot');
-        
-        // Find existing image or create new one
-        let preview = slot.querySelector('img'); 
-        if (!preview) {
-          preview = document.createElement('img');
-          preview.className = 'w-full h-full object-cover rounded-2xl pointer-events-none';
-          slot.appendChild(preview);
-        } else {
-          // If it was an existing image being replaced, ensure it looks like a preview
-          preview.classList.add('object-cover', 'rounded-2xl');
+        if ((existingImages + newImages - deletedImages) < 3) {
+          alert(`Variant ${index + 1} must have at least 3 images total`)
+          valid = false
         }
-        preview.src = dataURL;
-        preview.classList.remove('opacity-0'); // In case it was hidden
+      })
+      if (!valid) e.preventDefault()
+    })
+  });
 
-        // Add Remove Button for new images (if not already there)
-        if (!slot.querySelector('.remove-btn') && !slot.querySelector('.delete-checkbox')) {
-          const removeBtn = document.createElement('button');
-          removeBtn.type = 'button';
-          removeBtn.className = 'remove-btn absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-lg hover:bg-red-600 transition-all z-10';
-          removeBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
-          removeBtn.onclick = (e) => {
-            e.stopPropagation();
-            slot.remove();
-          };
-          slot.appendChild(removeBtn);
-        }
+  function closeCrop() {
+    const modal = document.getElementById('cropModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+    if (currentInput && currentInput.files.length > 0 && currentInput.files[0].name !== 'cropped.jpg') {
+      currentInput.value = ''; // Clear if not applied
+    }
+  }
 
-        // Add a new slot if this was the last one in the 'newImageSlots' container
-        const parent = slot.parentElement;
-        if (parent.classList.contains('newImageSlots') && slot === parent.lastElementChild) {
-          const newSlot = slot.cloneNode(true);
-          newSlot.querySelector('input').value = '';
-          const oldImg = newSlot.querySelector('img');
-          if (oldImg) oldImg.remove();
-          const oldRemoveBtn = newSlot.querySelector('.remove-btn');
-          if (oldRemoveBtn) oldRemoveBtn.remove();
-          
-          // Restore the 'Add New' placeholder svg/text
-          const placeholder = `
+  function applyCrop() {
+    if (!cropper) return;
+    const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
+    canvas.toBlob((blob) => {
+      const croppedFile = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(croppedFile);
+      currentInput.files = dataTransfer.files;
+
+      // Preview
+      const dataURL = canvas.toDataURL('image/jpeg');
+      const slot = currentInput.closest('.image-slot');
+
+      // Find existing image or create new one
+      let preview = slot.querySelector('img');
+      if (!preview) {
+        preview = document.createElement('img');
+        preview.className = 'w-full h-full object-cover rounded-2xl pointer-events-none';
+        slot.appendChild(preview);
+      } else {
+        // If it was an existing image being replaced, ensure it looks like a preview
+        preview.classList.add('object-cover', 'rounded-2xl');
+      }
+      preview.src = dataURL;
+      preview.classList.remove('opacity-0'); // In case it was hidden
+
+      // Add Remove Button for new images (if not already there)
+      if (!slot.querySelector('.remove-btn') && !slot.querySelector('.delete-checkbox')) {
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-btn absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-lg hover:bg-red-600 transition-all z-10';
+        removeBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+        removeBtn.onclick = (e) => {
+          e.stopPropagation();
+          slot.remove();
+        };
+        slot.appendChild(removeBtn);
+      }
+
+      // Add a new slot if this was the last one in the container
+      const parent = slot.parentElement;
+      if (slot === parent.lastElementChild) {
+        const newSlot = slot.cloneNode(true);
+        newSlot.querySelector('input').value = '';
+        const oldImg = newSlot.querySelector('img');
+        if (oldImg) oldImg.remove();
+        const oldRemoveBtn = newSlot.querySelector('.remove-btn');
+        if (oldRemoveBtn) oldRemoveBtn.remove();
+
+        // Restore the 'Add New' placeholder svg/text
+        const placeholder = `
             <div onclick="this.querySelector('input').click()" class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all relative group/slot">
               <svg class="w-8 h-8 text-gray-200 group-hover/slot:text-lime-bright transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
               <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add New</span>
               <input type="file" name="${currentInput.name}" class="variantImages hidden" accept="image/*">
             </div>
           `;
-          newSlot.innerHTML = placeholder;
-          parent.appendChild(newSlot);
-        }
+        newSlot.innerHTML = placeholder;
+        parent.appendChild(newSlot);
+      }
 
-        closeCrop();
-      }, 'image/jpeg', 0.9);
-    }
-  </script>
+      closeCrop();
+    }, 'image/jpeg', 0.9);
+  }
+</script>
 {% endblock %}

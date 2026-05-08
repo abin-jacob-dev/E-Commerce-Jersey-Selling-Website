@@ -7,41 +7,47 @@
         THE PITCH<br />
         <span class="text-lime">AESTHETIC.</span>
       </h2>
-      <a href="{% url "products:all_products" %}" class="inline-block bg-lime text-black font-black uppercase px-12 py-4 text-sm hover:bg-white transition-colors">Shop Now</a>
+      <a href="{% url 'products:all_products' %}" class="inline-block bg-lime text-black font-black uppercase px-12 py-4 text-sm hover:bg-white transition-colors">Shop Now</a>
 
-      <div class="mt-20 flex justify-center space-x-2">
-        
-      </div>
+      <div class="mt-20 flex justify-center space-x-2"></div>
     </div>
     <!-- Background decorative elements can go here -->
   </section>
 
   <!-- Shop by Category -->
   <section class="py-20 bg-[#f9fafb]">
-    <div class="container mx-auto px-4 text-center">
-      <h3 class="text-3xl font-black uppercase mb-12 tracking-tightest">Shop by Category</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Category 1 -->
-        <div class="group cursor-pointer">
-          <div class="w-48 h-48 mx-auto rounded-full overflow-hidden mb-4 border-4 border-transparent group-hover:border-lime transition-all">
-            <img src="https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=300&h=300&auto=format&fit=crop" alt="Embroidery" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-14">
+        <h3 class="text-3xl md:text-4xl font-black uppercase tracking-tightest">Shop by Category</h3>
+
+        <p class="text-sm text-gray-500 mt-3">Explore collections by category</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {% for category in categories %}
+          <a href="{% url 'products:all_products' %}?category={{category.slug|urlencode}}" class="group flex flex-col items-center text-center">
+            <!-- Category Image -->
+            <div class="w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden bg-black/5 border-4 border-transparent group-hover:border-lime transition-all duration-300 shadow-sm">
+              {% if category.image %}
+                <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              {% else %}
+                <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">No Image</div>
+              {% endif %}
+            </div>
+
+            <!-- Category Name -->
+            <h4 class="mt-5 font-extrabold uppercase text-sm tracking-widest group-hover:text-lime transition-colors duration-300">{{ category.name }}</h4>
+
+            <!-- Optional Description -->
+            {% if category.description %}
+              <p class="text-xs text-gray-500 mt-2 max-w-[200px] line-clamp-2">{{ category.description }}</p>
+            {% endif %}
+          </a>
+        {% empty %}
+          <div class="col-span-full text-center py-10">
+            <p class="text-gray-500 text-sm">No categories available.</p>
           </div>
-          <h4 class="font-bold uppercase text-sm tracking-widest tracking-tightest">Embroidery</h4>
-        </div>
-        <!-- Category 2 -->
-        <div class="group cursor-pointer">
-          <div class="w-48 h-48 mx-auto rounded-full overflow-hidden mb-4 border-4 border-transparent group-hover:border-lime transition-all">
-            <img src="https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=300&h=300&auto=format&fit=crop" alt="Full Sleeve" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
-          </div>
-          <h4 class="font-bold uppercase text-sm tracking-widest tracking-tightest">Full Sleeve</h4>
-        </div>
-        <!-- Category 3 -->
-        <div class="group cursor-pointer">
-          <div class="w-48 h-48 mx-auto rounded-full overflow-hidden mb-4 border-4 border-transparent group-hover:border-lime transition-all">
-            <img src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=300&h=300&auto=format&fit=crop" alt="Retro" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
-          </div>
-          <h4 class="font-bold uppercase text-sm tracking-widest tracking-tightest">Retro</h4>
-        </div>
+        {% endfor %}
       </div>
     </div>
   </section>
@@ -50,50 +56,34 @@
   <section class="py-20">
     <div class="container mx-auto px-4 text-center">
       <h3 class="text-3xl font-black uppercase mb-12 tracking-tightest">New Arrivals.</h3>
+
       <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12">
-        <!-- Product Card -->
-        <div class="text-left group cursor-pointer">
-          <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
-            <img src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=400&h=533&auto=format&fit=crop" alt="Jersey" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
-          </div>
-          <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">London Blue Home</h5>
-          <div class="flex space-x-2 text-xs">
-            <span class="text-lime font-bold">€110.00</span>
-            <span class="text-black-400 line-through">€140.00</span>
-          </div>
-        </div>
-        <!-- Repeat 3 more times for the grid -->
-        <div class="text-left group cursor-pointer">
-          <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
-            <img src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=400&h=533&auto=format&fit=crop" alt="Jersey" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
-          </div>
-          <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">London Blue Home</h5>
-          <div class="flex space-x-2 text-xs">
-            <span class="text-lime font-bold">€110.00</span>
-            <span class="text-black-400 line-through">€140.00</span>
-          </div>
-        </div>
-        <div class="text-left group cursor-pointer">
-          <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
-            <img src="https://images.unsplash.com/photo-1434682881908-b43d0467b798?q=80&w=400&h=533&auto=format&fit=crop" alt="Jersey" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
-          </div>
-          <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">Vintage 98 Replica</h5>
-          <div class="flex space-x-2 text-xs">
-            <span class="text-lime font-bold">€120.00</span>
-          </div>
-        </div>
-        <div class="text-left group cursor-pointer">
-          <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
-            <img src="https://images.unsplash.com/photo-1434682881908-b43d0467b798?q=80&w=400&h=533&auto=format&fit=crop" alt="Jersey" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
-          </div>
-          <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">Vintage 98 Replica</h5>
-          <div class="flex space-x-2 text-xs">
-            <span class="text-lime font-bold">€120.00</span>
-          </div>
-        </div>
+        {% for product in products %}
+          <a href="{% url 'products:product_detail' product.slug %}"  class="block">
+            <div class="text-left group cursor-pointer">
+              <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
+                {% if product.get_primary_image %}
+                  <img src="{{ product.get_primary_image }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
+                {% else %}
+                  <img src="https://via.placeholder.com/400x533?text=No+Image" alt="No image" class="w-full h-full object-cover" />
+                {% endif %}
+              </div>
+
+              <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">{{ product.name }}</h5>
+
+              <div class="flex space-x-2 text-xs">
+                {% with variant=product.variants.first %}
+                  {% if variant %}
+                    <span class="text-lime font-bold">₹{{ variant.price }}</span>
+                  {% endif %}
+                {% endwith %}
+              </div>
+            </div>
+          </a>
+        {% endfor %}
       </div>
 
-      <button class="mt-16 border-2 border-black font-bold uppercase px-12 py-3 text-xs hover:bg-black hover:text-white transition-colors">Load More</button>
+      <a href="{% url 'products:all_products' %}" class="inline-block mt-16 border-2 border-black font-bold uppercase px-12 py-3 text-xs hover:bg-black hover:text-white transition-colors">View All</a>
     </div>
   </section>
 

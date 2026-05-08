@@ -55,10 +55,10 @@
                   </div>
                 </div>
                 <div class="text-right flex flex-col justify-between items-end h-full min-w-[120px]">
-                  <span class="text-xl font-black text-black mb-6">${{ item.variant.price }}</span>
+                  <span class="text-xl font-black text-black mb-6">₹{{ item.variant.price }}</span>
                   <div class="mt-auto">
                     <p class="text-[9px] font-black uppercase tracking-widest text-gray-300 mb-1">Total</p>
-                    <span id="subtotal-{{ item.id }}" class="text-3xl font-black text-lime-dark">${{ item.subtotal }}</span>
+                    <span id="subtotal-{{ item.id }}" class="text-3xl font-black text-lime-dark">₹{{ item.subtotal }}</span>
                   </div>
                 </div>
                 <a href="{% url 'products:remove_from_cart' item.id %}" class="absolute top-6 right-6 text-gray-400 hover:text-red-500 transition-colors">
@@ -87,7 +87,7 @@
             <div class="space-y-4 text-sm font-bold mb-8 border-b border-white/10 pb-6">
               <div class="flex justify-between items-center">
                 <span class="uppercase tracking-[0.2em] opacity-60 text-xs">Subtotal ({{ items.count }} item{{ items.count|pluralize }})</span>
-                <span id="summary-subtotal" class="text-lg font-black">${{ cart.total_price }}</span>
+                <span id="summary-subtotal" class="text-lg font-black">₹{{ cart.total_price }}</span>
               </div>
 
               <div class="flex justify-between items-center">
@@ -99,7 +99,7 @@
             <!-- TOTAL -->
             <div class="mb-8">
               <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-50">ESTIMATED TOTAL</span>
-              <div id="summary-total" class="text-5xl font-black text-lime-bright mt-2 leading-none">${{ cart.total_price }}</div>
+              <div id="summary-total" class="text-5xl font-black text-lime-bright mt-2 leading-none">₹{{ cart.total_price }}</div>
             </div>
 
             <!-- CHECKOUT BUTTON -->
@@ -157,9 +157,9 @@
       .then(data => {
         if (data.status === 'success') {
           document.getElementById(`qty-${itemId}`).innerText = data.quantity;
-          document.getElementById(`subtotal-${itemId}`).innerText = `$${data.subtotal.toFixed(2)}`;
-          document.getElementById('summary-subtotal').innerText = `$${data.total_price.toFixed(2)}`;
-          document.getElementById('summary-total').innerText = `$${data.total_price.toFixed(2)}`;
+          document.getElementById(`subtotal-${itemId}`).innerText = `₹${data.subtotal.toFixed(2)}`;
+          document.getElementById('summary-subtotal').innerText = `₹${data.total_price.toFixed(2)}`;
+          document.getElementById('summary-total').innerText = `₹${data.total_price.toFixed(2)}`;
         } else {
           alert(data.message);
         }

@@ -3,6 +3,7 @@
 
 {% block content %}
   <main class="flex-1 p-4 md:p-12 overflow-y-auto">
+    {% include "partials/alert.html" %}
     <!-- HEADER -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
       <div>
@@ -27,7 +28,7 @@
     <!-- SEARCH BAR -->
     <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
       <form method="GET" class="flex gap-3 w-full md:w-auto">
-        <input type="text" name="search" value="{{ request.GET.search }}" placeholder="Search categories..." class="w-full md:w-72 bg-white border border-gray-200 rounded-lg px-4 py-3 text-[12px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime-200" />
+        <input type="text" name="search" value="{{ search_query|default:'' }}" placeholder="Search categories..." class="w-full md:w-72 bg-white border border-gray-200 rounded-lg px-4 py-3 text-[12px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime-200" />
 
         <button type="submit" class="bg-lime-500 text-white px-4 py-3 rounded-lg text-xs font-bold uppercase hover:bg-lime-600 transition">Search</button>
 
@@ -47,92 +48,67 @@
               <th class="px-4 md:px-10 py-6 md:py-8 text-right">Actions</th>
             </tr>
           </thead>
+          <tbody class="text-xs font-bold text-balckbg-black-600">
           {% if categories %}
             {% for category in categories %}
-              <!-- BODY -->
-              <tbody class="text-xs font-bold text-balckbg-black-600">
-                <!-- ROW 1 (ACTIVE) -->
-                <tr class="border-b border-balckbg-black-50 hover:bg-black-50/50 transition-colors">
-                  <td class="px-4 md:px-10 py-6 md:py-8">
-                    <span class="font-black text-black">{{ category.name }}</span>
-                  </td>
+              <!-- ROW -->
+              <tr class="border-b border-balckbg-black-50 hover:bg-black-50/50 transition-colors">
+                <td class="px-4 md:px-10 py-6 md:py-8">
+                  <span class="font-black text-black">{{ category.name }}</span>
+                </td>
 
-                  <td class="px-4 md:px-10 py-6 md:py-8">
-                    <p class="text-[10px] opacity-60 max-w-xs whitespace-normal break-words leading-snug">{{ category.description }}</p>
-                  </td>
+                <td class="px-4 md:px-10 py-6 md:py-8">
+                  <p class="text-[10px] opacity-60 max-w-xs whitespace-normal break-words leading-snug">{{ category.description }}</p>
+                </td>
 
-                  <td class="px-4 md:px-10 py-6 md:py-8 text-center">
-                    <span class="bg-black text-white text-[12px] font-black px-4 py-1 rounded-full">142</span>
-                  </td>
+                <td class="px-4 md:px-10 py-6 md:py-8 text-center">
+                  <span class="bg-black text-white text-[12px] font-black px-4 py-1 rounded-full">{{ category.products.count }}</span>
+                </td>
 
-                  <!-- STATUS ACTIVE -->
-                  <td class="px-4 md:px-10 py-6 md:py-8 text-center">
-                    <span class="inline-flex px-3 py-1 text-[12px] font-black uppercase tracking-widest rounded-full
-  {% if category.is_active %}
-                        
-                        
-                        
-                        
-                        
-                        
-    bg-green-100 text-green-700
+                <!-- STATUS -->
+                <td class="px-4 md:px-10 py-6 md:py-8 text-center">
+                  <span class="inline-flex px-3 py-1 text-[12px] font-black uppercase tracking-widest rounded-full
+                    {% if category.is_active %}
+                      bg-green-100 text-green-700
+                    {% else %}
+                      bg-red-100 text-red-700
+                    {% endif %}">
+                    {% if category.is_active %}
+                      Active
+                    {% else %}
+                      Inactive
+                    {% endif %}
+                  </span>
+                </td>
 
+                <td class="px-4 md:px-10 py-6 md:py-8 text-right">
+                  <div class="flex justify-end gap-4">
+                    <a href="{% url 'products:edit_category' category.slug %}" class="text-balckbg-black-300 hover:text-black transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </a>
 
-
-
-
-
-                      {% else %}
-                        
-                        
-                        
-                        
-                        
-                        
-    bg-red-100 text-red-700
-
-
-
-
-
-
-                      {% endif %}
-">
-                      {% if category.is_active %}
-                        Active
-                      {% else %}
-                        Inactive
-                      {% endif %}
-                    </span>
-                  </td>
-
-                  <td class="px-4 md:px-10 py-6 md:py-8 text-right">
-                    <div class="flex justify-end gap-4">
-                      <a href="{% url 'products:edit_category' category.id %}" class="text-balckbg-black-300 hover:text-black transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </a>
-
-                      <a href="{% url 'products:delete_category' category.id %}" class="text-balckbg-black-300 hover:text-red-500 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
+                    <a href="{% url 'products:delete_category' category.slug %}" class="text-balckbg-black-300 hover:text-red-500 transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
             {% endfor %}
           {% else %}
             <tr>
               <td colspan="5" class="text-center py-10 text-sm text-gray-500 font-bold">No categories found.</td>
             </tr>
           {% endif %}
+          </tbody>
         </table>
       </div>
 
       <!-- PAGINATION -->
+      {% if categories.paginator.num_pages > 1 %}
       <div class="p-6 md:p-10 flex flex-col md:flex-row justify-between items-center bg-black-50/50 gap-6">
         <!-- Showing count -->
         <p class="text-[12px] font-black uppercase tracking-widest text-black">Showing {{ categories.start_index }}-{{ categories.end_index }} of {{ categories.paginator.count }} categories</p>
@@ -141,8 +117,7 @@
         <div class="flex items-center gap-2 flex-wrap justify-center">
           <!-- Previous button -->
           {% if categories.has_previous %}
-            <a href="?page={{ categories.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}
-              {% endif %}"
+            <a href="?page={{ categories.previous_page_number }}{% if query_params %}&{{ query_params }}{% endif %}"
               class="p-2 text-black/40 hover:text-black">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -160,10 +135,9 @@
           {% for num in categories.paginator.page_range %}
             {% if categories.number == num %}
               <span class="min-w-[32px] h-8 px-2 bg-black text-white rounded-lg text-[10px] font-black flex items-center justify-center">{{ num }}</span>
-            {% else %}
-              <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}
-                {% endif %}"
-                class="min-w-[32px] h-8 px-2 bg-white border rounded-lg text-[10px] font-black flex items-center justify-center hover:bg-black hover:text-white">
+            {% elif num > categories.number|add:'-3' and num < categories.number|add:'3' %}
+              <a href="?page={{ num }}{% if query_params %}&{{ query_params }}{% endif %}"
+                class="min-w-[32px] h-8 px-2 bg-white border rounded-lg text-[10px] font-black flex items-center justify-center hover:bg-black hover:text-white transition-colors">
                 {{ num }}
               </a>
             {% endif %}
@@ -171,8 +145,7 @@
 
           <!-- Next button -->
           {% if categories.has_next %}
-            <a href="?page={{ categories.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}
-              {% endif %}"
+            <a href="?page={{ categories.next_page_number }}{% if query_params %}&{{ query_params }}{% endif %}"
               class="p-2 text-black/40 hover:text-black">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -187,6 +160,8 @@
           {% endif %}
         </div>
       </div>
+      {% endif %}
+    </div>
     </div>
   </main>
 {% endblock %}

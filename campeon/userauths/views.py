@@ -155,7 +155,7 @@ def activate_account(request):
 @never_cache
 def signin(request):
     if request.user.is_authenticated:
-        return redirect("user:profile")  # dashboard
+        return redirect("core:shop")  # dashboard
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")

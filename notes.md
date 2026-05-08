@@ -128,3 +128,35 @@ OTP Timer: The OTP is set to expire after 5 minutes. The is_expired method check
 Verify OTP: The user must enter the OTP to unlock the profile fields and make changes. If the OTP is correct and valid, the changes are saved.
 Considerations:
 Security: Ensure your email
+
+
+
+
+NATO phonetic alphabet
+
+A – Alpha
+B – Bravo
+C – Charlie
+D – Delta
+E – Echo
+F – Foxtrot
+G – Golf
+H – Hotel
+I – India
+J – Juliett
+K – Kilo
+L – Lima
+M – Mike
+N – November
+O – Oscar
+P – Papa
+Q – Quebec
+R – Romeo
+S – Sierra
+T – Tango
+U – Uniform
+V – Victor
+W – Whiskey
+X – X-ray
+Y – Yankee
+Z – Zulu

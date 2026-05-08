@@ -31,8 +31,8 @@
           <div class="space-y-4">
             {% for cat in category %}
             <label class="flex items-center gap-3 text-[13px] font-black uppercase tracking-widest cursor-pointer">
-              <input type="checkbox" name="category" value="{{ cat.id }}" 
-              {% if cat.id|stringformat:"s" in selected_categories %}
+              <input type="checkbox" name="category" value="{{ cat.slug }}" 
+              {% if cat.slug in selected_categories %}
                checked 
               {% endif %}
               class="w-4 h-4 accent-dark-lime" />
@@ -136,20 +136,20 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                   </svg>
                 </button>
-                <div class="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                {% comment %} <div class="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                   <button class="w-full bg-lime-bright text-black font-black uppercase py-4 flex items-center justify-center gap-3 text-[13px] tracking-widest shadow-xl">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                    </svg>ADD TO CART
+                    </svg>select options
                   </button>
-                </div>
+                </div> {% endcomment %}
               </div>
               <div class="flex justify-between items-start">
                 <div>
                   <span class="text-[12px] font-black uppercase tracking-widest text-gray-300 block mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-lime-dark rounded-full"></div>{{ product.category }}</span>
-                  <h4 class="text-xl font-black uppercase tracking-tighter leading-tight group-hover:text-lime-dark transition-colors tracking-tightest"><a href="{% url "products:product_detail" product.id %}">{{ product.name }}</a></h4>
+                  <h4 class="text-xl font-black uppercase tracking-tighter leading-tight group-hover:text-lime-dark transition-colors tracking-tightest"><a href="{% url "products:product_detail" product.slug %}">{{ product.name }}</a></h4>
                 </div>
-                <span class="text-xl font-black">{{ product.min_price }}</span>
+                <span class="text-xl font-black">₹{{ product.min_price }}</span>
               </div>
             </div>
           {% endfor %}

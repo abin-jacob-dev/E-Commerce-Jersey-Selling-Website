@@ -2,7 +2,6 @@
 {% load static %}
 {% block content %}
   <link rel="stylesheet" href="https://unpkg.com/drift-zoom/dist/drift-basic.css" />
-
   <script src="https://unpkg.com/drift-zoom/dist/Drift.min.js"></script>
   <script id="variantData" type="application/json">
   [
@@ -19,7 +18,7 @@
     {% endfor %}
   ]
 </script>
-  <main class="container mx-auto px-4 py-12">
+  <main class="container mx-auto px-4 py-6">
     <div class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-8">
       <a href="{% url 'core:home' %}">Home</a> <span class="mx-2">/</span> <a href="{% url 'products:all_products' %}">Shop</a> <span class="mx-2">/</span> {{ product.name }}
     </div>
@@ -54,7 +53,7 @@
         <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black uppercase leading-tight mb-6 break-words">{{ product.name }}</h2>
 
         <div class="flex flex-wrap items-center gap-3 mb-8">
-          <span id="productPrice" class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">${{ product.variants.first.price }}</span>
+          <span id="productPrice" class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ product.variants.first.price }}</span>
           <p id="stockStatus" class="text-xs font-bold text-gray-400 mt-2"></p>
           {% comment %} <span class="bg-red-50 text-red-500 text-[9px] font-black uppercase px-3 py-1 rounded-sm">Limited Edition</span> {% endcomment %}
         </div>
@@ -326,7 +325,7 @@
 
       selectedVariant = variants.find(v => v.color_id == selectedColor && v.size == selectedSize);
       if (selectedVariant) {
-        document.getElementById('productPrice').innerText = `$${selectedVariant.price}`;
+        document.getElementById('productPrice').innerText = `₹${selectedVariant.price}`;
 
         const stockText = selectedVariant.stock > 5
           ? "In stock"

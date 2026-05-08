@@ -199,9 +199,9 @@ SOCIALACCOUNT_PROVIDERS = {
 
 LOGIN_URL = "userauths:signin"
 LOGOUT_URL = "userauths:signout"
-LOGIN_REDIRECT_URL = "user:profile"  # dashboard
+LOGIN_REDIRECT_URL = "products:all_products"  # dashboard
 ACCOUNT_LOGOUT_REDIRECT_URL = "userauths:signin"
-ACCOUNT_LOGIN_REDIRECT_URL = "user:profile"  # dashboard
+ACCOUNT_LOGIN_REDIRECT_URL = "products:all_products"  # dashboard
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_ADAPTER = "userauths.adapters.MySocialAccountAdapter"
 

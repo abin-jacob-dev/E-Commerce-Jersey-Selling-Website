@@ -8,14 +8,14 @@ urlpatterns = [
     #categories
     path("categories/", views.categories, name="categories"),
     path("add-new-category/", views.add_new_category, name="add_new_category"),
-    path("edit-category/<id>", views.edit_category, name="edit_category"),
-    path("delete-category/<id>", views.delete_category, name="delete_category"),
+    path("edit-category/<slug:slug>", views.edit_category, name="edit_category"),
+    path("delete-category/<slug:slug>", views.delete_category, name="delete_category"),
 
     #products
     path("products-list/", views.products_list, name="products_list"),
     path("add-product/", views.add_product, name="add_product"),
-    path("edit-product/<id>", views.edit_product, name="edit_product"),
-    path("delete-product/<id>", views.delete_product, name="delete_product"),
+    path("edit-product/<slug:slug>", views.edit_product, name="edit_product"),
+    path("delete-product/<slug:slug>", views.delete_product, name="delete_product"),
 
     #colors
     path("colors/", views.colors, name="colors"),
@@ -25,7 +25,7 @@ urlpatterns = [
 
 
     path('all-products',views.all_products,name='all_products'),
-    path('product-detail/<id>',views.product_detail,name='product_detail'),
+    path('product-detail/<slug:slug>/',views.product_detail,name='product_detail'),
 
     # Cart
     path('cart/', views.cart, name='cart'),

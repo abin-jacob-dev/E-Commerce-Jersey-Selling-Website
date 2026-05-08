@@ -69,6 +69,7 @@
   </script>
   <main class="flex-1 p-12 overflow-y-auto">
     <!-- Top Bar -->
+     {% include "partials/alert.html" %}
     <div class="flex justify-between items-center mb-12">
       <div class="flex items-center gap-4">
         <a href="{% url 'products:categories' %}" class="p-2 bg-white rounded-lg shadow-sm hover:bg-black-50 transition-colors">

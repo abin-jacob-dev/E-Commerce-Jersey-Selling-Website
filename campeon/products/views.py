@@ -5,50 +5,75 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from products.forms import CategoryForm, ProductForm, ColorForm
-from .models import Category, Product, Variant, Color, VariantImage, Cart, CartItem, Wishlist
+from .models import (
+    Category,
+    Product,
+    Variant,
+    Color,
+    VariantImage,
+    Cart,
+    CartItem,
+    Wishlist,
+)
 from django.db.models import Prefetch
 from django.db.models import Min, Q
 
 
 # Create your views here.
 def categories(request):
-    categories = Category.objects.filter(is_deleted=False).order_by("-created_at")
+    categories_list = Category.objects.filter(is_deleted=False).order_by("-created_at")
     search_query = request.GET.get("search")
 
     if search_query:
-        categories = categories.filter(name__icontains=search_query).order_by(
-            "-created_at"
-        )
-    paginator = Paginator(categories, 1)  # Show 25 contacts per page.
+        categories_list = categories_list.filter(name__icontains=search_query)
+
+    paginator = Paginator(categories_list, 6)  # Show 5 categories per page.
 
     page_number = request.GET.get("page")
-    categories = paginator.get_page(page_number)
+    page_obj = paginator.get_page(page_number)
+
+    query_params = request.GET.copy()
+
+    if "page" in query_params:
+        del query_params["page"]
+
     return render(
-        request, "admin/products/categories/categories.html", {"categories": categories}
+        request,
+        "admin/products/categories/categories.html",
+        {
+            "categories": page_obj,
+            "search_query": search_query,
+            "query_params": query_params.urlencode(),
+        },
     )
 
 
 def add_new_category(request):
     form = CategoryForm()
     if request.method == "POST":
+        name = request.POST.get('name')
         form = CategoryForm(request.POST, request.FILES)
-
+        
+            
         if form.is_valid():
             form.save()
+            messages.success(request, "New Category Added")
             return redirect("products:categories")
         else:
             print(form.errors)
+            messages.error(request, "Please include all the values ")
     return render(
         request, "admin/products/categories/add_new_category.html", {"form": form}
     )
 
 
-def edit_category(request, id):
-    category = get_object_or_404(Category, id=id)
+def edit_category(request, slug):
+    category = get_object_or_404(Category, slug=slug)
     if request.method == "POST":
         form = CategoryForm(request.POST, request.FILES, instance=category)
         if form.is_valid():
             form.save()
+            messages.success(request, "Updated the Category")
             return redirect("products:categories")
     else:
         form = CategoryForm(instance=category)
@@ -59,11 +84,12 @@ def edit_category(request, id):
     )
 
 
-def delete_category(request, id):
-    category = Category.objects.get(id=id)
+def delete_category(request, slug):
+    category = Category.objects.get(slug=slug)
     if request.method == "POST":
         category.is_deleted = True
         category.save()
+        messages.error(request, "You have deleted the Category")
         return redirect("products:categories")
     return render(
         request,
@@ -113,14 +139,47 @@ def delete_color(request, id):
 
 
 def products_list(request):
-    products = (
-        Product.objects.prefetch_related("variants")
+    products_queryset = (
+        Product.objects.select_related("category")
+        .prefetch_related("variants")
         .filter(is_deleted=False)
         .order_by("-updated_at")
     )
-    return render(
-        request, "admin/products/products/products_list.html", {"products": products}
-    )
+
+    search_query = request.GET.get("search")
+    category_id = request.GET.get("category")
+    status = request.GET.get("status")
+
+    if search_query:
+        products_queryset = products_queryset.filter(name__icontains=search_query)
+
+    if category_id and category_id.isdigit():
+        products_queryset = products_queryset.filter(category_id=category_id)
+
+    if status == "Active":
+        products_queryset = products_queryset.filter(is_active=True)
+    elif status == "Inactive":
+        products_queryset = products_queryset.filter(is_active=False)
+
+    paginator = Paginator(products_queryset, 6)  # Show 1 products per page.
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    categories = Category.objects.filter(is_deleted=False)
+
+    query_params = request.GET.copy()
+    if "page" in query_params:
+        del query_params["page"]
+
+    context = {
+        "products": page_obj,
+        "categories": categories,
+        "query_params": query_params.urlencode(),
+        "selected_category": category_id,
+        "selected_status": status,
+        "search_query": search_query,
+    }
+    return render(request, "admin/products/products/products_list.html", context)
 
 
 def add_product(request):
@@ -195,8 +254,8 @@ def add_product(request):
     )
 
 
-def edit_product(request, id):
-    product = get_object_or_404(Product, id=id)
+def edit_product(request, slug):
+    product = get_object_or_404(Product, slug=slug)
 
     if request.method == "POST":
         try:
@@ -296,8 +355,8 @@ def edit_product(request, id):
     )
 
 
-def delete_product(request, id):
-    product = get_object_or_404(Product, id=id)
+def delete_product(request, slug):
+    product = get_object_or_404(Product, slug=slug)
     if request.method == "POST":
         product.is_deleted = True
         product.save()
@@ -324,7 +383,7 @@ def all_products(request):
         )
     selected_categories = request.GET.getlist("category")
     if selected_categories:
-        products = products.filter(category__id__in=selected_categories)
+        products = products.filter(category__slug__in=selected_categories)
 
     min_price = request.GET.get("min_price")
     max_price = request.GET.get("max_price")
@@ -365,7 +424,7 @@ def all_products(request):
     else:
         products = products.order_by("-created_at")
 
-    paginator = Paginator(products, 3)
+    paginator = Paginator(products, 6)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -387,27 +446,29 @@ def all_products(request):
     return render(request, "core/shop.html", context)
 
 
-def product_detail(request, id):
-    product = Product.objects.filter(
-        id=id,
-        is_deleted=False,
-        is_active=True
-    ).prefetch_related(
-        Prefetch(
-            "variants",
-            queryset=Variant.objects.filter(is_active=True).prefetch_related("images")
+def product_detail(request, slug):
+    product = (
+        Product.objects.filter(slug=slug, is_deleted=False, is_active=True)
+        .prefetch_related(
+            Prefetch(
+                "variants",
+                queryset=Variant.objects.filter(is_active=True).prefetch_related(
+                    "images"
+                ),
+            )
         )
-    ).first()
+        .first()
+    )
 
     if not product:
         messages.warning(request, "Product not found or unavailable.")
-        return redirect('products:all_products')
-    
+        return redirect("products:all_products")
+
     # Check if product has any active variants with stock
     has_stock = any(variant.stock > 0 for variant in product.variants.all())
     if not has_stock:
         messages.warning(request, "This product is currently out of stock.")
-        return redirect('products:all_products')
+        return redirect("products:all_products")
 
     # Get unique colors for the UI selection
     unique_colors = []
@@ -416,7 +477,7 @@ def product_detail(request, id):
         if variant.color and variant.color.id not in seen_color_ids:
             unique_colors.append(variant.color)
             seen_color_ids.add(variant.color.id)
-            
+
     context = {
         "product": product,
         "unique_colors": unique_colors,
@@ -426,21 +487,26 @@ def product_detail(request, id):
 
 def cart(request):
     cart_obj, created = Cart.objects.get_or_create(user=request.user)
-    items = cart_obj.items.select_related('variant__product', 'variant__color').prefetch_related('variant__images').all()
-    
+    items = (
+        cart_obj.items.select_related("variant__product", "variant__color")
+        .prefetch_related("variant__images")
+        .all()
+    )
+
     # Check for unavailable or out of stock items
     checkout_disabled = False
     for item in items:
-        if item.variant.stock < item.quantity or not item.variant.is_active or not item.variant.product.is_active or item.variant.product.is_deleted:
+        if (
+            item.variant.stock < item.quantity
+            or not item.variant.is_active
+            or not item.variant.product.is_active
+            or item.variant.product.is_deleted
+        ):
             item.error = "Unavailable or Out of stock"
             checkout_disabled = True
-    
-    context = {
-        'cart': cart_obj,
-        'items': items,
-        'checkout_disabled': checkout_disabled
-    }
-    return render(request, 'products/cart.html', context)
+
+    context = {"cart": cart_obj, "items": items, "checkout_disabled": checkout_disabled}
+    return render(request, "products/cart.html", context)
 
 
 def add_to_cart(request):
@@ -449,21 +515,36 @@ def add_to_cart(request):
         quantity = int(request.POST.get("quantity", 1))
 
         variant = get_object_or_404(Variant, id=variant_id)
-        
+
         # Prevent adding blocked/unlisted products
-        if not variant.product.is_active or variant.product.is_deleted or not variant.is_active:
-            return JsonResponse({"status": "error", "message": "This product is currently unavailable."})
+        if (
+            not variant.product.is_active
+            or variant.product.is_deleted
+            or not variant.is_active
+        ):
+            return JsonResponse(
+                {"status": "error", "message": "This product is currently unavailable."}
+            )
 
         # Max quantity limit
         if quantity > 5:
-             return JsonResponse({"status": "error", "message": "Maximum 5 items allowed per product."})
+            return JsonResponse(
+                {"status": "error", "message": "Maximum 5 items allowed per product."}
+            )
 
         # Stock validation
         if variant.stock < quantity:
-            return JsonResponse({"status": "error", "message": f"Only {variant.stock} items left in stock."})
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "message": f"Only {variant.stock} items left in stock.",
+                }
+            )
 
         cart_obj, created = Cart.objects.get_or_create(user=request.user)
-        cart_item, item_created = CartItem.objects.get_or_create(cart=cart_obj, variant=variant)
+        cart_item, item_created = CartItem.objects.get_or_create(
+            cart=cart_obj, variant=variant
+        )
 
         if not item_created:
             # Increase quantity if already in cart
@@ -471,15 +552,22 @@ def add_to_cart(request):
             if new_quantity > 5:
                 cart_item.quantity = 5
                 cart_item.save()
-                return JsonResponse({"status": "error", "message": "Total quantity in cart reached the limit of 5."})
-            
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "message": "Total quantity in cart reached the limit of 5.",
+                    }
+                )
+
             if variant.stock < new_quantity:
-                return JsonResponse({"status": "error", "message": "Not enough stock to add more."})
-            
+                return JsonResponse(
+                    {"status": "error", "message": "Not enough stock to add more."}
+                )
+
             cart_item.quantity = new_quantity
         else:
             cart_item.quantity = quantity
-        
+
         cart_item.save()
 
         # Remove from wishlist if added to cart
@@ -493,35 +581,43 @@ def remove_from_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
     cart_item.delete()
     messages.success(request, "Product removed from cart.")
-    return redirect('products:cart')
+    return redirect("products:cart")
 
 
 def update_cart_quantity(request):
     if request.method == "POST":
         item_id = request.POST.get("item_id")
         action = request.POST.get("action")
-        
+
         cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
-        
-        if action == 'inc':
+
+        if action == "inc":
             if cart_item.quantity < 5:
                 if cart_item.variant.stock > cart_item.quantity:
                     cart_item.quantity += 1
                 else:
-                    return JsonResponse({"status": "error", "message": "No more stock available."})
+                    return JsonResponse(
+                        {"status": "error", "message": "No more stock available."}
+                    )
             else:
-                return JsonResponse({"status": "error", "message": "Maximum limit of 5 reached."})
-        elif action == 'dec':
+                return JsonResponse(
+                    {"status": "error", "message": "Maximum limit of 5 reached."}
+                )
+        elif action == "dec":
             if cart_item.quantity > 1:
                 cart_item.quantity -= 1
             else:
-                return JsonResponse({"status": "error", "message": "Minimum quantity is 1."})
-        
+                return JsonResponse(
+                    {"status": "error", "message": "Minimum quantity is 1."}
+                )
+
         cart_item.save()
-        return JsonResponse({
-            "status": "success", 
-            "quantity": cart_item.quantity, 
-            "subtotal": float(cart_item.subtotal),
-            "total_price": float(cart_item.cart.total_price)
-        })
+        return JsonResponse(
+            {
+                "status": "success",
+                "quantity": cart_item.quantity,
+                "subtotal": float(cart_item.subtotal),
+                "total_price": float(cart_item.cart.total_price),
+            }
+        )
     return JsonResponse({"status": "error", "message": "Invalid request."})
