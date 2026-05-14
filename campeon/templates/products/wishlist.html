@@ -1,0 +1,331 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block content %}
+<!-- Confirm Remove Modal -->
+<div
+  id="removeModal"
+  class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-4"
+>
+  <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-2xl">
+    <h3 class="text-2xl font-black uppercase mb-3">
+      Remove Item?
+    </h3>
+
+    <p class="text-gray-500  text-xs tracking-wider mb-6">
+      Are you sure you want to remove this item from your wishlist?
+    </p>
+
+    <div class="flex gap-4">
+      <button
+        id="cancelRemove"
+        class="flex-1 border border-gray-300 py-3 rounded-lg font-black uppercase text-xs tracking-widest hover:bg-gray-100 transition"
+      >
+        Cancel
+      </button>
+
+      <button
+        id="confirmRemove"
+        class="flex-1 bg-red-500 text-white py-3 rounded-lg font-black uppercase text-xs tracking-widest hover:bg-black transition"
+      >
+        Remove
+      </button>
+    </div>
+  </div>
+</div>
+  <main class="bg-[#e9f5db] min-h-screen py-16">
+    <div class="container mx-auto px-4 sm:px-6 overflow-x-hidden">
+      <!-- Heading -->
+      <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black uppercase mb-8 sm:mb-12 tracking-tightest text-black break-words">Wishlist</h2>
+
+      <div class="flex flex-col xl:flex-row gap-8 xl:gap-12 items-start">
+        <!-- Wishlist Items -->                       
+        <div class="w-full xl:w-[70%] space-y-6 min-w-0">
+          <!-- Wishlist Item -->
+          {% for item in wishlist_items %}
+            <div class="bg-white shadow-sm relative overflow-hidden group flex flex-col lg:flex-row" data-variants='[
+        {% for v in item.product.active_variants %}
+        {
+          "color": "{{ v.color.name|default:'' }}",
+          "size": "{{ v.size|default:'' }}",
+          "price": "{{ v.price }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+     ]'>
+              <!-- Product Image -->
+              <div class="w-full lg:w-[280px] xl:w-[320px] 2xl:w-[360px] h-[240px] sm:h-[320px] lg:h-auto flex-shrink-0">
+                <img src="{{ item.product.get_primary_image }}" alt="{{ item.product.name }}" class="w-full h-full object-cover" />
+              </div>
+
+              <!-- Content -->
+              <div class="flex-1 flex flex-col 2xl:flex-row justify-between p-4 sm:p-6 lg:p-8 gap-8 min-w-0">
+                <!-- Left -->
+                <div class="flex-1 min-w-0">
+                  <span class="text-[9px] sm:text-[10px] font-black text-lime-dark uppercase tracking-[0.2em] break-words block">{{ item.product.category.name }}</span>
+
+                  <h3 class="mt-3 text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-black uppercase tracking-tightest leading-none break-words">{{ item.product.name }}</h3>
+
+                  <!-- Options -->
+                  {% comment %} <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 mt-8">
+                    <!-- Edition -->
+                    <div class="flex flex-col gap-2 min-w-0">
+                      <span class="text-[8px] font-black uppercase tracking-widest text-gray-400">Edition</span>
+
+                      <div class="relative">
+                        <select class="edition-select w-full bg-[#f3f4f6] border border-gray-100 rounded-lg px-4 py-3 text-[10px] font-black uppercase appearance-none focus:outline-none truncate">
+                          {% regroup item.product.active_variants by color as color_list %}
+                          {% for color in color_list %}
+                            {% if color.grouper %}
+                              <option value="{{ color.grouper.name }}">{{ color.grouper.name }}</option>
+                            {% endif %}
+                          {% endfor %}
+                        </select>
+
+                        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-black/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
+                    </div>
+
+                    <!-- Size -->
+                    <div class="flex flex-col gap-2 min-w-0">
+                      <span class="text-[8px] font-black uppercase tracking-widest text-gray-400">Size</span>
+
+                      <div class="relative">
+                        <select class="size-select w-full bg-[#f3f4f6] border border-gray-100 rounded-lg px-4 py-3 text-[10px] font-black uppercase appearance-none focus:outline-none">
+                          {% regroup item.product.active_variants by size as size_list %}
+                          {% for size in size_list %}
+                            <option value="{{ size.grouper }}">{{ size.grouper }}</option>
+                          {% endfor %}
+                        </select>
+
+                        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-black/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Mobile Price -->
+                  <div class="2xl:hidden mt-8">
+                    <span class="price-value text-2xl sm:text-3xl font-black text-lime-dark tracking-tightest">₹{{ item.product.first_active_variant.price }}</span>
+                  </div> {% endcomment %}
+
+                  <!-- Button -->
+                  <div class="pt-8">
+                    <a
+                      href="{% url 'products:wishlist_item_to_cart' item.id %}"
+                      class="inline-flex w-auto bg-lime-dark text-white px-6 sm:px-8 py-4 rounded-lg font-black uppercase text-[10px] tracking-[0.15em] items-center justify-center gap-4 hover:bg-black transition-all shadow-lg whitespace-nowrap"
+                    >
+                      <svg
+                        class="w-5 h-5 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                        ></path>
+                      </svg>
+
+                      <span>ADD TO CART</span>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Desktop Price -->
+                <div class="hidden 2xl:flex text-right flex-col justify-between items-end min-w-[120px]">
+                  <span class="price-value text-4xl font-black text-lime-dark tracking-tightest">{{ item.product.first_active_variant.price }}</span>
+                </div>
+              </div>
+
+              <!-- Remove -->
+              <button class="remove-wishlist-btn absolute top-4 right-4 sm:top-5 sm:right-5 text-gray-400 hover:text-red-500 transition-colors z-10" data-url="{% url 'products:remove_from_wishlist' item.id %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          {% empty %}
+            <div class="bg-white p-10 text-center space-y-6">
+              <h3 class="text-2xl font-black uppercase">Your wishlist is empty</h3>
+
+              <p class="text-gray-500  text-sm tracking-wider">Explore products and add your favorites</p>
+
+              <a href="{% url 'products:all_products' %}" class="inline-block bg-lime-dark text-white px-8 py-4 rounded-lg font-black uppercase text-[10px] tracking-[0.15em] hover:bg-black transition-all">Go To Shop</a>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Wishlist Summary -->
+        <div class="w-full xl:w-[30%] shrink-0">
+          <div class="bg-[#1f2937] text-white p-6 sm:p-8 lg:p-10 rounded-sm shadow-xl flex flex-col">
+            <h3 class="text-xl sm:text-2xl font-black uppercase mb-8 tracking-[0.15em] leading-none">Wishlist Summary</h3>
+
+            <div class="space-y-4 text-sm font-bold mb-8 border-b border-white/10 pb-6">
+              <div class="flex justify-between items-center gap-4">
+                <span class="uppercase tracking-[0.15em] opacity-60 text-[10px] sm:text-xs">Stored Items</span>
+
+                <span class="text-lg font-black">{{wishlist_items.count}}</span>
+              </div>
+
+              {% comment %} <div class="flex justify-between items-center gap-4">
+                <span class="uppercase tracking-[0.15em] opacity-60 text-[10px] sm:text-xs">Total Estimate</span>
+
+                <span class="text-xl sm:text-2xl text-lime-bright font-black">$235.00</span>
+              </div> {% endcomment %}
+            </div>
+
+            <!-- Buttons -->
+            <div class="space-y-4">
+              <a
+                href="{% url 'products:wishlist_to_cart'%}"
+                class="w-full block text-center bg-lime-bright text-black font-black uppercase py-4 sm:py-5 hover:bg-white transition-all shadow-[0_10px_30px_rgba(0,255,0,0.15)] text-xs sm:text-sm tracking-[0.15em]"
+              >
+                MOVE ALL TO CART
+              </a>
+              <form action="{% url 'products:clear_wishlist' %}" method="POST">
+                    {% csrf_token %}
+                    <button
+                        type="submit"
+                        class="w-full text-red-500 font-black uppercase text-[9px] sm:text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 hover:opacity-70 transition-opacity py-3"
+                    >
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                            </path>
+                        </svg>
+                        CLEAR ALL ITEMS
+                    </button>
+                </form>
+            </div>
+
+            <!-- Tip -->
+            <div class="bg-white/5 border-l-4 border-lime-bright p-5 sm:p-6 space-y-2 mt-8">
+              <span class="text-[8px] font-black uppercase tracking-widest text-lime-bright">PRO-TIP</span>
+
+              <p class="text-[9px] sm:text-[10px] text-gray-400 font-bold leading-relaxed uppercase tracking-wider">Items in your wishlist are not reserved until checkout is completed.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+document.querySelectorAll('[data-variants]').forEach(card => {
+  const variants = JSON.parse(card.dataset.variants);
+
+  const editionSelect = card.querySelector('.edition-select');
+  const sizeSelect = card.querySelector('.size-select');
+  const priceEl = card.querySelector('.price-value');
+
+  function updatePrice() {
+    const selectedColor = editionSelect?.value;
+    const selectedSize = sizeSelect?.value;
+
+    const match = variants.find(v =>
+      (!selectedColor || v.color === selectedColor) &&
+      (!selectedSize || v.size === selectedSize)
+    );
+
+    if (match) {
+      priceEl.textContent = `₹${match.price}`;
+    }
+  }
+
+  editionSelect?.addEventListener('change', updatePrice);
+  sizeSelect?.addEventListener('change', updatePrice);
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* =========================
+     PRICE UPDATE
+  ========================= */
+
+  document.querySelectorAll('[data-variants]').forEach(card => {
+    const variants = JSON.parse(card.dataset.variants);
+
+    const editionSelect = card.querySelector('.edition-select');
+    const sizeSelect = card.querySelector('.size-select');
+    const priceEl = card.querySelector('.price-value');
+
+    function updatePrice() {
+      const selectedColor = editionSelect?.value;
+      const selectedSize = sizeSelect?.value;
+
+      const match = variants.find(v =>
+        (!selectedColor || v.color === selectedColor) &&
+        (!selectedSize || v.size === selectedSize)
+      );
+
+      if (match && priceEl) {
+        priceEl.textContent = `₹${match.price}`;
+      }
+    }
+
+    editionSelect?.addEventListener('change', updatePrice);
+    sizeSelect?.addEventListener('change', updatePrice);
+  });
+
+
+  /* =========================
+     REMOVE MODAL
+  ========================= */
+
+  const modal = document.getElementById('removeModal');
+  const confirmBtn = document.getElementById('confirmRemove');
+  const cancelBtn = document.getElementById('cancelRemove');
+
+  let removeUrl = '';
+
+  document.querySelectorAll('.remove-wishlist-btn').forEach(button => {
+
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      removeUrl = button.dataset.url;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    });
+
+  });
+
+
+  /* CANCEL */
+
+  cancelBtn?.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+
+    removeUrl = '';
+  });
+
+
+  /* CONFIRM */
+
+  confirmBtn?.addEventListener('click', () => {
+    if (removeUrl) {
+      window.location.href = removeUrl;
+    }
+  });
+
+
+  /* OUTSIDE CLICK */
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+
+      removeUrl = '';
+    }
+  });
+
+});
+</script>
+{% endblock %}

@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from products.forms import CategoryForm, ProductForm, ColorForm
-from .models import (
+from products.models import (
     Category,
     Product,
     Variant,
@@ -14,7 +14,10 @@ from .models import (
     Cart,
     CartItem,
     Wishlist,
+    Order,
+    OrderItem,
 )
+from user.models import Addresses
 from django.db.models import Prefetch
 from django.db.models import Min, Q
 
@@ -51,10 +54,9 @@ def categories(request):
 def add_new_category(request):
     form = CategoryForm()
     if request.method == "POST":
-        name = request.POST.get('name')
+        name = request.POST.get("name")
         form = CategoryForm(request.POST, request.FILES)
-        
-            
+
         if form.is_valid():
             form.save()
             messages.success(request, "New Category Added")
@@ -621,3 +623,221 @@ def update_cart_quantity(request):
             }
         )
     return JsonResponse({"status": "error", "message": "Invalid request."})
+
+
+def wishlist(request):
+    wishlist_items = (
+        Wishlist.objects.filter(
+            user=request.user,
+            product__is_active=True,
+            product__is_deleted=False,
+            product__variants__is_active=True,
+        )
+        .select_related("product", "product__category")
+        .prefetch_related("product__variants__images")
+        .distinct()
+    )
+    total_price = sum(
+        item.product.variants.filter(is_active=True).first().price
+        for item in wishlist_items
+        if item.product.variants.filter(is_active=True).first()
+    )
+    context = {
+        "wishlist_items": wishlist_items,
+        "wishlist_count": wishlist_items.count(),
+        "total_price": total_price,
+    }
+    return render(request, "products/wishlist.html", context)
+
+
+def add_to_wishlist(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+
+    wishlist_item, created = Wishlist.objects.get_or_create(
+        user=request.user, product=product
+    )
+
+    if created:
+        messages.success(request, "Product added to wishlist")
+    else:
+        messages.info(request, "Product already in wishlist")
+    return redirect("products:all_products")
+
+
+def remove_from_wishlist(request, id):
+    item = get_object_or_404(Wishlist, id=id, user=request.user)
+    item.delete()
+    return redirect("products:wishlist")
+
+
+def clear_wishlist(request):
+    Wishlist.objects.filter(user=request.user).delete()
+    return redirect("products:wishlist")
+
+
+def wishlist_item_to_cart(request, wishlist_id):
+    wishlist_item = get_object_or_404(Wishlist, id=wishlist_id, user=request.user)
+    product = wishlist_item.product
+    variant = product.variants.filter(is_active=True, stock__gt=0).first()
+    if not variant:
+        messages.error(request, "Prodcut is unavailable.")
+        return redirect("products:wishlist")
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    cart_item, created = CartItem.objects.get_or_create(
+        cart=cart,
+        variant=variant,
+        defaults={"quantity": 1},
+    )
+    if not created:
+        if cart_item.quantity >= 5:
+            messages.error(request, "Maximum quantity limit reached.")
+        return redirect("products:wishlist")
+        if variant.stock <= cart_item.quantity:
+            messages.error(request, "Not enough stock available.")
+            return redirect("products:wishlist")
+        cart_item.quantity += 1
+        cart_item.save()
+    wishlist_item.delete()
+    messages.success(request, "Item moved to Cart.")
+    return redirect("products:cart")
+
+
+def wishlist_to_cart(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user)
+    if not wishlist_items.exists():
+        messages.error(request, "Wishlist is empty")
+        return redirect("products:wishlist")
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    moved_count = 0
+    with transaction.atomic():
+        for item in wishlist_items:
+            product = item.product
+            variant = product.variants.filter(is_active=True, stock__gt=0).first()
+
+            if not variant:
+                continue
+
+            cart_item, created = CartItem.objects.get_or_create(
+                cart=cart,
+                variant=variant,
+                defaults={"quantity": 1},
+            )
+
+            if not created:
+                if cart_item.quantity >= 5:
+                    continue
+                if variant.stock <= cart_item.quantity:
+                    continue
+                cart_item.quantity += 1
+                cart_item.save()
+            moved_count += 1
+
+        wishlist_items.delete()
+    messages.success(request, f"{moved_count} item(s) moved to cart successfully.")
+
+    return redirect("products:cart")
+
+
+def checkout(request):
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+
+    items = cart.items.select_related(
+        "variant__product", "variant__color"
+    ).prefetch_related("variant__images")
+
+    addresses = Addresses.objects.filter(user=request.user)
+    if not items.exists():
+        messages.error(request, "Your Cart is empty.")
+        return redirect("products:cart")
+
+    if request.method == "POST":
+        address_id = request.POST.get("selected_address")
+        if not address_id:
+            messages.error(request, "Please select a shipping addresses.")
+            return redirect("products:checkout")
+        address = get_object_or_404(Addresses, id=address_id, user=request.user)
+        request.session["address_id"] = address.id
+        messages.success(request, "Address selected successfully.")
+        return redirect("products:select_payment")
+    context = {"items": items, "addresses": addresses, "cart": cart}
+    return render(request, "products/checkout.html", context)
+
+
+def select_payment(request):
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+
+    cart_items = cart.items.select_related(
+        "variant__product", "variant__color"
+    ).prefetch_related("variant__images")
+    if not cart_items.exists():
+        messages.error(request, "Your cart is empty")
+        return redirect("products:cart")
+    subtotal = cart.total_price
+    shipping = 0
+    total = subtotal + shipping
+
+    if request.method == "POST":
+        payment_method = request.POST.get("payment_method")
+        if not payment_method:
+            messages.error(request, "Please select the payment method.")
+            return redirect("products:select_payment")
+
+        address_id = request.session.get("address_id")
+        if not address_id:
+            messages.error(request, "Please select an address.")
+            return redirect("product:checkout")
+        address = get_object_or_404(Addresses, id=address_id, user=request.user)
+        with transaction.atomic():
+            order = Order.objects.create(
+                user=request.user,
+                address=address,
+                payment_method=payment_method,
+                subtotal=subtotal,
+                shipping=shipping,
+                total_amount=total,
+            )
+
+            for item in cart_items:
+
+                OrderItem.objects.create(
+                    order=order,
+                    variant=item.variant,
+                    product_name=item.variant.product.name,
+                    size=item.variant.size,
+                    color=item.variant.color.name if item.variant.color else "",
+                    price=item.variant.price,
+                    quantity=item.quantity,
+                    subtotal=item.subtotal,
+                )
+
+                # REDUCE STOCK
+                item.variant.stock -= item.quantity
+                item.variant.save()
+            if payment_method == "cod":
+                order.payment_status = "pending"
+            elif payment_method == "wallet":
+                # make the validattion if the ruppes is there or not
+
+                order.payment_status = "paid"
+            elif payment_method == "razorpay":
+                # payment integration with razorpay
+
+                order.payment_status = "pending"
+            order.save()
+            cart.items.all().delete()
+            messages.success(request, "Order placed Successfully")
+            return redirect("products:payment_successful")
+    context = {
+        "cart_items": cart_items,
+        "subtotal": subtotal,
+        "shipping": shipping,
+        "total": total,
+    }
+
+    return render(request, "products/select_payment.html", context)
+
+
+def payment_successful(request):
+    cart , _ = Cart.objects.get_or_create(user=request.user)
+    
+    return render(request, "products/payment_successful.html")

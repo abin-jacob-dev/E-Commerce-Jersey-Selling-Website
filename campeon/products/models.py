@@ -6,7 +6,7 @@ from django.utils.crypto import get_random_string
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import Sum
 from userauths.models import Account
-
+from user.models import Addresses
 
 # Create your models here.
 class Category(models.Model):
@@ -25,6 +25,10 @@ class Category(models.Model):
         ordering = ["-created_at"]
 
     def save(self, *args, **kwargs):
+        if self.pk:
+            old = Product.objects.filter(pk=self.pk).first()
+            if old and old.name != self.name:
+                self.slug = None  # force regenerate
         if not self.slug:
             base_slug = slugify(self.name)
             slug = base_slug
@@ -60,7 +64,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def get_primary_image(self):
-        variant = self.variants.first()
+        variant = self.variants.filter(is_active=True).first()
         if variant:
             image = variant.images.first()
             if image:
@@ -70,6 +74,14 @@ class Product(models.Model):
     @property
     def total_stock(self):
         return self.variants.aggregate(total=Sum("stock"))["total"] or 0
+
+    @property
+    def active_variants(self):
+        return self.variants.filter(is_active=True)
+
+    @property
+    def first_active_variant(self):
+        return self.variants.filter(is_active=True).first()
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -192,3 +204,131 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"
+
+class Order(models.Model):
+
+    PAYMENT_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("paid", "Paid"),
+        ("failed", "Failed"),
+    ]
+
+    PAYMENT_METHOD_CHOICES = [
+        ("cod", "Cash On Delivery"),
+        ("wallet", "Wallet"),
+        ("razorpay", "Razorpay"),
+    ]
+
+    ORDER_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("processing", "Processing"),
+        ("shipped", "Shipped"),
+        ("delivered", "Delivered"),
+        ("cancelled", "Cancelled"),
+        ("returned", "Returned"),
+    ]
+
+    user = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        related_name="orders"
+    )
+
+    address = models.ForeignKey(
+        Addresses,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders"
+    )
+
+    order_id = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True
+    )
+
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS_CHOICES,
+        default="pending"
+    )
+
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PAYMENT_METHOD_CHOICES
+    )
+
+    order_status = models.CharField(
+        max_length=20,
+        choices=ORDER_STATUS_CHOICES,
+        default="pending"
+    )
+
+    subtotal = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    shipping = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    total_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    reason = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+
+        if not self.order_id:
+            self.order_id = f"ORD-{get_random_string(8).upper()}"
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.order_id
+
+class OrderItem(models.Model):
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="items"
+    )
+
+    variant = models.ForeignKey(
+        Variant,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    product_name = models.CharField(max_length=255)
+
+    size = models.CharField(max_length=10)
+
+    color = models.CharField(max_length=50, blank=True)
+
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    quantity = models.PositiveIntegerField(default=1)
+
+    subtotal = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    def __str__(self):
+        return f"{self.product_name} x {self.quantity}"
+

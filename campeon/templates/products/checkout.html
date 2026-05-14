@@ -1,0 +1,294 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="bg-[#e9f5db] min-h-screen py-16">
+  <div class="container mx-auto px-4 sm:px-6">
+
+    <!-- HEADER -->
+    <div class="mb-14">
+      <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tightest text-black">
+        Secure Checkout
+      </h2>
+
+      <p class="text-[10px] sm:text-xs font-black uppercase tracking-[0.25em] text-gray-500 mt-3">
+        Finish your order securely
+      </p>
+    </div>
+
+    {% if addresses %}
+
+    <!-- FORM START -->
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="flex flex-col xl:flex-row gap-10 items-start">
+
+        <!-- LEFT: ADDRESSES -->
+        <div class="flex-1 space-y-8">
+
+          <div class="flex items-center justify-between flex-wrap gap-4">
+
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-lime-dark text-white rounded-lg flex items-center justify-center font-black text-lg shadow-lg">
+                1
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-black uppercase tracking-tightest">
+                  Shipping Address
+                </h3>
+
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-gray-400 mt-1">
+                  Select delivery location
+                </p>
+              </div>
+            </div>
+
+            <a href="{% url 'user:address' %}"
+              class="bg-lime-dark hover:bg-black transition-all text-white px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 shadow-lg">
+
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 4v16m8-8H4" />
+              </svg>
+
+              Add Address
+            </a>
+          </div>
+
+          <!-- ADDRESS LIST -->
+          <div class="space-y-5">
+
+            {% for address in addresses %}
+
+            <label
+              class="relative block cursor-pointer rounded-xl border-2 transition-all duration-200
+              {% if address.is_default %}
+                border-lime-dark bg-lime-50
+              {% else %}
+                border-gray-200 bg-white hover:border-lime-dark
+              {% endif %}">
+
+              <!-- RADIO -->
+              <input
+                type="radio"
+                name="selected_address"
+                value="{{ address.id }}"
+                class="peer sr-only"
+                {% if address.is_default %}checked{% endif %}
+              />
+
+              <!-- CARD -->
+              <div class="p-7 rounded-xl peer-checked:border-lime-dark peer-checked:bg-lime-50">
+
+                <!-- TOP -->
+                <div class="flex items-start justify-between mb-5">
+
+                  <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.25em] text-lime-dark">
+                      Shipping Address
+                    </p>
+
+                    {% if address.is_default %}
+                    <span
+                      class="mt-2 inline-block text-[9px] px-2 py-1 bg-lime-dark text-white rounded uppercase font-black tracking-[0.2em]">
+                      Default
+                    </span>
+                    {% endif %}
+                  </div>
+
+                  <!-- CUSTOM RADIO -->
+                  <div
+                    class="w-6 h-6 rounded-full border-2 border-lime-dark flex items-center justify-center">
+
+                    <div
+                      class="w-3 h-3 rounded-full bg-lime-dark hidden peer-checked:block">
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- ADDRESS INFO -->
+                <div class="space-y-1">
+
+                  <h4 class="text-xl font-black text-black">
+                    {{ address.full_name }}
+                  </h4>
+
+                  <p class="text-sm font-medium text-gray-700">
+                    {{ address.phone_number }}
+                  </p>
+
+                  <p class="text-sm text-gray-700">
+                    {{ address.address_line_1 }}
+                  </p>
+
+                  {% if address.address_line_2 %}
+                  <p class="text-sm text-gray-700">
+                    {{ address.address_line_2 }}
+                  </p>
+                  {% endif %}
+
+                  <p class="text-sm text-gray-700">
+                    {{ address.city }}, {{ address.place }}
+                  </p>
+
+                  <p class="text-sm text-gray-700">
+                    {{ address.postal_code }}
+                  </p>
+
+                </div>
+              </div>
+            </label>
+
+            {% endfor %}
+
+          </div>
+        </div>
+
+        <!-- RIGHT: SUMMARY -->
+        <div class="w-full xl:w-[420px] shrink-0">
+
+          <div class="bg-[#1f2937] text-white p-8 sm:p-10 rounded-sm shadow-xl">
+
+            <h3 class="text-2xl font-black uppercase tracking-[0.15em] mb-10">
+              Order Summary
+            </h3>
+
+            {% if items %}
+
+            <div class="space-y-6 mb-10">
+
+              {% for item in items %}
+
+              <div class="flex gap-4 items-start">
+
+                <div class="w-20 h-20 bg-white/10 rounded-sm overflow-hidden shrink-0">
+
+                  {% with img=item.variant.images.first %}
+
+                    {% if img %}
+                    <img src="{{ img.image.url }}" class="w-full h-full object-cover" />
+                    {% else %}
+                    <img src="{% static 'images/placeholder.png' %}"
+                      class="w-full h-full object-cover" />
+                    {% endif %}
+
+                  {% endwith %}
+
+                </div>
+
+                <div class="flex-1 min-w-0">
+
+                  <h4 class="text-[11px] font-black uppercase tracking-widest leading-tight">
+                    {{ item.variant.product.name }}
+                  </h4>
+
+                  <p class="text-[9px] uppercase text-gray-400 font-bold tracking-wider mt-2">
+                    Size: {{ item.variant.get_size_display }} /
+                    {{ item.variant.color.name }}
+                  </p>
+
+                  <div
+                    class="mt-3 inline-flex bg-lime-bright text-black px-3 py-1 rounded-sm text-[9px] font-black uppercase tracking-[0.2em]">
+                    Qty: {{ item.quantity }}
+                  </div>
+
+                </div>
+
+                <span class="text-sm font-black whitespace-nowrap">
+                  ₹{{ item.subtotal }}
+                </span>
+
+              </div>
+
+              {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <p class="text-sm text-gray-400 uppercase font-bold mb-10">
+              Your cart is empty
+            </p>
+
+            {% endif %}
+
+            <!-- PRICE -->
+            <div class="border-t border-white/10 pt-8 space-y-5 mb-8">
+
+              <div class="flex justify-between">
+                <span class="text-[10px] uppercase opacity-60 font-black">
+                  Subtotal
+                </span>
+
+                <span class="font-black text-lg">
+                  ₹{{ cart.total_price }}
+                </span>
+              </div>
+
+              <div class="flex justify-between">
+                <span class="text-[10px] uppercase opacity-60 font-black">
+                  Shipping
+                </span>
+
+                <span class="font-black text-lime-bright uppercase">
+                  Free
+                </span>
+              </div>
+
+            </div>
+
+            <!-- TOTAL -->
+            <div class="border-t border-white/10 pt-8 mb-10 flex justify-between items-end">
+
+              <div>
+                <span class="text-[10px] uppercase tracking-[0.3em] opacity-50 font-black">
+                  Estimated Total
+                </span>
+
+                <div class="text-5xl font-black text-lime-bright mt-2 leading-none">
+                  ₹{{ cart.total_price }}
+                </div>
+              </div>
+
+            </div>
+
+            <!-- BUTTON -->
+            <button
+              type="submit"
+              class="w-full bg-lime-bright text-black font-black uppercase py-5 hover:bg-white transition-all text-sm tracking-[0.2em]">
+
+              Place Order
+            </button>
+
+            <div
+              class="text-center mt-8 text-[10px] font-black uppercase tracking-[0.25em] flex items-center justify-center gap-2 opacity-40">
+
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
+              </svg>
+
+              Secure Checkout
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </form>
+    <!-- FORM END -->
+
+    {% else %}
+
+    <p class="text-sm text-gray-500 font-bold uppercase">
+      No saved addresses found.
+    </p>
+
+    {% endif %}
+
+  </div>
+</main>
+{% endblock %}

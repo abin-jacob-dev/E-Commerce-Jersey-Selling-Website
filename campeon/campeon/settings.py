@@ -19,7 +19,7 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-#Cloudinary imports
+# Cloudinary imports
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
@@ -38,8 +38,8 @@ ALLOWED_HOSTS = ["*", "127.0.0.1"]
 # Application definition
 
 INSTALLED_APPS = [
-    'cloudinary',
-    'cloudinary_storage',
+    "cloudinary",
+    "cloudinary_storage",
     # "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -72,7 +72,7 @@ CLOUDINARY_STORAGE = {
     "API_SECRET": os.getenv("API_SECRET"),
 }
 # Set Cloudinary as the default storage for media files
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 
 MIDDLEWARE = [
@@ -99,6 +99,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "products.context_processors.cart_data",
             ],
         },
     },
@@ -196,6 +197,7 @@ SOCIALACCOUNT_PROVIDERS = {
         "OAUTH_PKCE_ENABLED": True,
     }
 }
+
 
 LOGIN_URL = "userauths:signin"
 LOGOUT_URL = "userauths:signout"
