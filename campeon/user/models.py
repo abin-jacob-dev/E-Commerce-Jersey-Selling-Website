@@ -20,7 +20,7 @@ class Addresses(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.full_name} - {self.address_line_1} | {self.created_at}"
+        return f"{self.full_name} - {self.address_line_1} "
 
     class Meta:
         ordering = ['created_at']

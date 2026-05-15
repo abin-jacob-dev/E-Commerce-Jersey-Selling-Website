@@ -9,9 +9,9 @@
         {% csrf_token %}
         <input type="hidden" name="payment_method" id="payment_method" value="wallet" />
 
-        <div class="flex flex-col lg:flex-row gap-12 items-start">
+        <div class="flex flex-col lg:flex-row gap-12 items-start w-full">
           <!-- Payment Methods -->
-          <div class="flex-1 w-full space-y-6">
+          <div class="flex-[1_1_0%] w-full space-y-6">
             <!-- Razorpay -->
             <div class="payment-method selected bg-[#d9f99d] border-2 border-[#166534] p-10 rounded-2xl flex items-center gap-8 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md" data-method="razorpay">
               <div class="icon-box w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-sm">

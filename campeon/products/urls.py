@@ -64,7 +64,7 @@ urlpatterns = [
         name="select_payment",
     ),
     path(
-        "payment-successful/",
+        "payment-successful/<str:order_id>",
         views.payment_successful,
         name="payment_successful",
     ),

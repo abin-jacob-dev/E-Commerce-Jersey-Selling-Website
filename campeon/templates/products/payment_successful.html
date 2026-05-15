@@ -29,30 +29,44 @@
               <div class="space-y-4">
                 <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
                   <span class="text-gray-400">Order Number</span>
-                  <span class="text-black">#D6568EAA</span>
+                  <span class="text-black">{{ order.order_id }}</span>
                 </div>
                 <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
                   <span class="text-gray-400">Order Date</span>
-                  <span class="text-black">Apr 12, 2026</span>
+                  <span class="text-black">{{ order.created_at|date }}</span>
                 </div>
                 <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
                   <span class="text-gray-400">Payment Method</span>
-                  <span class="bg-[#f3f4f6] px-3 py-1 rounded-full text-[9px]">RAZORPAY</span>
+                  <span class="bg-[#f3f4f6] px-3 py-1 rounded-full text-[9px]">{{ order.get_payment_method_display }}</span>
                 </div>
               </div>
             </div>
 
             <!-- Product Item -->
-            <div class="bg-[#e9f5db] p-6 rounded-2xl flex items-center gap-6">
-              <div class="w-16 h-16 bg-black rounded-xl overflow-hidden flex-shrink-0">
-                <img src="https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=200&h=200&auto=format&fit=crop" class="w-full h-full object-cover grayscale" />
+            {% for item in order_items %}
+              <div class="bg-[#e9f5db] p-6 rounded-2xl flex items-center gap-6">
+                <div class="w-16 h-16 bg-black rounded-xl overflow-hidden flex-shrink-0">
+                  {% if item.variant %}
+                    {% with image=item.variant.images.first %}
+                      {% if image %}
+                        <img src="{{ image.image.url }}" class="w-full h-full object-cover" />
+                      {% endif %}
+                    {% endwith %}
+                  {% endif %}
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-sm font-black uppercase tracking-tightest leading-tight">{{ item.product_name }} × {{ item.quantity }}</h4>
+                  <p class="text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-1">
+                    Size: {{ item.size }}
+
+                    {% if item.color %}
+                      | Color: {{ item.color }}
+                    {% endif %}
+                  </p>
+                </div>
+                <span class="text-lg font-black text-[#008000] tracking-tightest">₹{{ order.subtotal }}</span>
               </div>
-              <div class="flex-1">
-                <h4 class="text-sm font-black uppercase tracking-tightest leading-tight">Cricket × 2</h4>
-                <p class="text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-1">Premium Performance Gear</p>
-              </div>
-              <span class="text-lg font-black text-[#008000] tracking-tightest">$2468.00</span>
-            </div>
+            {% endfor %}
           </div>
 
           <!-- Right: Shipping & Total -->
@@ -67,8 +81,9 @@
                 <span class="text-[9px] font-black uppercase tracking-widest">Shipping To</span>
               </div>
               <div class="space-y-1 mb-6">
-                <p class="text-sm font-black uppercase tracking-tightest">Marcus Rashford</p>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Manchester, UK</p>
+                <p class="text-sm font-black uppercase tracking-tightest">{{ order.address.full_name }}</p>
+                <p class="text-sm font-black uppercase tracking-tightest">{{ order.address.address_line_1 }}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.address.city }}</p>
               </div>
               <div class="pt-6 border-t border-pink-100">
                 <p class="text-[8px] font-black text-gray-300 uppercase tracking-widest mb-1">Estimated Delivery</p>
@@ -79,7 +94,7 @@
             <!-- Total Paid Box -->
             <div class="bg-[#f1f4f0] p-8 rounded-2xl">
               <span class="text-[9px] font-black text-[#008000] uppercase tracking-widest block mb-2">Total Paid</span>
-              <div class="text-4xl font-black tracking-tightest text-black">$2468.00</div>
+              <div class="text-4xl font-black tracking-tightest text-black">₹{{order.total_amount}}</div>
             </div>
           </div>
         </div>
@@ -95,7 +110,7 @@
             </button>
           </div>
           <div class="text-center">
-            <a href="Landing Page.html" class="text-[10px] font-black uppercase tracking-[0.3em] text-[#008000] hover:underline">Continue Shopping</a>
+            <a href="{% url "products:all_products" %}" class="text-[10px] font-black uppercase tracking-[0.3em] text-[#008000] hover:underline">Continue Shopping</a>
           </div>
         </div>
       </div>

@@ -778,6 +778,7 @@ def select_payment(request):
 
     if request.method == "POST":
         payment_method = request.POST.get("payment_method")
+        request.session["payment_method"] = payment_method
         if not payment_method:
             messages.error(request, "Please select the payment method.")
             return redirect("products:select_payment")
@@ -824,9 +825,9 @@ def select_payment(request):
 
                 order.payment_status = "pending"
             order.save()
-            cart.items.all().delete()
+            # cart.items.all().delete()
             messages.success(request, "Order placed Successfully")
-            return redirect("products:payment_successful")
+            return redirect("products:payment_successful", order_id=order.order_id)
     context = {
         "cart_items": cart_items,
         "subtotal": subtotal,
@@ -837,7 +838,8 @@ def select_payment(request):
     return render(request, "products/select_payment.html", context)
 
 
-def payment_successful(request):
-    cart , _ = Cart.objects.get_or_create(user=request.user)
+def payment_successful(request, order_id):
+    order = get_object_or_404(Order, order_id=order_id, user=request.user)
     
-    return render(request, "products/payment_successful.html")
+    context = {"order": order, "order_items": order.items.all(),"payment_method":request.session.get('payment_method')}
+    return render(request, "products/payment_successful.html", context)
