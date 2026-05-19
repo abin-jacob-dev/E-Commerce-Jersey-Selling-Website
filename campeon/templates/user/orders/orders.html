@@ -1,0 +1,135 @@
+{% extends 'user/partials/base.html' %}
+{% load static %}
+{% block content %}
+  <main class="flex-1 p-12 overflow-y-auto">
+    <!-- Top Bar -->
+
+    <div class="flex justify-between items-end mb-12">
+      <div>
+        <h2 class="text-6xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest">ALL ORDERS</h2>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">View and manage full transaction history</p>
+      </div>
+      {% comment %} <div class="flex gap-4">
+        <button class="bg-white border border-gray-100 px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm flex items-center gap-3">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+          </svg>Filter
+        </button>
+        <button class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-lg shadow-lg flex items-center gap-3">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>Export CSV
+        </button>
+      </div> {% endcomment %}
+    </div>
+
+    <!-- Orders Table -->
+    <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100">
+          <tr>
+            <th class="px-10 py-8">Order ID</th>
+            <th class="px-10 py-8">Date</th>
+            <th class="px-10 py-8">Total Amount</th>
+            <th class="px-10 py-8">Status</th>
+            <th class="px-10 py-8 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="text-xs font-bold text-gray-600">
+          <!-- Row -->
+          {% for order in orders %}
+            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+              <td class="px-10 py-8 font-black text-black">{{ order.order_id }}</td>
+              <td class="px-10 py-8 text-gray-400">{{ order.created_at|date }}</td>
+              <td class="px-10 py-8 font-black text-black text-lg">₹{{ order.subtotal|floatformat:2 }}</td>
+              <td class="px-10 py-8">
+                <span class="text-[8px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full flex items-center gap-2 w-fit
+
+  {% if order.order_status == 'pending' %}
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+      bg-yellow-100 text-yellow-700
+
+
+
+
+
+
+
+
+                  {% elif order.order_status == 'completed' %}
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+      bg-green-100 text-green-700
+
+
+
+
+
+
+
+
+                  {% elif order.order_status == 'cancelled' %}
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+      bg-red-100 text-red-700
+
+
+
+
+
+
+
+
+                  {% else %}
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+      bg-gray-100 text-gray-700
+
+
+
+
+
+
+
+                  {% endif %}
+">
+                  {{ order.get_order_status_display }}
+                </span>
+              </td>
+              <td class="px-10 py-8 text-right">
+                <a href="{% url 'products:order_view_details' order.order_id %}" class="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors">View Details</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="text-center py-12 text-gray-400 font-bold">No Orders Found</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% include 'components/pagination.html' with page_obj=orders %}
+    </div>
+  </main>
+{% endblock %}

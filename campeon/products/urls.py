@@ -53,6 +53,7 @@ urlpatterns = [
         views.wishlist_item_to_cart,
         name="wishlist_item_to_cart",
     ),
+    # checkout
     path(
         "checkout/",
         views.checkout,
@@ -68,5 +69,25 @@ urlpatterns = [
         views.payment_successful,
         name="payment_successful",
     ),
-    
+    # user orders
+    path(
+        "orders",
+        views.orders,
+        name="orders",
+    ),
+    path(
+        "order-view-details/<str:order_id>",
+        views.order_details,
+        name="order_view_details",
+    ),
+    path(
+        "return-order",
+        views.return_order,
+        name="return_order",
+    ),
+    path(
+        "cancel-order",
+        views.cancel_order,
+        name="cancel_order",
+    ),
 ]

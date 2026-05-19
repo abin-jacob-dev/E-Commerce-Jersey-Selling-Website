@@ -1,0 +1,129 @@
+{% extends 'user/partials/base.html' %}
+{% load static %}
+
+{% block content %}
+  <main class="flex-1 bg-lime-light p-12">
+    <h2 class="text-7xl font-black uppercase tracking-tighter leading-none mb-2 tracking-tightest">RETURN STATUS</h2>
+    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-16">ORDER #CMP-77290</p>
+
+    <div class="flex flex-col lg:flex-row gap-12">
+      <!-- Status Timeline and Product -->
+      <div class="flex-1 space-y-12">
+        <!-- Timeline Card -->
+        <div class="bg-white rounded-[2rem] p-10 shadow-sm flex items-center justify-between relative overflow-hidden">
+          <div class="flex flex-col items-center gap-4 relative z-10">
+            <div class="w-12 h-12 bg-lime-bright rounded-xl flex items-center justify-center text-black shadow-lg shadow-lime-bright/30">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <span class="text-[8px] font-black uppercase tracking-widest text-center">Return<br />Initiated</span>
+          </div>
+          <div class="flex-1 h-0.5 bg-gray-100 mx-4"></div>
+          <div class="flex flex-col items-center gap-4 relative z-10">
+            <div class="w-12 h-12 bg-lime-bright rounded-xl flex items-center justify-center text-black shadow-lg shadow-lime-bright/30">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
+              </svg>
+            </div>
+            <span class="text-[8px] font-black uppercase tracking-widest text-center">Picked<br />Up</span>
+          </div>
+          <div class="flex-1 h-0.5 bg-gray-100 mx-4"></div>
+          <div class="flex flex-col items-center gap-4 relative z-10 opacity-30">
+            <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <span class="text-[8px] font-black uppercase tracking-widest text-center">Quality<br />Check</span>
+          </div>
+          <div class="flex-1 h-0.5 bg-gray-100 mx-4"></div>
+          <div class="flex flex-col items-center gap-4 relative z-10 opacity-30">
+            <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <span class="text-[8px] font-black uppercase tracking-widest text-center">Refund<br />Done</span>
+          </div>
+        </div>
+
+        <!-- Product Card -->
+        <div class="bg-white rounded-[2rem] p-10 shadow-sm flex gap-12 relative overflow-hidden">
+          <div class="w-64 aspect-square bg-gray-50 rounded-2xl overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1591124586057-79873291add7?q=80&w=400&h=400&auto=format&fit=crop" class="w-full h-full object-cover grayscale opacity-80" />
+          </div>
+          <div class="flex-1">
+            <span class="bg-red-50 text-red-500 text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-sm mb-4 inline-block">Refund Pending</span>
+            <h3 class="text-4xl font-black uppercase tracking-tighter leading-none mb-10 tracking-tightest">ELITE PERFORMANCE KIT '24</h3>
+            <div class="grid grid-cols-2 gap-y-10 gap-x-12">
+              <div>
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-300 block mb-2">Size</span>
+                <p class="text-sm font-black">ADULT LARGE (L)</p>
+              </div>
+              <div>
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-300 block mb-2">Color</span>
+                <p class="text-sm font-black">ELECTRIC LIME / CARBON</p>
+              </div>
+              <div>
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-300 block mb-2">Quantity</span>
+                <p class="text-2xl font-black">01</p>
+              </div>
+              <div>
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-300 block mb-2">Value</span>
+                <p class="text-2xl font-black">$145.00</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pickup and Actions -->
+      <div class="w-full lg:w-96 space-y-6">
+        <div class="bg-[#e2ead8] rounded-[1.5rem] p-10 border-b-4 border-dark-lime">
+          <div class="mb-10">
+            <span class="text-[9px] font-black uppercase tracking-widest text-lime-dark block mb-4">Pickup Address</span>
+            <div class="flex gap-4">
+              <svg class="w-5 h-5 text-lime-dark mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <div class="text-sm font-bold text-gray-700 leading-relaxed">
+                <p class="text-black mb-1">ALEX MORGAN</p>
+                <p>42 Stadium Way, Apt 8B</p>
+                <p>Manhattan, NY 10019</p>
+                <p>United States</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-dark-lime/10 pt-10">
+            <span class="text-[9px] font-black uppercase tracking-widest text-lime-dark block mb-4">Estimated Refund Date</span>
+            <div class="flex items-center gap-4">
+              <svg class="w-6 h-6 text-lime-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <p class="text-2xl font-black uppercase tracking-tighter">OCTOBER 14, 2024</p>
+            </div>
+            <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-4 leading-relaxed">Funds typically appear in your account 3-5 business days after quality clearance.</p>
+          </div>
+        </div>
+
+        <button class="w-full bg-[#006400] text-white font-black uppercase py-5 rounded-lg shadow-xl hover:bg-black transition-all flex items-center justify-center gap-4">
+          <span class="text-[10px] tracking-[0.2em]">CONTACT SUPPORT</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+        </button>
+
+        <button class="w-full bg-[#e2ead8] text-black font-black uppercase py-5 rounded-lg hover:bg-white transition-all flex items-center justify-center gap-4 shadow-sm">
+          <span class="text-[10px] tracking-[0.2em]">VIEW ORDER DETAILS</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </main>
+{% endblock %}

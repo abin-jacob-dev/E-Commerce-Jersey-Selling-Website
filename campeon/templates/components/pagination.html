@@ -1,0 +1,53 @@
+{% load query_transform %}
+{% if page_obj.has_other_pages %}
+  <div class="p-10 flex justify-between items-center bg-gray-50/50 border-t border-gray-100">
+    <!-- Results -->
+    <p class="text-[9px] font-black uppercase tracking-widest text-gray-400">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }}
+      of {{ page_obj.paginator.count }}</p>
+
+    <!-- Pagination -->
+    <div class="flex items-center gap-4">
+      <!-- Previous -->
+      {% if page_obj.has_previous %}
+        <a href="?{% query_transform request page=page_obj.previous_page_number %}" class="p-2 text-gray-400 hover:text-black transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </a>
+      {% else %}
+        <span class="p-2 text-gray-200 cursor-not-allowed">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </span>
+      {% endif %}
+
+      <!-- Page Numbers -->
+      <div class="flex gap-2">
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <!-- Active -->
+            <span class="w-8 h-8 flex items-center justify-center bg-lime-bright text-black rounded-lg font-black text-[10px]">{{ num }}</span>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?{% query_transform request page=num %}" class="w-8 h-8 flex items-center justify-center bg-white border border-gray-100 rounded-lg font-black text-[10px] hover:bg-gray-100 shadow-sm transition">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Next -->
+      {% if page_obj.has_next %}
+        <a href="?{% query_transform request page=page_obj.next_page_number %}" class="p-2 text-gray-400 hover:text-black transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      {% else %}
+        <span class="p-2 text-gray-200 cursor-not-allowed">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </span>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

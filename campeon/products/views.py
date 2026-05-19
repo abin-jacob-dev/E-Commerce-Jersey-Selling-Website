@@ -20,6 +20,7 @@ from products.models import (
 from user.models import Addresses
 from django.db.models import Prefetch
 from django.db.models import Min, Q
+from datetime import timedelta
 
 
 # Create your views here.
@@ -840,6 +841,37 @@ def select_payment(request):
 
 def payment_successful(request, order_id):
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
-    
-    context = {"order": order, "order_items": order.items.all(),"payment_method":request.session.get('payment_method')}
+
+    context = {
+        "order": order,
+        "order_items": order.items.all(),
+        "payment_method": request.session.get("payment_method"),
+    }
     return render(request, "products/payment_successful.html", context)
+
+
+def orders(request):
+    orders_list = Order.objects.filter(user=request.user).order_by('-created_at')
+    paginator = Paginator(orders_list, 2)  # Show 25 contacts per page.
+
+    page_number = request.GET.get("page")
+    orders = paginator.get_page(page_number)
+    context = {"orders": orders}
+    return render(request, "user/orders/orders.html", context)
+
+def order_details(request,order_id):    
+    order = get_object_or_404(Order,user=request.user,order_id = order_id)
+    expected_delivery = order.created_at + timedelta(days=5)
+    context = {
+        "order":order,
+        "expected_delivery":expected_delivery
+    }
+    return render(request,'user/orders/order_details.html', context)
+
+def return_order(request):
+    
+    pass
+
+def cancel_order(request):
+    
+    pass

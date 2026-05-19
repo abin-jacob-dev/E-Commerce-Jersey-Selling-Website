@@ -1,0 +1,141 @@
+{% extends 'user/partials/base.html' %}
+{% load static %}
+
+{% block content %}
+  <main class="flex-1 bg-[#f0fdf4] p-12">
+    <div class="max-w-[1000px] mx-auto">
+      <!-- Heading Section -->
+      <div class="mb-16">
+        <h2 class="text-[90px] font-black uppercase tracking-tightest leading-[0.85] text-black">ORDER</h2>
+        <h2 class="text-[90px] font-black uppercase tracking-tightest leading-[0.85] text-[#00ff00]">CANCELLED</h2>
+      </div>
+
+      <!-- Info Bar -->
+      <div class="bg-white/50 backdrop-blur-md rounded-3xl p-10 flex flex-wrap items-center justify-between gap-8 mb-8 border border-white">
+        <div>
+          <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">ORDER ID</p>
+          <p class="text-2xl font-black uppercase tracking-tightest">#CP-8842</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">CANCELLATION DATE</p>
+          <p class="text-2xl font-black uppercase tracking-tightest">OCT 24, 2024</p>
+        </div>
+        <a href="All Jerseys - Catalog.html" class="bg-[#00ff00] text-black px-10 py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] shadow-lg shadow-lime-500/20 hover:bg-black hover:text-white transition-all flex items-center gap-4">
+          CONTINUE SHOPPING<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Refund Info -->
+      <div class="bg-white/40 border border-white rounded-3xl p-8 flex gap-6 items-start mb-16">
+        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-[#00ff00] flex-shrink-0 shadow-sm">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="text-[11px] font-black uppercase tracking-widest mb-2">REFUND PROCESSING</p>
+          <p class="text-[13px] font-bold text-gray-500 leading-relaxed max-w-2xl">
+            Amount of <span class="text-black">$145.00</span> will be credited to your wallet. Please allow 3–5 business days for the transaction to finalize.
+          </p>
+        </div>
+      </div>
+
+      <!-- Cancelled Items -->
+      <div class="space-y-8">
+        <h3 class="text-xl font-black uppercase tracking-widest text-black/80">CANCELLED ITEMS</h3>
+
+        <div class="space-y-4">
+          <!-- Item 1 -->
+          <div class="bg-white/60 p-6 rounded-2xl flex items-center gap-8 border border-white hover:bg-white transition-all">
+            <div class="w-28 h-28 bg-black rounded-xl overflow-hidden flex-shrink-0 shadow-md">
+              <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=200&h=200&auto=format&fit=crop" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1">
+              <h4 class="text-xl font-black uppercase tracking-tightest mb-1">PHANTOM ELITE SG-PRO</h4>
+              <div class="flex items-center gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#00ff00]"></span> VOLT / BLACK</span>
+                <span>SIZE: EU 44</span>
+                <span>QTY: 1</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-xl font-black text-[#00ff00] tracking-tightest">$110.00</p>
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="bg-white/60 p-6 rounded-2xl flex items-center gap-8 border border-white hover:bg-white transition-all">
+            <div class="w-28 h-28 bg-black rounded-xl overflow-hidden flex-shrink-0 shadow-md">
+              <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=200&h=200&auto=format&fit=crop" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1">
+              <h4 class="text-xl font-black uppercase tracking-tightest mb-1">PITCH PRECISION BALL</h4>
+              <div class="flex items-center gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full border border-gray-300"></span> WHITE / NEON</span>
+                <span>STANDARD SIZE</span>
+                <span>QTY: 1</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-xl font-black text-[#00ff00] tracking-tightest">$35.00</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="mt-32 border-t border-gray-100 pt-20 pb-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+        <div class="space-y-6">
+          <h4 class="text-sm font-black uppercase tracking-widest">Help Customers</h4>
+          <p class="text-[12px] font-bold text-gray-400 leading-relaxed">Find a location nearest you to reduce shipping costs and make shopping easier.</p>
+          <a href="#" class="text-[11px] font-black uppercase tracking-widest text-[#00ff00] underline">View on Google Maps</a>
+        </div>
+        <div class="space-y-6">
+          <h4 class="text-sm font-black uppercase tracking-widest">QUICK LINKS</h4>
+          <nav class="flex flex-col gap-3 text-[12px] font-bold text-gray-400 uppercase tracking-widest">
+            <a href="#" class="hover:text-black transition-colors">Privacy Policy</a>
+            <a href="#" class="hover:text-black transition-colors">Terms & Conditions</a>
+            <a href="#" class="hover:text-black transition-colors">Cancellation & Refund Policy</a>
+            <a href="#" class="hover:text-black transition-colors">Shipping Policy</a>
+            <a href="#" class="hover:text-black transition-colors">About</a>
+            <a href="#" class="hover:text-black transition-colors">Return Policy</a>
+          </nav>
+        </div>
+        <div class="col-span-2 space-y-6">
+          <h4 class="text-sm font-black uppercase tracking-widest text-right md:text-left">NEWSLETTER</h4>
+          <div class="flex flex-col gap-6">
+            <div class="relative">
+              <input type="email" placeholder="Enter your email" class="w-full bg-gray-50 border-none rounded-xl px-6 py-5 text-sm focus:outline-none" />
+              <button class="mt-4 w-full bg-black text-white py-5 rounded-xl font-black uppercase text-[11px] tracking-[0.2em] hover:bg-[#00ff00] hover:text-black transition-all">SIGN UP</button>
+            </div>
+            <div class="flex justify-between items-center">
+              <div class="flex gap-6">
+                <a href="#" class="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors">Instagram</a>
+                <a href="#" class="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors">TikTok</a>
+              </div>
+              <div class="flex gap-4">
+                <svg class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M2 4h20v16H2V4zm2 2v12h16V6H4zm2 2h12v2H6V8zm0 4h12v2H6v-2zm0 4h7v2H6v-2z"></path>
+                </svg>
+                <svg class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm3 3h6v2H9V9zm0 4h6v2H9v-2z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-between items-center pt-8 border-t border-gray-50">
+        <p class="text-[10px] font-bold text-gray-300 uppercase tracking-widest">© 2024 Campeón Sports. High Performance Editorial.</p>
+        <div class="flex gap-4 grayscale opacity-30">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" class="h-4" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="h-4" />
+        </div>
+      </div>
+    </footer>
+  </main>
+{% endblock %}
