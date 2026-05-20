@@ -1,0 +1,183 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="flex-1 p-8 md:p-12 space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <p class="text-[10px] text-gray-400 uppercase tracking-widest">Order Detail</p>
+      <h1 class="text-4xl font-black uppercase tracking-tight">{{order.order_id}}</h1>
+    </div>
+
+    <div class="flex gap-3 flex-wrap">
+      <span class="px-4 py-2 text-xs font-bold uppercase rounded-full bg-yellow-100 text-yellow-700">
+        {{ order.get_payment_status_display }}
+      </span>
+
+      <span class="px-4 py-2 text-xs font-bold uppercase rounded-full bg-gray-100 text-gray-600">
+        Created: {{ order.created_at|date:"M d, Y" }}
+      </span>
+    </div>
+  </div>
+
+  <!-- TOP GRID -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- LEFT: ORDER ITEMS -->
+    <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm">
+      <h2 class="text-sm font-black uppercase tracking-widest mb-6">Items</h2>
+
+      <div class="space-y-6">
+
+        {% for item in order.items.all %}
+        <div class="border-b pb-4 space-y-3">
+
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-black uppercase">{{ item.product_name }}</p>
+              <p class="text-xs text-gray-400">Qty: {{ item.quantity }}{% if item.size %} | Size: {{ item.size }}{% endif %}{% if item.color %} | Color: {{ item.color }}{% endif %}</p>
+            </div>
+
+            <p class="font-black">₹{{ item.subtotal }}</p>
+          </div>
+
+          <!-- ITEM STATUS -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-gray-400 uppercase">Status:</span>
+              <span class="px-3 py-1 text-[10px] font-bold uppercase rounded-full bg-yellow-100 text-yellow-700">
+                {{ item.get_status_display }}
+              </span>
+            </div>
+
+            <div class="flex gap-2 w-full md:w-auto">
+
+              <form method="POST" class="flex gap-2 w-full">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <select name="status" class="flex-1 md:w-48 border rounded-lg p-2 text-xs font-bold uppercase">
+                  <option value="pending" {% if item.status == 'pending' %}selected{% endif %}>Pending</option>
+                  <option value="processing" {% if item.status == 'processing' %}selected{% endif %}>Processing</option>
+                  <option value="shipped" {% if item.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                  <option value="delivered" {% if item.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                  <option value="cancelled" {% if item.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                  <option value="partially_cancel" {% if item.status == 'partially_cancel' %}selected{% endif %}>Partially Cancelled</option>
+                  <option value="returned" {% if item.status == 'returned' %}selected{% endif %}>Returned</option>
+                  <option value="partially_return" {% if item.status == 'partially_return' %}selected{% endif %}>Partially Returned</option>
+                </select>
+
+                <button type="submit" name="update_item_status" value="true" class="bg-black text-white px-4 py-2 text-xs font-black uppercase rounded-lg hover:bg-gray-800">
+                  Update
+                </button>
+              </form>
+
+            </div>
+
+          </div>
+
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+
+    <!-- RIGHT: SUMMARY -->
+    <div class="bg-white rounded-xl p-6 shadow-sm space-y-6">
+      <h2 class="text-sm font-black uppercase tracking-widest">Summary</h2>
+
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-400">Subtotal</span>
+        <span class="font-black">₹{{ order.subtotal }}</span>
+      </div>
+
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-400">Shipping</span>
+        <span class="font-black">₹{{ order.shipping }}</span>
+      </div>
+
+      <div class="flex justify-between text-lg border-t pt-4">
+        <span class="font-bold">Total</span>
+        <span class="font-black">₹{{ order.total_amount }}</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 pt-4">
+
+        <div class="bg-gray-50 p-3 rounded-lg">
+          <p class="text-[10px] text-gray-400 uppercase">Method</p>
+          <p class="font-black text-xs">{{ order.get_payment_method_display }}</p>
+        </div>
+
+        <div class="bg-gray-50 p-3 rounded-lg">
+          <p class="text-[10px] text-gray-400 uppercase">Status</p>
+          <p class="font-black text-xs">{{ order.get_order_status_display }}</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ADMIN ACTIONS -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- GLOBAL STATUS UPDATE -->
+    <div class="bg-white p-6 rounded-xl shadow-sm">
+      <h3 class="text-sm font-black uppercase tracking-widest mb-4">
+        Update Order Status
+      </h3>
+
+      <form method="POST">
+        {% csrf_token %}
+        <select name="order_status" class="w-full border rounded-lg p-3 text-xs font-bold uppercase">
+          <option value="pending" {% if order.order_status == 'pending' %}selected{% endif %}>Pending</option>
+          <option value="processing" {% if order.order_status == 'processing' %}selected{% endif %}>Processing</option>
+          <option value="shipped" {% if order.order_status == 'shipped' %}selected{% endif %}>Shipped</option>
+          <option value="delivered" {% if order.order_status == 'delivered' %}selected{% endif %}>Delivered</option>
+          <option value="cancelled" {% if order.order_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+          <option value="partially_cancel" {% if order.order_status == 'partially_cancel' %}selected{% endif %}>Partially Cancelled</option>
+          <option value="returned" {% if order.order_status == 'returned' %}selected{% endif %}>Returned</option>
+          <option value="partially_return" {% if order.order_status == 'partially_return' %}selected{% endif %}>Partially Returned</option>
+        </select>
+
+        <button type="submit" name="update_order" value="true" class="w-full mt-4 bg-black text-white py-3 text-xs font-black uppercase rounded-lg hover:bg-gray-800">
+          Update Order
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- CUSTOMER INFO -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <div class="bg-white p-6 rounded-xl shadow-sm">
+      <h3 class="text-sm font-black uppercase tracking-widest mb-4">Customer</h3>
+
+      <p class="font-black">{{ order.user.first_name }} {{ order.user.last_name }}</p>
+      <p class="text-xs text-gray-400">{{ order.user.email }}</p>
+      <p class="text-xs text-gray-400">{{ order.user.phone_number|default:"N/A" }}</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-sm">
+      <h3 class="text-sm font-black uppercase tracking-widest mb-4">Shipping</h3>
+
+      <p class="text-xs leading-relaxed">
+        {% if order.address %}
+          {{ order.address.full_name }}<br />
+          {{ order.address.address_line_1 }}<br />
+          {% if order.address.address_line_2 %}{{ order.address.address_line_2 }}<br />{% endif %}
+          {{ order.address.city }}, {{ order.address.state }} - {{ order.address.postal_code }}<br />
+          <span class="font-black uppercase">Phone: {{ order.address.phone_number }}</span>
+        {% else %}
+          N/A
+        {% endif %}
+      </p>
+    </div>
+
+  </div>
+
+</main>
+{% endblock %}

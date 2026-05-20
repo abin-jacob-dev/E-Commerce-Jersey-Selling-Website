@@ -1,0 +1,141 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="flex-1 p-4 md:p-12 overflow-y-auto bg-lime-light">
+
+  {% include 'partials/alert.html' %}
+
+  <div class="flex justify-between items-end mb-8">
+    <div>
+      <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-2">
+        ALL ORDERS
+      </h2>
+      <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">
+        View and manage full transaction history
+      </p>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+    <form method="GET" class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+
+      <input
+        type="text"
+        name="search"
+        value="{{ request.GET.search }}"
+        placeholder="Search orders..."
+        class="w-full md:w-72 bg-white border border-gray-200 rounded-lg px-4 py-3 text-[12px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime-200"
+      />
+
+      <div class="flex gap-3">
+        <button
+          type="submit"
+          class="bg-lime-500 text-white px-4 py-3 rounded-lg text-xs font-bold uppercase hover:bg-lime-600 transition"
+        >
+          Search
+        </button>
+
+        <a
+          href="{% url 'products:all_orders' %}"
+          class="bg-black text-white px-4 py-3 text-xs font-bold uppercase rounded-lg hover:bg-gray-800 transition"
+        >
+          Clear
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- TABLE -->
+  <div class="bg-white rounded-2xl shadow-sm">
+
+    <table class="w-full table-fixed text-left">
+
+      <thead class="bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100">
+        <tr>
+          <th class="px-3 md:px-6 py-4 w-[25%]">Order ID</th>
+          <th class="px-3 md:px-6 py-4 w-[25%]">Date</th>
+          <th class="px-3 md:px-6 py-4 w-[20%]">Total</th>
+          <th class="px-3 md:px-6 py-4 w-[20%]">Status</th>
+          <th class="px-3 md:px-6 py-4 w-[10%] text-right">Action</th>
+        </tr>
+      </thead>
+
+      <tbody class="text-xs font-bold text-gray-600">
+
+        {% for order in orders %}
+        <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition">
+
+          <!-- Order ID -->
+          <td class="px-3 md:px-6 py-4 font-black text-black break-words">
+            {{ order.order_id }}
+          </td>
+
+          <!-- Date -->
+          <td class="px-3 md:px-6 py-4 text-gray-400 text-xs">
+            {{ order.created_at|date }}
+          </td>
+
+          <!-- Total -->
+          <td class="px-3 md:px-6 py-4 font-black text-black">
+            ₹{{ order.subtotal|floatformat:2 }}
+          </td>
+
+          <!-- Status -->
+          <td class="px-3 md:px-6 py-4">
+            {% if order.order_status == 'pending' %}
+              <span class="bg-yellow-100 text-yellow-700 text-[10px] px-3 py-1 rounded-full">
+                Pending
+              </span>
+
+            {% elif order.order_status == 'delivered' %}
+              <span class="bg-green-100 text-green-700 text-[10px] px-3 py-1 rounded-full">
+                Delivered
+              </span>
+
+            {% elif order.order_status == 'cancelled' %}
+              <span class="bg-red-100 text-red-700 text-[10px] px-3 py-1 rounded-full">
+                Cancelled
+              </span>
+
+            {% else %}
+              <span class="bg-gray-100 text-gray-700 text-[10px] px-3 py-1 rounded-full">
+                {{ order.get_order_status_display }}
+              </span>
+            {% endif %}
+          </td>
+
+          <!-- Action -->
+          <td class="px-3 md:px-6 py-4 text-right">
+            <a
+              href="{% url 'products:order_view' order.order_id %}"
+              class="text-[10px] font-black uppercase text-gray-400 hover:text-black transition"
+            >
+              View
+            </a>
+          </td>
+
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center py-10 text-gray-400 font-bold">
+            No Orders Found
+          </td>
+        </tr>
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+  <!-- Pagination -->
+  <div class="mt-6">
+    {% include 'components/pagination.html' with page_obj=orders %}
+  </div>
+
+</main>
+{% endblock %}

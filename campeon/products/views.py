@@ -21,6 +21,11 @@ from user.models import Addresses
 from django.db.models import Prefetch
 from django.db.models import Min, Q
 from datetime import timedelta
+from django.utils import timezone
+from django.template.loader import get_template
+from django.http import HttpResponse
+
+# from xhtml2pdf import pisa
 
 
 # Create your views here.
@@ -55,10 +60,18 @@ def categories(request):
 def add_new_category(request):
     form = CategoryForm()
     if request.method == "POST":
-        name = request.POST.get("name")
+
         form = CategoryForm(request.POST, request.FILES)
 
         if form.is_valid():
+            name = form.cleaned_data.get("name")
+            if Category.objects.filter(name__iexact=name, is_deleted=False).exists():
+                messages.error(request, "Category already exists")
+                return render(
+                    request,
+                    "admin/products/categories/add_new_category.html",
+                    {"form": form},
+                )
             form.save()
             messages.success(request, "New Category Added")
             return redirect("products:categories")
@@ -164,7 +177,7 @@ def products_list(request):
     elif status == "Inactive":
         products_queryset = products_queryset.filter(is_active=False)
 
-    paginator = Paginator(products_queryset, 6)  # Show 1 products per page.
+    paginator = Paginator(products_queryset, 2)  # Show 1 products per page.
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -468,7 +481,9 @@ def product_detail(request, slug):
         return redirect("products:all_products")
 
     # Check if product has any active variants with stock
-    has_stock = any(variant.stock > 0 for variant in product.variants.all())
+    has_stock = any(
+        variant.stock > 0 and variant.is_active for variant in product.variants.all()
+    )
     if not has_stock:
         messages.warning(request, "This product is currently out of stock.")
         return redirect("products:all_products")
@@ -826,7 +841,7 @@ def select_payment(request):
 
                 order.payment_status = "pending"
             order.save()
-            # cart.items.all().delete()
+            cart.items.all().delete()
             messages.success(request, "Order placed Successfully")
             return redirect("products:payment_successful", order_id=order.order_id)
     context = {
@@ -851,27 +866,130 @@ def payment_successful(request, order_id):
 
 
 def orders(request):
-    orders_list = Order.objects.filter(user=request.user).order_by('-created_at')
-    paginator = Paginator(orders_list, 2)  # Show 25 contacts per page.
+
+    orders_list = Order.objects.filter(user=request.user).order_by("-created_at")
+    search_query = request.GET.get("search")
+    if search_query:
+        orders_list = orders_list.filter(order_id__icontains=search_query)
+    paginator = Paginator(orders_list, 5)
 
     page_number = request.GET.get("page")
     orders = paginator.get_page(page_number)
     context = {"orders": orders}
     return render(request, "user/orders/orders.html", context)
 
-def order_details(request,order_id):    
-    order = get_object_or_404(Order,user=request.user,order_id = order_id)
+
+def order_details(request, order_id):
+    order = get_object_or_404(Order, user=request.user, order_id=order_id)
     expected_delivery = order.created_at + timedelta(days=5)
-    context = {
-        "order":order,
-        "expected_delivery":expected_delivery
-    }
-    return render(request,'user/orders/order_details.html', context)
+    context = {"order": order, "expected_delivery": expected_delivery}
+    return render(request, "user/orders/order_details.html", context)
+
 
 def return_order(request):
-    
+
     pass
 
-def cancel_order(request):
-    
-    pass
+
+def cancel_order_item(request, item_id):
+    item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
+    context = {"item": item, "order": item.order}
+    return render(request, "user/orders/cancel_request.html", context)
+
+
+@transaction.atomic
+def cancel_order_item_request(request, item_id):
+    item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
+
+    if request.method != "POST":
+        return redirect("products:order_details", order_id=item.order.order_id)
+
+    if item.status in ["cancelled", "delivered"]:
+        messages.error(request, "This item cannot be cancelled.")
+        return redirect("products:order_details", order_id=item.order.order_id)
+
+    if item.variant:
+        item.variant.stock += item.quantity
+        item.variant.save()
+
+    item.status = "cancelled"
+    # item.is_cancelled = True
+    item.cancelled_at = timezone.now()
+
+    reason = request.POST.get("reason", "")
+    if reason == "other":
+        reason = request.POST.get("other_reason", "Other")
+    item.cancel_reason = reason
+    item.save()
+
+    order = item.order
+    active_items = order.items.exclude(status="cancelled")
+    if not active_items.exists():
+        order.order_status = "cancelled"
+    else:
+        order.order_status = "partially_cancel"
+    order.save()
+    messages.success(request, "Item cancelled successfully")
+    return redirect("products:order_details", order_id=order.order_id)
+
+
+# def download_invoice(request, order_id):
+#     order = get_object_or_404(Order, order_id=order_id, user=request.user)
+#     template = get_template("user/orders/order_invoice_pdf.html")
+#     invoice = template.render({"order": order})
+#     response = HttpResponse(content_type="application/pdf")
+#     response["Content-Disposition"] = f"attachemnt;filename=ORD-{order.order_id}.pdf"
+#     pisa.CreatePDF(html, dest=response)
+#     return response
+
+
+def all_orders(request):
+    orders_list = Order.objects.all().order_by("-created_at")
+    search_query = request.GET.get("search")
+    if search_query:
+        orders_list = orders_list.filter(order_id__icontains=search_query)
+    paginator = Paginator(orders_list, 5)
+    page_number = request.GET.get("page")
+    orders = paginator.get_page(page_number)
+    context = {"orders": orders}
+    return render(request, "admin/orders/all_orders.html", context)
+
+
+def order_view(request, order_id):
+    order = get_object_or_404(
+        Order.objects.select_related("user").prefetch_related(
+            "items__variant__product", "items__variant__images"
+        ),
+        order_id=order_id,
+    )
+
+    if request.method == "POST":
+        if "update_order" in request.POST:
+            order_status = request.POST.get("order_status")
+            if order_status:
+                order.order_status = order_status
+                order.save()
+
+                order.items.all().update(status=order_status)
+
+                messages.success(
+                    request,
+                    f"Order status updated to {order.get_order_status_display()}",
+                )
+                return redirect("products:order_view", order_id=order.order_id)
+
+        elif "update_item_status" in request.POST:
+            item_id = request.POST.get("item_id")
+            item_status = request.POST.get("status")
+            if item_id and item_status:
+                item = get_object_or_404(OrderItem, id=item_id, order=order)
+                item.status = item_status
+                item.save()
+
+                messages.success(
+                    request, f"Item status updated to {item.get_status_display()}"
+                )
+                return redirect("products:order_view", order_id=order.order_id)
+
+    context = {"order": order}
+    return render(request, "admin/orders/order_view.html", context)

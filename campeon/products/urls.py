@@ -76,9 +76,9 @@ urlpatterns = [
         name="orders",
     ),
     path(
-        "order-view-details/<str:order_id>",
+        "order-details/<str:order_id>",
         views.order_details,
-        name="order_view_details",
+        name="order_details",
     ),
     path(
         "return-order",
@@ -86,8 +86,29 @@ urlpatterns = [
         name="return_order",
     ),
     path(
-        "cancel-order",
-        views.cancel_order,
-        name="cancel_order",
+        "cancel-order-item/<int:item_id>/",
+        views.cancel_order_item,
+        name="cancel_order_item",
+    ),
+    path(
+        "cancel-order-item-request/<int:item_id>/",
+        views.cancel_order_item_request,
+        name="cancel_order_item_request",
+    ),
+    # path(
+    #     "download-invoice/<str:order_id>/",
+    #     views.download_invoice,
+    #     name="download_invoice",
+    # ),
+    # admin panel side
+    path(
+        "all-orders",
+        views.all_orders,
+        name="all_orders",
+    ),
+    path(
+        "order-view/<str:order_id>",
+        views.order_view,
+        name="order_view",
     ),
 ]

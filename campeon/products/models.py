@@ -27,7 +27,7 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if self.pk:
-            old = Product.objects.filter(pk=self.pk).first()
+            old = Category.objects.filter(pk=self.pk).first()
             if old and old.name != self.name:
                 self.slug = None  # force regenerate
         if not self.slug:
@@ -85,6 +85,10 @@ class Product(models.Model):
         return self.variants.filter(is_active=True).first()
 
     def save(self, *args, **kwargs):
+        if self.pk:
+            old = Product.objects.filter(pk=self.pk).first()
+            if old and old.name != self.name:
+                self.slug = None  # force regenerate
         if not self.slug:
             base_slug = slugify(self.name)
             slug = base_slug
@@ -227,9 +231,9 @@ class Order(models.Model):
         ("shipped", "Shipped"),
         ("delivered", "Delivered"),
         ("cancelled", "Cancelled"),
-        ("partial_cancel", "Partially Cancelled"),
+        ("partially_cancel", "Partially Cancelled"),
         ("returned", "Returned"),
-        ("partial_return", "Partially Returned"),
+        ("partially_return", "Partially Returned"),
     ]
 
     user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="orders")
@@ -284,7 +288,9 @@ class OrderItem(models.Model):
         ("shipped", "Shipped"),
         ("delivered", "Delivered"),
         ("cancelled", "Cancelled"),
+        ("partially_cancel", "Partially Cancelled"),
         ("returned", "Returned"),
+        ("partially_return", "Partially Returned"),
     ]
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
@@ -305,7 +311,9 @@ class OrderItem(models.Model):
     status = models.CharField(
         max_length=20, choices=ITEM_STATUS_CHOICES, default="pending"
     )
+
     cancel_reason = models.TextField(blank=True, null=True)
+    cancelled_at = models.DateTimeField(auto_now_add=True,null=True,blank = True)
 
     def __str__(self):
         return f"{self.product_name} x {self.quantity}"

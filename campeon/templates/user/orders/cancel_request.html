@@ -2,100 +2,172 @@
 {% load static %}
 
 {% block content %}
-  <main class="flex-1 bg-[#f4fce3] p-12">
-    <div class="flex flex-col lg:flex-row gap-12">
-      <!-- Left Section: Form -->
-      <div class="flex-1">
-        <h2 class="text-7xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest">CANCEL ORDER</h2>
-        <div class="flex items-center gap-4 mb-12">
-          <span class="bg-[#a3e635] text-black text-[10px] font-black uppercase tracking-widest px-4 py-1">ID: #CP-8842</span>
-          <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">PLACED: OCTOBER 24, 2024</span>
+  <main class="flex-1 bg-lime-light p-4 md:p-8 xl:p-12">
+    {% include 'partials/alert.html' %}
+    <div class="max-w-[1500px] mx-auto">
+      <!-- HEADER -->
+      <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6 mb-12">
+        <!-- LEFT -->
+        <div>
+          <h2 class="text-[28px] sm:text-[38px] lg:text-[48px] font-black uppercase tracking-[-0.03em] leading-none text-black">CANCEL ORDER ITEM</h2>
+
+          <p class="text-[11px] md:text-[12px] font-bold text-gray-500 uppercase tracking-widest mt-5 max-w-md">Please confirm your cancellation request carefully before proceeding.</p>
         </div>
 
-        <div class="space-y-8">
-          <div>
-            <div class="flex items-center gap-4 mb-6">
-              <div class="w-8 h-1 bg-black"></div>
-              <h3 class="text-xs font-black uppercase tracking-widest tracking-tightest">REASON FOR CANCELLATION</h3>
-            </div>
-            <div class="space-y-2">
-              <label class="flex items-center gap-4 bg-[#e2ead8] p-4 cursor-pointer group">
-                <input type="radio" name="reason" class="w-5 h-5 border-2 border-black checked:bg-black appearance-none rounded-full focus:outline-none focus:ring-2 focus:ring-lime/20" checked />
-                <span class="text-[10px] font-black uppercase tracking-widest">ORDERED WRONG SIZE</span>
-              </label>
-              <label class="flex items-center gap-4 bg-[#e2ead8] p-4 cursor-pointer group">
-                <input type="radio" name="reason" class="w-5 h-5 border-2 border-black checked:bg-black appearance-none rounded-full focus:outline-none focus:ring-2 focus:ring-lime/20" />
-                <span class="text-[10px] font-black uppercase tracking-widest">DEFECTIVE / DAMAGED</span>
-              </label>
-              <label class="flex items-center gap-4 bg-[#e2ead8] p-4 cursor-pointer group">
-                <input type="radio" name="reason" class="w-5 h-5 border-2 border-black checked:bg-black appearance-none rounded-full focus:outline-none focus:ring-2 focus:ring-lime/20" />
-                <span class="text-[10px] font-black uppercase tracking-widest">NOT AS DESCRIBED</span>
-              </label>
-              <label class="flex items-center gap-4 bg-[#e2ead8] p-4 cursor-pointer group">
-                <input type="radio" name="reason" class="w-5 h-5 border-2 border-black checked:bg-black appearance-none rounded-full focus:outline-none focus:ring-2 focus:ring-lime/20" />
-                <span class="text-[10px] font-black uppercase tracking-widest">CHANGED MY MIND</span>
-              </label>
-            </div>
-          </div>
+        <!-- RIGHT -->
+        {% comment %} <div class="xl:text-right">
+          <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">ITEM ID</p>
 
-          <div>
-            <div class="flex items-center gap-4 mb-6">
-              <div class="w-8 h-1 bg-black"></div>
-              <h3 class="text-xs font-black uppercase tracking-widest tracking-tightest">REASON</h3>
-            </div>
-            <textarea placeholder="TELL US MORE..." class="w-full bg-[#e2ead8] border-none p-6 text-[10px] font-black uppercase tracking-widest focus:ring-0 h-32 focus:outline-none focus:ring-2 focus:ring-lime/20"></textarea>
-          </div>
-
-          <div class="bg-[#fdf2e9] border-l-4 border-[#e67e22] p-8">
-            <p class="text-[10px] font-bold text-[#a04000] uppercase tracking-widest leading-relaxed">REFUND POLICY: CANCELLATIONS ARE PROCESSED IMMEDIATELY. DEPENDING ON YOUR BANK, FUNDS WILL RETURN TO YOUR ORIGINAL PAYMENT METHOD WITHIN 3-5 BUSINESS DAYS. ONCE CANCELLED, THIS ACTION CANNOT BE REVERSED.</p>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <button class="bg-[#00ff00] text-black px-12 py-5 text-xs font-black uppercase tracking-widest shadow-lg hover:bg-black hover:text-white transition-all">CONFIRM CANCELLATION</button>
-            <button class="bg-[#e2ead8] text-black px-12 py-5 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">KEEP MY ORDER</button>
-          </div>
-        </div>
+          <p class="text-2xl sm:text-3xl lg:text-4xl font-black text-[#008000] tracking-tight">#{{ item.id }}</p>
+        </div> {% endcomment %}
       </div>
 
-      <!-- Right Section: Order Summary -->
-      <div class="w-full lg:w-96">
-        <div class="bg-[#e2ead8] p-10 rounded-sm">
-          <h3 class="text-2xl font-black uppercase tracking-tighter mb-8 tracking-tightest">ORDER SUMMARY</h3>
+      <!-- GRID -->
+      <div class="grid grid-cols-12 gap-8">
+        <!-- LEFT FORM -->
+        <div class="col-span-12 xl:col-span-8">
+          <form method="post" class="flex flex-col gap-8" action="{% url 'products:cancel_order_item_request' item.id %}">
+            {% csrf_token %}
 
-          <div class="flex gap-6 mb-12">
-            <div class="w-24 h-32 bg-black relative flex-shrink-0">
-              <img src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=200&h=266&auto=format&fit=crop" class="w-full h-full object-cover grayscale opacity-80" />
-              <span class="absolute top-2 left-2 bg-black text-white text-[8px] font-black px-2 py-1">LTD</span>
-            </div>
-            <div>
-              <h4 class="text-xs font-black uppercase tracking-widest leading-tight mb-2 tracking-tightest">ELITE PERFORMANCE KIT '24</h4>
-              <p class="text-[8px] font-bold text-gray-500 uppercase tracking-widest mb-4">SIZE: XL / HOME COLORWAY</p>
-              <div class="text-xl font-black text-[#006400]">$120.00</div>
-            </div>
-          </div>
+            <!-- REASON -->
+            <div class="bg-white rounded-[2rem] shadow-sm p-6 md:p-8">
+              <div class="flex items-center justify-between mb-8">
+                <h3 class="text-2xl font-black uppercase tracking-tight text-black">Cancellation Reason</h3>
+                <div class="h-1 w-20 bg-[#008000]"></div>
+              </div>
 
-          <div class="border-t border-dashed border-gray-300 pt-8 space-y-4 mb-8">
-            <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-gray-500">
-              <span>SUBTOTAL</span>
-              <span>$120.00</span>
-            </div>
-            <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-gray-500">
-              <span>SHIPPING</span>
-              <span class="text-[#006400]">FREE</span>
-            </div>
-          </div>
+              <div class="space-y-3">
+                <label class="flex items-center gap-4 bg-lime-light p-4 rounded-xl cursor-pointer">
+                  <input type="radio" name="reason" value="wrong_size" class="w-5 h-5 accent-black" />
+                  <span class="text-[11px] font-black uppercase tracking-widest">ORDERED WRONG SIZE</span>
+                </label>
 
-          <div class="flex justify-between items-end">
-            <span class="text-xs font-black uppercase tracking-widest">TOTAL REFUND</span>
-            <span class="text-2xl font-black text-[#006400]">$120.00</span>
-          </div>
+                <label class="flex items-center gap-4 bg-lime-light p-4 rounded-xl cursor-pointer">
+                  <input type="radio" name="reason" value="defective" class="w-5 h-5 accent-black" />
+                  <span class="text-[11px] font-black uppercase tracking-widest">DEFECTIVE / DAMAGED</span>
+                </label>
+
+                <label class="flex items-center gap-4 bg-lime-light p-4 rounded-xl cursor-pointer">
+                  <input type="radio" name="reason" value="not_as_described" class="w-5 h-5 accent-black" />
+                  <span class="text-[11px] font-black uppercase tracking-widest">NOT AS DESCRIBED</span>
+                </label>
+
+                <label class="flex items-center gap-4 bg-lime-light p-4 rounded-xl cursor-pointer">
+                  <input type="radio" name="reason" value="changed_mind" class="w-5 h-5 accent-black" />
+                  <span class="text-[11px] font-black uppercase tracking-widest">CHANGED MY MIND</span>
+                </label>
+
+                <!-- OTHER -->
+                <label class="flex items-start gap-4 bg-lime-light p-4 rounded-xl cursor-pointer">
+                  <input type="radio" name="reason" value="other" id="reason_other" class="w-5 h-5 accent-black mt-1" />
+
+                  <div class="w-full">
+                    <span class="text-[11px] font-black uppercase tracking-widest">OTHER</span>
+
+                    <textarea name="other_reason" id="other_reason_textarea" placeholder="PLEASE SPECIFY YOUR REASON..." class="mt-3 w-full h-28 hidden bg-white border border-gray-200 rounded-lg p-4 text-[11px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[#008000]"></textarea>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <script>
+              const otherRadio = document.getElementById('reason_other')
+              const textarea = document.getElementById('other_reason_textarea')
+              
+              document.querySelectorAll('input[name="reason"]').forEach((radio) => {
+                radio.addEventListener('change', () => {
+                  if (otherRadio.checked) {
+                    textarea.classList.remove('hidden')
+                  } else {
+                    textarea.classList.add('hidden')
+                    textarea.value = ''
+                  }
+                })
+              })
+            </script>
+
+            <!-- TEXTAREA -->
+            {% comment %} <div class="bg-white rounded-[2rem] shadow-sm p-6 md:p-8">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-black uppercase tracking-tight text-black">Additional Details</h3>
+                <div class="h-1 w-20 bg-[#008000]"></div>
+              </div>
+
+              <textarea name="note" placeholder="TELL US MORE..." class="w-full h-40 bg-[#f0fdf4] border border-gray-100 rounded-xl p-5 text-[11px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[#008000]"></textarea>
+            </div> {% endcomment %}
+
+            <!-- POLICY -->
+            <div class="bg-lime-light p-6 rounded-xl">
+              <p class="text-[11px] font-bold text-gray-600 uppercase tracking-widest leading-relaxed">REFUND POLICY: CANCELLATIONS ARE PROCESSED IMMEDIATELY. DEPENDING ON YOUR BANK, FUNDS WILL RETURN TO YOUR ORIGINAL PAYMENT METHOD WITHIN 3-5 BUSINESS DAYS. ONCE CANCELLED, THIS ACTION CANNOT BE REVERSED.</p>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="flex items-center gap-4 pt-2">
+              <!-- Confirm Cancel -->
+              <button type="submit" class="flex-1 h-12 bg-[#008000] text-white rounded-xl font-black uppercase tracking-[0.14em] text-[11px] hover:bg-black transition-all flex items-center justify-center">CONFIRM</button>
+
+              <!-- Keep Order -->
+              <a href="{% url 'products:order_details' order.order_id %}" class="flex-1 h-12 bg-white border border-gray-200 text-black rounded-xl font-black uppercase tracking-[0.14em] text-[11px] hover:bg-gray-100 transition-all flex items-center justify-center">KEEP ORDER</a>
+            </div>
+          </form>
         </div>
 
-        <div class="mt-8 flex items-start gap-4 p-4 bg-white border border-gray-100 rounded-lg">
-          <svg class="w-5 h-5 text-[#006400] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-          </svg>
-          <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">SECURE TRANSACTION & GUARANTEED HASSLE-FREE RETURNS</p>
+        <!-- RIGHT SUMMARY -->
+        <div class="col-span-12 xl:col-span-4">
+          <div class="bg-white rounded-[2rem] shadow-sm p-6 md:p-8">
+            <h3 class="text-xl font-black uppercase tracking-tight mb-8 text-black">ORDER SUMMARY</h3>
+
+            <!-- ITEM -->
+            <div class="flex gap-5 mb-8">
+              <div class="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                {% if item.variant and item.variant.images.first %}
+                  <img src="{{ item.variant.images.first.image.url }}" class="w-full h-full object-cover" />
+                {% else %}
+                  <div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-gray-400">NO IMAGE</div>
+                {% endif %}
+              </div>
+
+              <div class="min-w-0">
+                <h4 class="text-[12px] font-black uppercase tracking-widest leading-tight">{{ item.product_name }}</h4>
+
+                <p class="text-[10px] font-bold text-gray-400 uppercase mt-2">
+                  SIZE: {{ item.size }}
+                  {% if item.color %}
+                    / {{ item.color }}
+                  {% endif %}
+                </p>
+
+                <p class="text-xl font-black text-[#008000] mt-3">₹{{ item.subtotal }}</p>
+              </div>
+            </div>
+
+            <!-- TOTAL -->
+            <div class="border-t pt-6 space-y-3">
+              <div class="flex justify-between text-[11px] font-bold uppercase text-gray-500">
+                <span>SUBTOTAL</span>
+                <span>₹{{ item.subtotal }}</span>
+              </div>
+
+              <div class="flex justify-between text-[11px] font-bold uppercase text-gray-500">
+                <span>SHIPPING</span>
+                <span class="text-[#008000]">FREE</span>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-end mt-6">
+              <span class="text-[11px] font-black uppercase tracking-widest">TOTAL REFUND</span>
+              <span class="text-2xl font-black text-[#008000]">₹{{ item.subtotal }}</span>
+            </div>
+          </div>
+
+          <!-- SECURITY -->
+          <div class="mt-6 bg-lime-light rounded-xl p-4 flex items-start gap-3">
+            <svg class="w-5 h-5 text-[#008000] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+
+            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">SECURE TRANSACTION & GUARANTEED REFUND PROCESSING</p>
+          </div>
         </div>
       </div>
     </div>

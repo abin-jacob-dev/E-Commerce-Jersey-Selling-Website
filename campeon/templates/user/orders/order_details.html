@@ -2,264 +2,176 @@
 {% load static %}
 
 {% block content %}
-  <!-- Main Content -->
-  <main class="flex-1 bg-[#f0fdf4] p-4 md:p-8 xl:p-12">
+  <main class="flex-1 bg-lime-light p-4 md:p-8 xl:p-12">
     <div class="max-w-[1500px] mx-auto">
-      <!-- Header -->
-      <!-- Header -->
+      {% include 'partials/alert.html' %}
+
+      <!-- HEADER -->
       <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6 mb-10">
-        <!-- LEFT -->
         <div>
           <p class="text-[11px] font-black uppercase tracking-[0.3em] text-[#008000] mb-3">Order Details</p>
 
-          <h2 class="text-[28px] sm:text-[38px] lg:text-[48px] font-black uppercase tracking-[-0.03em] leading-none text-black">ORDER #{{ order.order_id }}</h2>
+          <h2 class="text-[28px] sm:text-[38px] lg:text-[48px] font-black uppercase">ORDER #{{ order.order_id }}</h2>
 
-          <p class="text-[11px] md:text-[12px] font-bold text-gray-500 uppercase tracking-widest mt-5 max-w-md leading-relaxed">Your performance upgrades are navigating the final stretch.</p>
+          <p class="text-[12px] font-bold text-gray-500 uppercase mt-5 max-w-md">Your performance upgrades are navigating the final stretch.</p>
         </div>
 
-        <!-- RIGHT -->
         <div class="xl:text-right">
-          <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">EXPECTED DELIVERY</p>
+          <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Expected Delivery</p>
 
-          <p class="text-2xl sm:text-3xl lg:text-4xl font-black text-[#008000] tracking-tight">
-            {% if order.created_at %}
-              {{ expected_delivery|date:'F d, Y' }}
-            {% endif %}
-          </p>
+          <p class="text-3xl font-black text-[#008000]">{{ expected_delivery|date:'F d, Y' }}</p>
         </div>
       </div>
 
-      <!-- Main Grid -->
-      <div class="grid grid-cols-12 gap-8 items-start">
-        <!-- LEFT SIDE -->
+      <div class="grid grid-cols-12 gap-8">
+        <!-- LEFT -->
         <div class="col-span-12 xl:col-span-8 space-y-10">
-          <!-- Tracking Card -->
-          <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm">
-  
-  <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
-    
-    <div>
-      <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
-        Order Status
-      </p>
+          <h3 class="text-3xl font-black uppercase mb-6">Shipment Contents</h3>
 
-      <h3 class="text-2xl font-black uppercase tracking-tight">
-        {{ order.get_order_status_display }}
-      </h3>
-    </div>
-  </div>
-
-  <!-- Progress Bar -->
-  <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-    
-    <div class="
-      h-full bg-[#008000] rounded-full transition-all duration-500
-      {% if order.order_status == 'pending' %}
-        w-[20%]
-      {% elif order.order_status == 'processing' %}
-        w-[45%]
-      {% elif order.order_status == 'shipped' %}
-        w-[75%]
-      {% elif order.order_status == 'delivered' %}
-        w-full
-      {% elif order.order_status == 'cancelled' %}
-        w-full bg-red-500
-      {% endif %}
-    "></div>
-
-  </div>
-
-  <!-- Footer -->
-  <div class="flex justify-between mt-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
-    <span>Placed</span>
-    <span>Processing</span>
-    <span>Shipped</span>
-    <span>Delivered</span>
-  </div>
-
-</div>
-          <!-- Products -->
-          <div>
-            <h3 class="text-3xl font-black uppercase tracking-tight mb-8 text-black">SHIPMENT CONTENTS</h3>
-
-            <div class="space-y-6">
-              {% if order.items.exists %}
-                {% for item in order.items.all %}
-                  <div class="bg-white rounded-[2rem] shadow-sm p-6 lg:p-8">
-                    <!-- TOP CONTENT -->
-                    <div class="flex flex-col xl:flex-row gap-8 xl:items-center">
-                      <!-- Product Image -->
-                      <div class="w-full sm:w-44 h-44 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100">
-                        {% if item.variant and item.variant.images.first %}
-                          <img src="{{ item.variant.images.first.image.url }}" class="w-full h-full object-cover" alt="{{ item.product_name }}" />
-                        {% else %}
-                          <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs font-bold">NO IMAGE</div>
-                        {% endif %}
-                      </div>
-
-                      <!-- Product Content -->
-                      <div class="flex-1 min-w-0">
-                        {% if item.variant.product.category %}
-                          <p class="text-[11px] font-black text-[#008000] uppercase tracking-widest mb-3">{{ item.variant.product.category.name }}</p>
-                        {% endif %}
-
-                        <h4 class="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-tight leading-[1.05] mb-4 break-words">{{ item.product_name }}</h4>
-
-                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                          Size: {{ item.size }}
-                          {% if item.color %}
-                            • Color: {{ item.color }}
-                          {% endif %}
-                        </p>
-                      </div>
-
-                      <!-- Price -->
-                      <div class="flex flex-row xl:flex-col gap-10 xl:gap-5 justify-between xl:justify-center">
-                        <div class="text-left xl:text-center">
-                          <p class="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">QTY</p>
-
-                          <p class="text-2xl font-black">{{ item.quantity|stringformat:'02d' }}</p>
-                        </div>
-
-                        <div class="text-right xl:text-center">
-                          <p class="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">SUBTOTAL</p>
-
-                          <p class="text-3xl font-black text-[#008000] tracking-tight">₹{{ item.subtotal }}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- ACTION BUTTONS -->
-                    <div class="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row gap-3">
-                      <!-- Review -->
-                      <a href="" class="flex-1 h-12 rounded-xl bg-[#008000] text-white hover:bg-black transition-all flex items-center justify-center text-[11px] font-black uppercase tracking-[0.18em]">Write Review</a>
-
-                      <!-- Cancel -->
-                      {% if order.order_status != 'cancelled' and order.order_status != 'delivered' %}
-                        <a href="" class="flex-1 h-12 rounded-xl border border-red-200 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all flex items-center justify-center text-[11px] font-black uppercase tracking-[0.18em]">Cancel Order</a>
-                      {% endif %}
-
-                      <!-- Return -->
-                      {% if order.order_status == 'delivered' %}
-                        <a href="" class="flex-1 h-12 rounded-xl border border-gray-200 bg-gray-50 text-black hover:bg-black hover:text-white transition-all flex items-center justify-center text-[11px] font-black uppercase tracking-[0.18em]">Request Return</a>
-                      {% endif %}
-                    </div>
-                  </div>
-                {% endfor %}
-              {% else %}
-                <div class="bg-white p-8 rounded-3xl text-center">
-                  <p class="text-gray-500 font-bold uppercase tracking-widest">No items found in this order.</p>
+          {% for item in order.items.all %}
+            <div class="bg-white rounded-3xl p-6 shadow-sm">
+              <div class="flex flex-col xl:flex-row gap-8">
+                <!-- IMAGE -->
+                <div class="w-44 h-44 bg-gray-100 rounded-2xl overflow-hidden">
+                  {% if item.variant and item.variant.images.first %}
+                    <img src="{{ item.variant.images.first.image.url }}" class="w-full h-full object-cover" />
+                  {% else %}
+                    <div class="flex items-center justify-center h-full text-xs text-gray-400">NO IMAGE</div>
+                  {% endif %}
                 </div>
-              {% endif %}
+
+                <!-- DETAILS -->
+                <div class="flex-1">
+                  <p class="text-[11px] font-black text-[#008000] uppercase">{{ item.variant.product.category.name }}</p>
+
+                  <h4 class="text-2xl font-black uppercase mt-2">{{ item.product_name }}</h4>
+
+                  <p class="text-[11px] font-bold text-gray-400 mt-2 uppercase">
+                    Size: {{ item.size }} {% if item.color %}
+                      • {{ item.color }}
+                    {% endif %}
+                  </p>
+                  <div class="mt-4">
+                    <span class="
+    px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wide
+
+    {% if item.status == 'pending' %}
+                        
+      bg-black-100 text-black-700
+
+
+                      {% elif item.status == 'processing' %}
+                        
+      bg-black-100 text-black-700
+
+
+                      {% elif item.status == 'shipped' %}
+                        
+      bg-black-100 text-black-700
+
+
+                      {% elif item.status == 'out_for_delivery' %}
+                        
+      bg-black-100 text-black-700
+
+
+                      {% elif item.status == 'delivered' %}
+                        
+      bg-black-100 text-black-700
+
+
+                      {% elif item.status == 'cancelled' %}
+                        
+      bg-black-100 text-red-700
+
+
+                      {% else %}
+                        
+      bg-gray-100 text-gray-700
+
+                      {% endif %}
+  ">
+                      {{ item.get_status_display }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- PRICE -->
+                <div class="text-right">
+                  <p class="text-2xl font-black">{{ item.quantity|stringformat:'02d' }}</p>
+                  <p class="text-3xl font-black text-[#008000]">₹{{ item.subtotal }}</p>
+                </div>
+              </div>
+
+              <!-- ACTIONS -->
+              <div class="mt-6 pt-6 border-t flex gap-3">
+                {% if item.status == 'cancelled' %}
+                  <div class="flex-1 text-center text-red-600 bg-red-100 py-3 text-[11px] uppercase font-black">Cancelled</div>
+                {% elif item.status == 'delivered' %}
+                  <a class="flex-1 text-center bg-[#008000] text-white py-3 text-[11px] uppercase font-black">Write Review</a>
+                {% else %}
+                  <div class="flex-1 text-center bg-gray-100 text-gray-400 py-3 text-[11px] uppercase font-black">Review Unavailable</div>
+                {% endif %}
+
+                {% if item.status not in 'cancelled delivered' %}
+                  <a href="{% url 'products:cancel_order_item' item.id %}" class="flex-1 text-center border border-red-200 text-red-600 py-3 text-[11px] uppercase font-black">Cancel Item</a>
+                {% endif %}
+              </div>
             </div>
-          </div>
+          {% empty %}
+            <p class="text-gray-500 font-bold">No items found.</p>
+          {% endfor %}
         </div>
 
-        <!-- RIGHT SIDE -->
-        <div class="col-span-12 xl:col-span-4 flex flex-col gap-6">
-          <!-- Address -->
-          <div class="bg-[#dcfce7] p-8 rounded-[2rem] shadow-sm">
-            <div class="flex items-center gap-4 mb-8 text-[#008000]">
-              <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+        <!-- RIGHT -->
+        <div class="col-span-12 xl:col-span-4 space-y-6">
+          <!-- ADDRESS -->
+          <div class="bg-white p-6 rounded-3xl">
+            <h3 class="font-black uppercase mb-4">Delivery Address</h3>
 
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0"></path>
+            <p class="font-black">{{ order.address.full_name }}</p>
+            <p class="text-gray-500 text-sm">
+              {{ order.address.address_line_1 }}<br />
+              {{ order.address.city }}, {{ order.address.state }} {{ order.address.zip_code }}<br />
+              {{ order.address.country }}
+            </p>
+
+            <div class="mt-6 text-sm">
+              <p class="text-gray-400 uppercase text-[10px]">Payment</p>
+              <p class="font-black">{{ order.get_payment_method_display }}</p>
+
+              <p class="text-[10px] uppercase mt-4 text-gray-400">Status</p>
+              <p class="font-black
+              {% if order.payment_status == 'paid' %}
+                  
+                  text-green-600
+
+
+                {% elif order.payment_status == 'failed' %}
+                  
+                  text-red-600
+
+
+                {% else %}
+                  
+                  text-gray-600
+
+                {% endif %}">{{ order.get_payment_status_display }}</p>
+            </div>
+          </div>
+          {% comment %} <a href="" class="w-full h-16 bg-[#008000] hover:bg-black text-white rounded-2xl px-6 flex items-center justify-between transition-all group">
+            <div class="flex items-center gap-3">
+              <!-- Download Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4M4 17v3h16v-3" />
               </svg>
-
-              <h3 class="text-[11px] font-black uppercase tracking-[0.2em]">DELIVERY DESTINATION</h3>
+              <span class="text-[11px] font-black uppercase tracking-[0.18em]">DOWNLOAD INVOICE</span>
             </div>
 
-            <div class="space-y-3 mb-8">
-              <p class="text-2xl font-black uppercase tracking-tight">{{ order.address.full_name }}</p>
-
-              <p class="text-[13px] font-bold text-gray-500 leading-relaxed break-words">
-                {{ order.address.address_line_1 }}<br />
-                {{ order.address.city }}, {{ order.address.state }} {{ order.address.zip_code }}<br />
-                {{ order.address.country }}
-              </p>
-            </div>
-
-            <div class="pt-6 border-t border-gray-200/50">
-              <div class="mt-6">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Payment Method</p>
-
-                <p class="text-lg font-black uppercase">{{ order.get_payment_method_display }}</p>
-              </div>
-              <div class="mt-4">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Payment Status</p>
-
-                <p class="
-    text-lg font-black uppercase
-    {% if order.payment_status == 'paid' %}
-      text-green-600
-                  {% elif order.payment_status == 'failed' %}
-      text-red-600
-                  {% else %}
-      text-black-600
-                  {% endif %}
-  ">{{ order.get_payment_status_display }}</p>
-              </div>
-              {% comment %} <button class="flex items-center gap-3 text-[11px] font-black uppercase tracking-widest text-[#008000] hover:text-black transition-colors">
-                CHANGE DELIVERY INSTRUCTIONS<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </button> {% endcomment %}
-            </div>
-          </div>
-
-          <!-- ACTION BUTTONS -->
-          <div class="bg-white border border-gray-100 rounded-3xl shadow-sm p-4">
-            <div class="flex flex-col gap-4">
-              <!-- Track -->
-              <button class="w-full h-16 bg-[#00ff00] hover:bg-black hover:text-white transition-all rounded-2xl flex items-center justify-center gap-3 px-5 text-black font-black uppercase tracking-[0.18em] text-[11px] shadow-lg shadow-lime-500/20">
-                <!-- Proper Truck Icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 17H6a2 2 0 01-2-2V7a2 2 0 012-2h9a2 2 0 012 2v3" />
-
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h-1m5 0h-2m2 0a2 2 0 002-2v-3.586a1 1 0 00-.293-.707l-2.414-2.414A1 1 0 0017.586 8H15v9m4 0a2 2 0 11-4 0m-6 0a2 2 0 11-4 0" />
-                </svg>
-
-                <span class="leading-none whitespace-nowrap">TRACK ORDER</span>
-              </button>
-
-              <!-- Invoice -->
-              <a href="Invoice.html" class="w-full h-16 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-2xl px-6 flex items-center justify-between transition-all group">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                  <!-- Proper Document Icon -->
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-black flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-
-                  <span class="text-[11px] font-black uppercase tracking-[0.18em] text-black leading-none">VIEW INVOICE</span>
-                </div>
-
-                <!-- Arrow -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 group-hover:text-black transition-colors flex-shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-
-              <!-- Support -->
-              <button class="w-full h-16 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-2xl px-6 flex items-center justify-between transition-all group">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                  <!-- Proper Support Icon -->
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-black flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 10c0-3.314-2.686-6-6-6s-6 2.686-6 6v4a2 2 0 002 2h1v-6H8a4 4 0 118 0h-1v6h1a2 2 0 002-2v-4z" />
-
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01" />
-                  </svg>
-
-                  <span class="text-[11px] font-black uppercase tracking-[0.18em] text-black leading-none">SHIPMENT SUPPORT</span>
-                </div>
-
-                <!-- Arrow -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 group-hover:text-black transition-colors flex-shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white/70 group-hover:text-white transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </a> {% endcomment %}
         </div>
       </div>
     </div>
