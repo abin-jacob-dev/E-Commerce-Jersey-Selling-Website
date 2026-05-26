@@ -1,5 +1,5 @@
 from django import forms
-from products.models import Category, Product, Color
+from products.models import Category, Product
 
 
 class CategoryForm(forms.ModelForm):
@@ -16,7 +16,3 @@ class ProductForm(forms.ModelForm):
         fields = ["name", "category", "description", "highlights", "is_active"]
 
 
-class ColorForm(forms.ModelForm):
-    class Meta:
-        model = Color
-        fields = ["name", "code"]

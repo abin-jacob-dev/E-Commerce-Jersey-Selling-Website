@@ -14,11 +14,6 @@ urlpatterns = [
     path("add-product/", views.add_product, name="add_product"),
     path("edit-product/<slug:slug>", views.edit_product, name="edit_product"),
     path("delete-product/<slug:slug>", views.delete_product, name="delete_product"),
-    # colors
-    path("colors/", views.colors, name="colors"),
-    path("add-color/", views.add_color, name="add_color"),
-    path("edit-color/<id>", views.edit_color, name="edit_color"),
-    path("delete-color/<id>", views.delete_color, name="delete_color"),
     path("all-products", views.all_products, name="all_products"),
     path("product-detail/<slug:slug>/", views.product_detail, name="product_detail"),
     # Cart
@@ -49,7 +44,7 @@ urlpatterns = [
         name="wishlist_to_cart",
     ),
     path(
-        "wishlist-item-to-cart/<int:wishlist_id>/",
+        "wishlist-item-to-cart/<int:variant_id>/",
         views.wishlist_item_to_cart,
         name="wishlist_item_to_cart",
     ),
@@ -95,11 +90,16 @@ urlpatterns = [
         views.cancel_order_item_request,
         name="cancel_order_item_request",
     ),
-    # path(
-    #     "download-invoice/<str:order_id>/",
-    #     views.download_invoice,
-    #     name="download_invoice",
-    # ),
+    path(
+        "view-invoice/<str:order_id>",
+        views.view_invoice,
+        name="view_invoice",
+    ),
+    path(
+        "download-invoice/<str:order_id>/",
+        views.download_invoice,
+        name="download_invoice",
+    ),
     # admin panel side
     path(
         "all-orders",

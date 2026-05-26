@@ -81,9 +81,14 @@
                 <span class="text-[9px] font-black uppercase tracking-widest">Shipping To</span>
               </div>
               <div class="space-y-1 mb-6">
-                <p class="text-sm font-black uppercase tracking-tightest">{{ order.address.full_name }}</p>
-                <p class="text-sm font-black uppercase tracking-tightest">{{ order.address.address_line_1 }}</p>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.address.city }}</p>
+                <p class="text-sm font-black uppercase tracking-tightest">{{ order.full_name }}</p>
+                <p class="text-sm font-black uppercase tracking-tightest">{{ order.phone_number }}</p>
+                <p class="text-sm font-black uppercase tracking-tightest">{{ order.address_line_1 }}</p>
+                <p class="text-sm font-black uppercase tracking-tightest">{{ order.address_line_2 }}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.city }}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.place }}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.state }}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.postal_code }}</p>
               </div>
               <div class="pt-6 border-t border-pink-100">
                 <p class="text-[8px] font-black text-gray-300 uppercase tracking-widest mb-1">Estimated Delivery</p>
@@ -94,7 +99,7 @@
             <!-- Total Paid Box -->
             <div class="bg-[#f1f4f0] p-8 rounded-2xl">
               <span class="text-[9px] font-black text-[#008000] uppercase tracking-widest block mb-2">Total Paid</span>
-              <div class="text-4xl font-black tracking-tightest text-black">₹{{order.total_amount}}</div>
+              <div class="text-4xl font-black tracking-tightest text-black">₹{{ order.total_amount }}</div>
             </div>
           </div>
         </div>
@@ -102,15 +107,17 @@
         <!-- Buttons -->
         <div class="space-y-8 pt-4">
           <div class="flex flex-col sm:flex-row gap-4">
-            <a href="{% url 'products:orders' %}" class="text-center flex-1 bg-[#008000] text-white py-6 rounded-xl font-black uppercase text-[11px] tracking-[0.2em] shadow-xl hover:bg-black transition-all transform hover:-translate-y-1">View Order Details</a href="{% url 'products:orders' %}">
-            <button class="flex-1 bg-[#e9f5db] text-black py-6 rounded-xl font-black uppercase text-[11px] tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#d9e6d1] transition-all">
+            <a href="{% url 'products:orders' %}" class="text-center flex-1 bg-[#008000] text-white py-6 rounded-xl font-black uppercase text-[11px] tracking-[0.2em] shadow-xl hover:bg-black transition-all transform hover:-translate-y-1">View Order Details</a>
+            <a href="{% url 'products:download_invoice' order.order_id %}" class="flex-1 bg-[#e9f5db] text-black py-6 rounded-xl font-black uppercase text-[11px] tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#d9e6d1] transition-all">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-              </svg>Download Invoice
-            </button>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+
+              <span class="leading-none">Download Invoice</span>
+            </a>
           </div>
           <div class="text-center">
-            <a href="{% url "products:all_products" %}" class="text-[10px] font-black uppercase tracking-[0.3em] text-[#008000] hover:underline">Continue Shopping</a>
+            <a href="{% url 'products:all_products' %}" class="text-[10px] font-black uppercase tracking-[0.3em] text-[#008000] hover:underline">Continue Shopping</a>
           </div>
         </div>
       </div>

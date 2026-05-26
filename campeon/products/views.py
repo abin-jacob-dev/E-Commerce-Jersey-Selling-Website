@@ -4,12 +4,11 @@ from django.db import transaction
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from products.forms import CategoryForm, ProductForm, ColorForm
+from products.forms import CategoryForm, ProductForm
 from products.models import (
     Category,
     Product,
     Variant,
-    Color,
     VariantImage,
     Cart,
     CartItem,
@@ -20,15 +19,16 @@ from products.models import (
 from user.models import Addresses
 from django.db.models import Prefetch
 from django.db.models import Min, Q
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from django.template.loader import get_template
 from django.http import HttpResponse
-
-# from xhtml2pdf import pisa
+from userauths.views import superuser_required, user_login_required
+from django.urls import reverse
 
 
 # Create your views here.
+@superuser_required
 def categories(request):
     categories_list = Category.objects.filter(is_deleted=False).order_by("-created_at")
     search_query = request.GET.get("search")
@@ -57,6 +57,7 @@ def categories(request):
     )
 
 
+@superuser_required
 def add_new_category(request):
     form = CategoryForm()
     if request.method == "POST":
@@ -83,6 +84,7 @@ def add_new_category(request):
     )
 
 
+@superuser_required
 def edit_category(request, slug):
     category = get_object_or_404(Category, slug=slug)
     if request.method == "POST":
@@ -100,6 +102,7 @@ def edit_category(request, slug):
     )
 
 
+@superuser_required
 def delete_category(request, slug):
     category = Category.objects.get(slug=slug)
     if request.method == "POST":
@@ -114,46 +117,7 @@ def delete_category(request, slug):
     )
 
 
-def colors(request):
-    colors_list = Color.objects.all().order_by("name")
-    return render(request, "admin/products/colors/colors.html", {"colors": colors_list})
-
-
-def add_color(request):
-    form = ColorForm()
-    if request.method == "POST":
-        form = ColorForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Color added successfully")
-            return redirect("products:colors")
-    return render(request, "admin/products/colors/add_color.html", {"form": form})
-
-
-def edit_color(request, id):
-    color = get_object_or_404(Color, id=id)
-    if request.method == "POST":
-        form = ColorForm(request.POST, instance=color)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Color updated successfully")
-            return redirect("products:colors")
-    else:
-        form = ColorForm(instance=color)
-    return render(
-        request, "admin/products/colors/edit_color.html", {"form": form, "color": color}
-    )
-
-
-def delete_color(request, id):
-    color = get_object_or_404(Color, id=id)
-    if request.method == "POST":
-        color.delete()
-        messages.success(request, "Color deleted successfully")
-        return redirect("products:colors")
-    return render(request, "admin/products/colors/delete_color.html", {"color": color})
-
-
+@superuser_required
 def products_list(request):
     products_queryset = (
         Product.objects.select_related("category")
@@ -198,6 +162,7 @@ def products_list(request):
     return render(request, "admin/products/products/products_list.html", context)
 
 
+@superuser_required
 def add_product(request):
 
     if request.method == "POST":
@@ -215,8 +180,8 @@ def add_product(request):
                 )
 
                 sizes = request.POST.getlist("size")
-                colors = request.POST.getlist("color")
-                skus = request.POST.getlist("sku")
+
+                # skus = request.POST.getlist("sku")
                 prices = request.POST.getlist("price")
                 discounts = request.POST.getlist("discount")
                 stocks = request.POST.getlist("stock")
@@ -229,14 +194,16 @@ def add_product(request):
                     variant_active = (
                         variant_status[i] == "true" if i < len(variant_status) else True
                     )
-
-                    color = Color.objects.get(id=colors[i])
+                    seen_sizes = set()
+                    for size in sizes:
+                        if size in seen_sizes:
+                            messages.error(request, f"Duplicate size:{size}")
+                            return redirect("prdouct:add_product")
 
                     variant = Variant.objects.create(
                         product=product,
                         size=sizes[i],
-                        color=color,
-                        sku=skus[i],
+                        # sku=skus[i],
                         price=prices[i],
                         discount=discount,
                         stock=stock,
@@ -258,18 +225,18 @@ def add_product(request):
             return redirect("products:add_product")
 
     categories = Category.objects.filter(is_active=True)
-    colors = Color.objects.all()
+
     return render(
         request,
         "admin/products/products/add_product.html",
         {
             "categories": categories,
-            "colors": colors,
             "slot_numbers": range(3),
         },
     )
 
 
+@superuser_required
 def edit_product(request, slug):
     product = get_object_or_404(Product, slug=slug)
 
@@ -287,8 +254,8 @@ def edit_product(request, slug):
                 # Process variants
                 variant_ids = request.POST.getlist("variant_id")
                 sizes = request.POST.getlist("size")
-                colors = request.POST.getlist("color")
-                skus = request.POST.getlist("sku")
+
+                # skus = request.POST.getlist("sku")
                 prices = request.POST.getlist("price")
                 discounts = request.POST.getlist("discount")
                 stocks = request.POST.getlist("stock")
@@ -302,18 +269,17 @@ def edit_product(request, slug):
                 processed_variant_ids = []
 
                 for i in range(len(sizes)):
-                    # Get or create color
-                    color_id = colors[i] if i < len(colors) else None
-                    color = (
-                        Color.objects.filter(id=color_id).first() if color_id else None
-                    )
 
                     variant_id = variant_ids[i] if i < len(variant_ids) else None
+                    seen_sizes = set()
+                    for size in sizes:
+                        if size in seen_sizes:
+                            messages.error(request, f"Duplicate size:{size}")
+                            return redirect("prdouct:edit_product")
 
                     variant_data = {
                         "size": sizes[i],
-                        "color": color,
-                        "sku": skus[i],
+                        # "sku": skus[i],
                         "price": prices[i],
                         "discount": discounts[i] if i < len(discounts) else 0,
                         "stock": stocks[i] if i < len(stocks) else 0,
@@ -354,10 +320,9 @@ def edit_product(request, slug):
         except Exception as e:
             print(f"ERROR editing product: {str(e)}")
             messages.error(request, f"Failed to update product: {str(e)}")
-            return redirect("products:edit_product", id=id)
+            return redirect("products:edit_product", slug=product.slug)
 
     categories = Category.objects.filter(is_active=True)
-    colors = Color.objects.all()
     variants = product.variants.all()
     return render(
         request,
@@ -365,12 +330,12 @@ def edit_product(request, slug):
         {
             "product": product,
             "categories": categories,
-            "colors": colors,
             "variants": variants,
         },
     )
 
 
+@superuser_required
 def delete_product(request, slug):
     product = get_object_or_404(Product, slug=slug)
     if request.method == "POST":
@@ -488,25 +453,26 @@ def product_detail(request, slug):
         messages.warning(request, "This product is currently out of stock.")
         return redirect("products:all_products")
 
-    # Get unique colors for the UI selection
-    unique_colors = []
-    seen_color_ids = set()
-    for variant in product.variants.all():
-        if variant.color and variant.color.id not in seen_color_ids:
-            unique_colors.append(variant.color)
-            seen_color_ids.add(variant.color.id)
+    # Find default variant (lowest price with stock)
+    active_variants = [v for v in product.variants.all() if v.stock > 0 and v.is_active]
+    default_variant = (
+        min(active_variants, key=lambda v: v.price)
+        if active_variants
+        else product.variants.first()
+    )
 
     context = {
         "product": product,
-        "unique_colors": unique_colors,
+        "default_variant": default_variant,
     }
     return render(request, "products/product_detail.html", context)
 
 
+@user_login_required
 def cart(request):
     cart_obj, created = Cart.objects.get_or_create(user=request.user)
     items = (
-        cart_obj.items.select_related("variant__product", "variant__color")
+        cart_obj.items.select_related("variant__product")
         .prefetch_related("variant__images")
         .all()
     )
@@ -527,6 +493,7 @@ def cart(request):
     return render(request, "products/cart.html", context)
 
 
+@user_login_required
 def add_to_cart(request):
     if request.method == "POST":
         variant_id = request.POST.get("variant_id")
@@ -595,6 +562,7 @@ def add_to_cart(request):
     return JsonResponse({"status": "error", "message": "Invalid request."})
 
 
+@user_login_required
 def remove_from_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
     cart_item.delete()
@@ -602,6 +570,7 @@ def remove_from_cart(request, item_id):
     return redirect("products:cart")
 
 
+@user_login_required
 def update_cart_quantity(request):
     if request.method == "POST":
         item_id = request.POST.get("item_id")
@@ -641,130 +610,148 @@ def update_cart_quantity(request):
     return JsonResponse({"status": "error", "message": "Invalid request."})
 
 
+@user_login_required
 def wishlist(request):
-    wishlist_items = (
-        Wishlist.objects.filter(
-            user=request.user,
-            product__is_active=True,
-            product__is_deleted=False,
-            product__variants__is_active=True,
-        )
-        .select_related("product", "product__category")
-        .prefetch_related("product__variants__images")
-        .distinct()
-    )
-    total_price = sum(
-        item.product.variants.filter(is_active=True).first().price
-        for item in wishlist_items
-        if item.product.variants.filter(is_active=True).first()
+    wishlist_items = Wishlist.objects.filter(user=request.user).select_related(
+        "variant", "variant__product", "variant__product__category"
     )
     context = {
         "wishlist_items": wishlist_items,
-        "wishlist_count": wishlist_items.count(),
-        "total_price": total_price,
     }
     return render(request, "products/wishlist.html", context)
 
 
+@user_login_required
 def add_to_wishlist(request, slug):
-    product = get_object_or_404(Product, slug=slug)
+    if request.method == "POST":
+        action = request.POST.get("action")
+        variant_id = request.POST.get("variant_id")
+        quantity = int(request.POST.get("quantity", 1))
+        variant = get_object_or_404(Variant, id=variant_id)
 
-    wishlist_item, created = Wishlist.objects.get_or_create(
-        user=request.user, product=product
-    )
+        if action == "cart":
+            cart, created = Cart.objects.get_or_create(user=request.user)
+            cart_item, created = CartItem.objects.get_or_create(
+                cart=cart, variant=variant, defaults={"quantity": quantity}
+            )
+            if not created:
+                cart_item.quantity += quantity
+                cart_item.save()
+            messages.success(request, "Added to Cart")
+            return redirect("products:cart")
 
-    if created:
-        messages.success(request, "Product added to wishlist")
-    else:
-        messages.info(request, "Product already in wishlist")
-    return redirect("products:all_products")
+        elif action == "wishlist":
+            wishlist, created = Wishlist.objects.get_or_create(
+                user=request.user, variant=variant
+            )
+            if created:
+                messages.success(request, "Added to wishlist")
+            else:
+                messages.info(request, "Already in wishlist")
+            return redirect("products:wishlist")
+
+    return redirect("products:product_detail", slug=slug)
 
 
+@user_login_required
 def remove_from_wishlist(request, id):
     item = get_object_or_404(Wishlist, id=id, user=request.user)
     item.delete()
     return redirect("products:wishlist")
 
 
+@user_login_required
 def clear_wishlist(request):
     Wishlist.objects.filter(user=request.user).delete()
+    messages.error(request, "Cleared all from wishlist")
     return redirect("products:wishlist")
 
 
-def wishlist_item_to_cart(request, wishlist_id):
-    wishlist_item = get_object_or_404(Wishlist, id=wishlist_id, user=request.user)
-    product = wishlist_item.product
-    variant = product.variants.filter(is_active=True, stock__gt=0).first()
-    if not variant:
-        messages.error(request, "Prodcut is unavailable.")
-        return redirect("products:wishlist")
+@user_login_required
+def wishlist_item_to_cart(request, variant_id):
+    wishlist_item = get_object_or_404(
+        Wishlist, user=request.user, variant_id=variant_id
+    )
     cart, _ = Cart.objects.get_or_create(user=request.user)
     cart_item, created = CartItem.objects.get_or_create(
-        cart=cart,
-        variant=variant,
-        defaults={"quantity": 1},
+        cart=cart, variant_id=variant_id, defaults={"quantity": 1}
     )
-    if not created:
+    if not created:  # item alread in cart exist
         if cart_item.quantity >= 5:
-            messages.error(request, "Maximum quantity limit reached.")
-        return redirect("products:wishlist")
-        if variant.stock <= cart_item.quantity:
-            messages.error(request, "Not enough stock available.")
+            messages.warning(request, "Maximum Item quantity reached.")
             return redirect("products:wishlist")
         cart_item.quantity += 1
         cart_item.save()
-    wishlist_item.delete()
-    messages.success(request, "Item moved to Cart.")
+        messages.success(request, "Item quantity updated")
+    else:
+        messages.success(request, "Item moved to Cart Successfully")
+        cart_item.quantity = 1
+        cart_item.save()
+
+    Wishlist.objects.filter(user=request.user, variant_id=variant_id).delete()
+
     return redirect("products:cart")
 
 
+@user_login_required
 def wishlist_to_cart(request):
     wishlist_items = Wishlist.objects.filter(user=request.user)
     if not wishlist_items.exists():
         messages.error(request, "Wishlist is empty")
         return redirect("products:wishlist")
-    cart, _ = Cart.objects.get_or_create(user=request.user)
-    moved_count = 0
-    with transaction.atomic():
-        for item in wishlist_items:
-            product = item.product
-            variant = product.variants.filter(is_active=True, stock__gt=0).first()
-
-            if not variant:
+    added_count = 0
+    skipped_count = 0
+    for item in wishlist_items:
+        variant = item.variant
+        if not variant.is_active:
+            skipped_count += 1
+            continue
+        if variant.stock <= 0:
+            skipped_count += 1
+            continue
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        cart_items, created = CartItem.objects.get_or_create(
+            cart=cart, variant=variant, defaults={"quantity": 1}
+        )
+        if not created:
+            if cart_items.quantity >= 5:
+                skipped_count += 1
                 continue
+            else:
+                cart_items.quantity += 1
+        else:
+            cart_items.quantity = 1
+        cart_items.save()
+        added_count += 1
+        item.delete()
 
-            cart_item, created = CartItem.objects.get_or_create(
-                cart=cart,
-                variant=variant,
-                defaults={"quantity": 1},
-            )
-
-            if not created:
-                if cart_item.quantity >= 5:
-                    continue
-                if variant.stock <= cart_item.quantity:
-                    continue
-                cart_item.quantity += 1
-                cart_item.save()
-            moved_count += 1
-
-        wishlist_items.delete()
-    messages.success(request, f"{moved_count} item(s) moved to cart successfully.")
+    if added_count > 0:
+        messages.success(request, f"{added_count} item(s) moved to cart")
+    if skipped_count > 0:
+        messages.warning(request, f"{skipped_count} item(s) not added to cart")
 
     return redirect("products:cart")
 
 
+@user_login_required
 def checkout(request):
+
     cart, _ = Cart.objects.get_or_create(user=request.user)
 
     items = cart.items.select_related(
-        "variant__product", "variant__color"
+        "variant__product",
     ).prefetch_related("variant__images")
 
-    addresses = Addresses.objects.filter(user=request.user)
+    addresses = Addresses.objects.filter(user=request.user).order_by(
+        "-is_default", "-created_at"
+    )
     if not items.exists():
         messages.error(request, "Your Cart is empty.")
         return redirect("products:cart")
+    if not addresses.exists():
+        next_url = request.path
+        add_address_url = reverse("user:add_address")
+        return redirect(f"{add_address_url}?next={next_url}")
 
     if request.method == "POST":
         address_id = request.POST.get("selected_address")
@@ -779,11 +766,12 @@ def checkout(request):
     return render(request, "products/checkout.html", context)
 
 
+@user_login_required
 def select_payment(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
 
     cart_items = cart.items.select_related(
-        "variant__product", "variant__color"
+        "variant__product",
     ).prefetch_related("variant__images")
     if not cart_items.exists():
         messages.error(request, "Your cart is empty")
@@ -807,7 +795,14 @@ def select_payment(request):
         with transaction.atomic():
             order = Order.objects.create(
                 user=request.user,
-                address=address,
+                full_name=address.full_name,
+                phone_number=address.phone_number,
+                address_line_1=address.address_line_1,
+                address_line_2=address.address_line_2,
+                city=address.city,
+                place=address.place,
+                state=address.state,
+                postal_code=address.postal_code,
                 payment_method=payment_method,
                 subtotal=subtotal,
                 shipping=shipping,
@@ -821,7 +816,6 @@ def select_payment(request):
                     variant=item.variant,
                     product_name=item.variant.product.name,
                     size=item.variant.size,
-                    color=item.variant.color.name if item.variant.color else "",
                     price=item.variant.price,
                     quantity=item.quantity,
                     subtotal=item.subtotal,
@@ -854,6 +848,7 @@ def select_payment(request):
     return render(request, "products/select_payment.html", context)
 
 
+@user_login_required
 def payment_successful(request, order_id):
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
 
@@ -865,6 +860,7 @@ def payment_successful(request, order_id):
     return render(request, "products/payment_successful.html", context)
 
 
+@user_login_required
 def orders(request):
 
     orders_list = Order.objects.filter(user=request.user).order_by("-created_at")
@@ -879,6 +875,7 @@ def orders(request):
     return render(request, "user/orders/orders.html", context)
 
 
+@user_login_required
 def order_details(request, order_id):
     order = get_object_or_404(Order, user=request.user, order_id=order_id)
     expected_delivery = order.created_at + timedelta(days=5)
@@ -891,12 +888,14 @@ def return_order(request):
     pass
 
 
+@user_login_required
 def cancel_order_item(request, item_id):
     item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
     context = {"item": item, "order": item.order}
     return render(request, "user/orders/cancel_request.html", context)
 
 
+@user_login_required
 @transaction.atomic
 def cancel_order_item_request(request, item_id):
     item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
@@ -933,16 +932,36 @@ def cancel_order_item_request(request, item_id):
     return redirect("products:order_details", order_id=order.order_id)
 
 
+# @user_login_required
 # def download_invoice(request, order_id):
 #     order = get_object_or_404(Order, order_id=order_id, user=request.user)
-#     template = get_template("user/orders/order_invoice_pdf.html")
-#     invoice = template.render({"order": order})
-#     response = HttpResponse(content_type="application/pdf")
-#     response["Content-Disposition"] = f"attachemnt;filename=ORD-{order.order_id}.pdf"
-#     pisa.CreatePDF(html, dest=response)
+
 #     return response
 
 
+def view_invoice(request, order_id):
+    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+    context = {"order": order}
+    return render(request, "user/orders/order_invoice.html", context)
+
+
+def download_invoice(request, order_id):
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items__variant__images").select_related("user"),
+        order_id=order_id,
+        user=request.user,
+    )
+    items = order.items.select_related("variant__product__category").prefetch_related(
+        "variant__images"
+    )
+    context = {
+        "order": order,
+        "items": items,
+    }
+    return render(request, "user/orders/order_invoice_pdf.html", context)
+
+
+@superuser_required
 def all_orders(request):
     orders_list = Order.objects.all().order_by("-created_at")
     search_query = request.GET.get("search")
@@ -955,6 +974,7 @@ def all_orders(request):
     return render(request, "admin/orders/all_orders.html", context)
 
 
+@superuser_required
 def order_view(request, order_id):
     order = get_object_or_404(
         Order.objects.select_related("user").prefetch_related(

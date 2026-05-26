@@ -129,31 +129,41 @@
           <!-- Product 1 -->
           {% for product in products %}
             <div class="group">
-              <div class="bg-gray-50 aspect-[4/5] rounded-sm relative overflow-hidden mb-6">
-                <img src="{{ product.get_primary_image }}" class="w-full h-full object-cover group-hover:grayscale-0 transition-all duration-500" />
-                
-                <a href="{% url "products:add_to_wishlist" product.slug %}" class="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                  </svg>
-                </a>
-                 </a>
-                {% comment %} <div class="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                  <button class="w-full bg-lime-bright text-black font-black uppercase py-4 flex items-center justify-center gap-3 text-[13px] tracking-widest shadow-xl">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                    </svg>select options
-                  </button>
-                </div> {% endcomment %}
-              </div>
-              <div class="flex justify-between items-start">
-                <div>
-                  <span class="text-[12px] font-black uppercase tracking-widest text-gray-300 block mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-lime-dark rounded-full"></div>{{ product.category }}</span>
-                  <h4 class="text-xl font-black uppercase tracking-tighter leading-tight group-hover:text-lime-dark transition-colors tracking-tightest"><a href="{% url "products:product_detail" product.slug %}">{{ product.name }}</a></h4>
-                </div>
-                <span class="text-xl font-black">₹{{ product.min_price }}</span>
-              </div>
-            </div>
+
+  <!-- Clickable Image -->
+  <a href="{% url 'products:product_detail' product.slug %}">
+    <div class="bg-gray-50 aspect-[4/5] rounded-sm relative overflow-hidden mb-6">
+      <img src="{{ product.get_primary_image }}"
+           class="w-full h-full object-cover group-hover:grayscale-0 transition-all duration-500" />
+
+      <a href="{% url 'products:add_to_wishlist' product.slug %}"
+         class="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+          </path>
+        </svg>
+      </a>
+    </div>
+  </a>
+
+  <div class="flex justify-between items-start">
+    <div>
+      <span class="text-[12px] font-black uppercase tracking-widest text-gray-300 block mb-2 flex items-center gap-2">
+        <div class="w-1.5 h-1.5 bg-lime-dark rounded-full"></div>
+        {{ product.category }}
+      </span>
+
+      <h4 class="text-xl font-black uppercase tracking-tighter leading-tight group-hover:text-lime-dark transition-colors tracking-tightest">
+        <a href="{% url 'products:product_detail' product.slug %}">
+          {{ product.name }}
+        </a>
+      </h4>
+    </div>
+
+    <span class="text-xl font-black">₹{{ product.min_price }}</span>
+  </div>
+</div>
           {% endfor %}
         </div>
 

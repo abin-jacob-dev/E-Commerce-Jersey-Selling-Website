@@ -57,37 +57,51 @@
 
     {% if item.status == 'pending' %}
                         
+                        
       bg-black-100 text-black-700
+
 
 
                       {% elif item.status == 'processing' %}
                         
+                        
       bg-black-100 text-black-700
+
 
 
                       {% elif item.status == 'shipped' %}
                         
+                        
       bg-black-100 text-black-700
+
 
 
                       {% elif item.status == 'out_for_delivery' %}
                         
+                        
       bg-black-100 text-black-700
+
 
 
                       {% elif item.status == 'delivered' %}
                         
+                        
       bg-black-100 text-black-700
+
 
 
                       {% elif item.status == 'cancelled' %}
                         
+                        
       bg-black-100 text-red-700
+
 
 
                       {% else %}
                         
+                        
       bg-gray-100 text-gray-700
+
 
                       {% endif %}
   ">
@@ -129,11 +143,21 @@
           <div class="bg-white p-6 rounded-3xl">
             <h3 class="font-black uppercase mb-4">Delivery Address</h3>
 
-            <p class="font-black">{{ order.address.full_name }}</p>
+            <p class="font-black">{{ order.full_name }}</p>
+            <p class="font-black">{{ order.phone_number }}</p>
+
             <p class="text-gray-500 text-sm">
-              {{ order.address.address_line_1 }}<br />
-              {{ order.address.city }}, {{ order.address.state }} {{ order.address.zip_code }}<br />
-              {{ order.address.country }}
+              {{ order.address_line_1 }}<br />
+
+              {% if order.address_line_2 %}
+                {{ order.address_line_2 }}<br />
+              {% endif %}
+
+              {{ order.city }}, {{ order.state }} {{ order.postal_code }}<br />
+
+              {% if order.place %}
+                {{ order.place }}
+              {% endif %}
             </p>
 
             <div class="mt-6 text-sm">
@@ -144,17 +168,23 @@
               <p class="font-black
               {% if order.payment_status == 'paid' %}
                   
+                  
                   text-green-600
+
 
 
                 {% elif order.payment_status == 'failed' %}
                   
+                  
                   text-red-600
+
 
 
                 {% else %}
                   
+                  
                   text-gray-600
+
 
                 {% endif %}">{{ order.get_payment_status_display }}</p>
             </div>

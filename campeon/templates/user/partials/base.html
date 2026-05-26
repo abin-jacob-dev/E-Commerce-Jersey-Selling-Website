@@ -11,53 +11,50 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
     {% comment %} <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" /> {% endcomment %}
   </head>
+  {% include 'user/partials/alert.html' %}
   <body class="bg-white text-black font-montserrat antialiased">
     <!-- Header -->
     <header class="border-b border-gray-100 sticky top-0 bg-white z-50">
-      <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-        <nav class="hidden md:flex space-x-6 text-sm font-bold uppercase tracking-wider">
+      <div class="max-w-screen-2xl mx-auto px-6 py-4 grid grid-cols-[1fr_auto_1fr] items-center gap-6">
+        <!-- Left Nav -->
+        <nav class="hidden lg:flex flex-nowrap items-center gap-6 text-sm font-bold uppercase tracking-wider min-w-max">
           <a href="{% url 'core:home' %}" class="hover:text-lime transition-colors">Home</a>
           <a href="{% url 'products:all_products' %}" class="hover:text-lime transition-colors">Shop</a>
           <a href="{% url 'core:contact' %}" class="hover:text-lime transition-colors">Contact</a>
           <a href="{% url 'core:about' %}" class="hover:text-lime transition-colors">About us</a>
-          <a href="{% url 'user:profile' %}" class="hover:text-lime transition-colors">Account</a>
+          {% comment %} <a href="{% url 'user:profile' %}" class="hover:text-lime transition-colors">Account</a> {% endcomment %}
         </nav>
 
-        <div class="flex-1 flex justify-center">
-          <h1 class="text-2xl font-black uppercase tracking-tighter tracking-tightest">campeon</h1>
+        <!-- Center Logo -->
+        <div class="flex justify-center px-4">
+          <h1 class="text-2xl font-black uppercase tracking-tight">campeon</h1>
         </div>
 
-        <div class="flex items-center space-x-4">
-          {% comment %} <div class="relative hidden sm:block">
-            <input type="text" placeholder="Search products..." class="bg-gray-100 rounded-full px-4 py-1 text-sm focus:outline-none w-48 focus:ring-2 focus:ring-lime/20" />
-            <button class="absolute right-3 top-1/2 -translate-y-1/2">
-              <svg class="w-4 h-4 text-black-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </button>
-          </div> {% endcomment %}
-          <div class="flex items-center space-x-3">
-            <a href="">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
-            </a>
-            <a href="#">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-              </svg>
-            </a>
-            <a href="{% url 'products:cart' %}" class="relative">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-              </svg>
-              <span class="absolute -top-2 -right-2 bg-lime text-black text-[13px] font-bold w-4 h-4 rounded-full flex items-center justify-center">3</span>
-            </a>
-          </div>
+        <!-- Right Icons -->
+        <div class="flex justify-end items-center gap-4">
+          <a href="{% url 'user:profile' %}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7"></path>
+            </svg>
+          </a>
+
+          <a href="{% url 'products:wishlist' %}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0"></path>
+            </svg>
+          </a>
+
+          <a href="{% url 'products:cart' %}" class="relative">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9"></path>
+            </svg>
+            {% if global_cart_count > 0 %}
+              <span class="absolute -top-2 -right-2 bg-lime-400 text-black text-[11px] font-bold w-4 h-4 rounded-full flex items-center justify-center">{{ global_cart_count }}</span>
+            {% endif %}
+          </a>
         </div>
       </div>
     </header>
-
     <div class="flex">
       <!-- Sidebar -->
       <aside class="w-64 bg-white border-r border-gray-100 min-h-[calc(100vh-80px)] p-8">
@@ -67,12 +64,12 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>Profile
           </a>
-          <a href="{% url "products:orders" %}" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-black-400 hover:text-black">
+          <a href="{% url 'products:orders' %}" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-black-400 hover:text-black">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>Orders
           </a>
-          <a href="#" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-black-400 hover:text-black">
+          <a href="{% url 'products:wishlist' %}" class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-black-400 hover:text-black">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
             </svg>Wishlist
@@ -108,8 +105,8 @@
 
       {% endblock %}
     </div>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+    {% comment %} <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script> {% endcomment %}
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
   </body>

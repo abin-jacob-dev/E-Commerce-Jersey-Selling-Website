@@ -33,13 +33,7 @@
                       <span class="text-[8px] font-black uppercase tracking-widest text-gray-400">SKU</span>
                       <span class="text-[10px] font-black uppercase">{{ item.variant.sku }}</span>
                     </div>
-                    <div class="flex flex-col">
-                      <span class="text-[8px] font-black uppercase tracking-widest text-gray-400">Edition</span>
-                      <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full border border-gray-100" style="background-color: {{ item.variant.color.code }};"></div>
-                        <span class="text-[10px] font-black uppercase">{{ item.variant.color.name }}</span>
-                      </div>
-                    </div>
+                    
                     <div class="flex flex-col">
                       <span class="text-[8px] font-black uppercase tracking-widest text-gray-400">Size</span>
                       <span class="text-[10px] font-black uppercase">{{ item.variant.get_size_display }}</span>

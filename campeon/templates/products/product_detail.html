@@ -8,8 +8,6 @@
     {% for variant in product.variants.all %}
     {
       "id": {{ variant.id }},
-      "color": "{{ variant.color.name|default:'' }}",
-      "color_id": "{{ variant.color.id|default:'' }}",
       "size": "{{ variant.size }}",
       "price": "{{ variant.price }}",
       "stock": {{ variant.stock }}
@@ -29,7 +27,7 @@
         <div class="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible" id="thumbnailGallery">
           {% for variant in product.variants.all %}
             {% for image in variant.images.all %}
-              <div class="thumb-wrapper min-w-[60px] w-16 h-16 sm:w-20 sm:h-20 border border-gray-200 rounded-sm overflow-hidden cursor-pointer flex-shrink-0" data-color-id="{{ variant.color.id }}">
+              <div data-variant-id="{{ variant.id }}" class="thumb-wrapper min-w-[60px] w-16 h-16 sm:w-20 sm:h-20 border border-gray-200 rounded-sm overflow-hidden cursor-pointer flex-shrink-0">
                 <img src="{{ image.image.url }}" onclick="changeImage(this)" class="thumb w-full h-full object-cover opacity-60 hover:opacity-100 transition cursor-pointer" />
               </div>
             {% endfor %}
@@ -48,30 +46,16 @@
 
       <!-- Product Info -->
       <div class="flex-1">
-        {% comment %} <span class="text-[10px] font-black uppercase tracking-[0.3em] text-lime-dark mb-3 block">New Release</span> {% endcomment %}
+        <span class="text-[10px] font-black uppercase tracking-[0.3em] text-lime-dark mb-3 block">{{ product.category.name }}</span>
 
         <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black uppercase leading-tight mb-6 break-words">{{ product.name }}</h2>
 
         <div class="flex flex-wrap items-center gap-3 mb-8">
-          <span id="productPrice" class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ product.variants.first.price }}</span>
+          <span id="productPrice" class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ default_variant.price }}</span>
           <p id="stockStatus" class="text-xs font-bold text-gray-400 mt-2"></p>
-          {% comment %} <span class="bg-red-50 text-red-500 text-[9px] font-black uppercase px-3 py-1 rounded-sm">Limited Edition</span> {% endcomment %}
         </div>
 
         <div class="space-y-10">
-          <div>
-            <div class="flex justify-between items-end mb-4">
-              <h3 class="text-[10px] font-black uppercase tracking-widest tracking-tightest">Select Edition</h3>
-              <span id="colorName" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Choose</span>
-            </div>
-
-            <div class="flex gap-4">
-              {% for color in unique_colors %}
-                <div onclick="selectColor('{{ color.id }}', this)" data-color-name="{{ color.name }}" class="color-btn w-10 h-10 rounded-lg border cursor-pointer" style="background-color: {{ color.code }};"></div>
-              {% endfor %}
-            </div>
-          </div>
-
           <div>
             <div class="flex justify-between items-end mb-4">
               <h3 class="text-[10px] font-black uppercase tracking-widest tracking-tightest">Select Size</h3>
@@ -86,25 +70,27 @@
             </div>
           </div>
 
-          <div class="flex gap-4">
+          <form method="POST" id="addToCartForm" action="{% url "products:add_to_wishlist" product.slug %}" class="flex gap-4" onsubmit="return submitCartForm(event)">
+            {% csrf_token %}
+            <input type="hidden" name="variant_id" id="formVariantId" />
+            <input type="hidden" name="quantity" id="formQuantity" />
+
             <div class="bg-white border border-gray-100 rounded-lg flex items-center px-6 py-4 shadow-sm">
-              <button onclick="decrementQty()" class="text-xl px-4">-</button>
+              <button type="button" onclick="decrementQty()" class="text-xl px-4">-</button>
               <span id="qtyDisplay" class="px-6 font-black">1</span>
-              <button onclick="incrementQty()" class="text-xl px-4">+</button>
+              <button type="button" onclick="incrementQty()" class="text-xl px-4">+</button>
             </div>
-            <button onclick="addToCart()" class="flex-1 bg-lime-dark text-white font-black uppercase py-4 rounded-lg shadow-xl hover:bg-black transition flex items-center justify-center gap-2">
+            <button name="action" value="cart" type="submit" class="flex-1 bg-lime-dark text-white font-black uppercase py-4 rounded-lg shadow-xl hover:bg-black transition flex items-center justify-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
               </svg>ADD TO CART
             </button>
-            <a href="{% url "products:add_to_wishlist" product.slug %}">
-            <button class="p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                </svg>
-              </button>
-            </a>
-          </div>
+            <button name="action" value="wishlist" type="submit" name="add_to_wishlist" class="p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+              </svg>
+            </button>
+          </form>
 
           <div class="pt-8 border-t border-gray-100 flex items-center gap-4">
             <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
@@ -123,34 +109,32 @@
 
     <!-- Tech Section -->
     <div class="mb-32">
-      <h3 class="text-4xl font-black uppercase tracking-tighter mb-12 tracking-tightest">ELITE PERFORMANCE TECH</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-12 rounded-[2rem] shadow-sm relative overflow-hidden group">
-          <svg class="w-8 h-8 text-lime-dark mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-          <h4 class="text-xl font-black uppercase tracking-tighter mb-4 tracking-tightest">ELITE-WICK FABRIC</h4>
-          <p class="text-xs font-medium text-gray-500 leading-relaxed">Micro-perforated channels pull moisture away from the body 40% faster than standard synthetic blends.</p>
-        </div>
-        <div class="bg-white p-12 rounded-[2rem] shadow-sm relative overflow-hidden group">
-          <svg class="w-8 h-8 text-lime-dark mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
-          </svg>
-          <h4 class="text-xl font-black uppercase tracking-tighter mb-4 tracking-tightest">KINETIC TAILORING</h4>
-          <p class="text-xs font-medium text-gray-500 leading-relaxed">Laser-cut seams and articulated joints provide total freedom of movement without excess weight.</p>
-        </div>
-        <div class="bg-white p-12 rounded-[2rem] shadow-sm relative overflow-hidden group">
-          <svg class="w-8 h-8 text-lime-dark mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
-          </svg>
-          <h4 class="text-xl font-black uppercase tracking-tighter mb-4 tracking-tightest">CIRCULAR SOURCING</h4>
-          <p class="text-xs font-medium text-gray-500 leading-relaxed">Crafted from 100% ocean-bound plastic resins, reducing carbon footprint while maintaining elite durability.</p>
-        </div>
+      <h3 class="text-4xl font-black uppercase tracking-tighter mb-12 tracking-tightest">PRODUCT DETAILS</h3>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {% if product.description %}
+          <div class="bg-white p-12 rounded-[2rem] shadow-sm relative overflow-hidden group">
+            <svg class="w-8 h-8 text-lime-dark mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <h4 class="text-xl font-black uppercase tracking-tighter mb-4 tracking-tightest">DESCRIPTION</h4>
+            <div class="text-sm font-medium text-gray-500 leading-relaxed prose prose-sm max-w-none">{{ product.description|linebreaks }}</div>
+          </div>
+        {% endif %}
+
+        {% if product.highlights %}
+          <div class="bg-white p-12 rounded-[2rem] shadow-sm relative overflow-hidden group">
+            <svg class="w-8 h-8 text-lime-dark mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h4 class="text-xl font-black uppercase tracking-tighter mb-4 tracking-tightest">HIGHLIGHTS</h4>
+            <div class="text-sm font-medium text-gray-500 leading-relaxed prose prose-sm max-w-none list-disc list-inside">{{ product.highlights|linebreaks }}</div>
+          </div>
+        {% endif %}
       </div>
     </div>
 
     <!-- Reviews Section -->
-    <div>
+    {% comment %} <div>
       <div class="flex justify-between items-end mb-12">
         <div>
           <h3 class="text-5xl font-black uppercase tracking-tighter mb-4 tracking-tightest">CUSTOMER REVIEWS</h3>
@@ -262,85 +246,60 @@
       <div class="mt-20 text-center">
         <button class="text-xs font-black uppercase tracking-widest text-[#00a300] border-b-2 border-[#00a300] pb-2 hover:text-black hover:border-black transition-all">READ ALL 128 REVIEWS</button>
       </div>
-    </div>
+    </div> {% endcomment %}
   </main>
 
   <script>
-    const variants = JSON.parse(document.getElementById('variantData').textContent);
-    let selectedColor = null;
-    let selectedSize = null;
-    let selectedVariant = null;
-    let driftInstance = null;
+  const variants = JSON.parse(document.getElementById('variantData').textContent);
+  let selectedSize = null;
+  let selectedVariant = null;
+  let driftInstance = null;
 
-    function initDrift() {
-      const img = document.getElementById('mainImage');
-      if (!img) return;
-      if (driftInstance) driftInstance.destroy();
+  function initDrift() {
+    const img = document.getElementById('mainImage');
+    if (!img) return;
+    if (driftInstance) driftInstance.destroy();
 
-      driftInstance = new Drift(img, {
-        paneContainer: document.querySelector('#zoomPane'),
-        inlinePane: false,
-        containInline: false,
-        hoverBoundingBox: true,
-        hoverBoundingBoxClass: 'drift-bounding-box bg-lime-400/20 border-2 border-lime-400 cursor-crosshair z-50',
-        zoomPaneClass: 'drift-zoom-pane z-[100] bg-white shadow-2xl border border-gray-100 rounded-2xl overflow-hidden w-full h-full',
-        zoomFactor: 2.5,
-        handleTouch: true,
-        onShow: () => { if (window.innerWidth >= 1024) document.querySelector('#zoomPane').classList.remove('hidden') },
-        onHide: () => { document.querySelector('#zoomPane').classList.add('hidden') }
-      });
-    }
+    driftInstance = new Drift(img, {
+      paneContainer: document.querySelector('#zoomPane'),
+      inlinePane: false,
+      containInline: false,
+      hoverBoundingBox: true,
+      hoverBoundingBoxClass: 'drift-bounding-box bg-lime-400/20 border-2 border-lime-400 cursor-crosshair z-50',
+      zoomPaneClass: 'drift-zoom-pane z-[100] bg-white shadow-2xl border border-gray-100 rounded-2xl overflow-hidden w-full h-full',
+      zoomFactor: 2.5,
+      handleTouch: true,
+      onShow: () => { if (window.innerWidth >= 1024) document.querySelector('#zoomPane').classList.remove('hidden') },
+      onHide: () => { document.querySelector('#zoomPane').classList.add('hidden') }
+    });
+  }
 
-    function selectColor(colorId, el) {
-      selectedColor = colorId;
-      selectedSize = null;
-      selectedVariant = null;
 
-      // UI highlight
-      document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-dark-lime'));
-      if (el) el.classList.add('ring-2', 'ring-dark-lime');
 
-      // Update color name
-      if (el) document.getElementById('colorName').innerText = el.dataset.colorName;
+  function selectSize(size, el) {
+    selectedSize = size;
+    document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('bg-lime-dark', 'text-white'));
+    el.classList.add('bg-lime-dark', 'text-white');
 
-      // Filter Thumbnails
-      const thumbs = document.querySelectorAll('.thumb-wrapper');
-      let firstThumb = null;
-      thumbs.forEach(thumb => {
-        if (thumb.dataset.colorId === colorId) {
-          thumb.style.display = 'block';
-          if (!firstThumb) firstThumb = thumb.querySelector('img');
-        } else {
-          thumb.style.display = 'none';
-        }
-      });
+    selectedVariant = variants.find(v => v.size == selectedSize);
+    if (selectedVariant) {
+      document.getElementById('productPrice').innerText = `₹${selectedVariant.price}`;
 
-      if (firstThumb) changeImage(firstThumb);
-      updateSizes();
-      document.getElementById('productPrice').innerText = '--';
-    }
-
-    function selectSize(size, el) {
-      selectedSize = size;
-      document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('bg-lime-dark', 'text-white'));
-      el.classList.add('bg-lime-dark', 'text-white');
-
-      selectedVariant = variants.find(v => v.color_id == selectedColor && v.size == selectedSize);
-      if (selectedVariant) {
-        document.getElementById('productPrice').innerText = `₹${selectedVariant.price}`;
-
-        const stockText = selectedVariant.stock > 5
-          ? "In stock"
-          : selectedVariant.stock > 0
+      const stockText = selectedVariant.stock > 5
+        ? "In stock"
+        : selectedVariant.stock > 0
           ? `Only ${selectedVariant.stock} left`
           : "Out of stock";
 
-        document.getElementById('stockStatus').innerText = stockText;
-      }
+      document.getElementById('stockStatus').innerText = stockText;
+      updateGallery();
     }
-    function updateAddToCartState() {
-      const btn = document.querySelector('[onclick="addToCart()"]');
+    updateAddToCartState();
+  }
+  function updateAddToCartState() {
+    const btn = document.querySelector('#addToCartForm button[type="submit"]');
 
+    if (btn) {
       if (!selectedVariant || selectedVariant.stock === 0) {
         btn.disabled = true;
         btn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -349,109 +308,116 @@
         btn.classList.remove('opacity-50', 'cursor-not-allowed');
       }
     }
-    function updateSizes() {
-      const sizeButtons = document.querySelectorAll('.size-btn');
+  }
 
-      sizeButtons.forEach(btn => {
-        const size = btn.dataset.size;
-        const variant = variants.find(v => v.color_id == selectedColor && v.size == size);
+  function updateGallery() {
+    const wrappers = document.querySelectorAll('.thumb-wrapper');
+    let firstVisibleThumb = null;
 
-        btn.classList.remove('bg-lime-dark', 'text-white');
-        btn.disabled = false;
-
-        if (!variant) {
-          btn.disabled = true;
-          btn.classList.add('opacity-30');
-          btn.title = "Unavailable";
-        } 
-        else if (variant.stock === 0) {
-          btn.disabled = true;
-          btn.classList.add('opacity-30', 'line-through');
-          btn.title = "Out of stock";
-        } 
-        else {
-          btn.classList.remove('opacity-30', 'line-through');
-          btn.title = "In stock";
+    wrappers.forEach(wrapper => {
+      if (selectedVariant && wrapper.dataset.variantId == selectedVariant.id) {
+        wrapper.classList.remove('hidden');
+        if (!firstVisibleThumb) {
+          firstVisibleThumb = wrapper.querySelector('.thumb');
         }
-      });
-    }
-
-    
-    function changeImage(el) {
-      const mainImage = document.getElementById('mainImage');
-      mainImage.src = el.src;
-      mainImage.setAttribute('data-zoom', el.src);
-      initDrift();
-
-      document.querySelectorAll('.thumb').forEach(img => {
-        img.classList.remove('opacity-100');
-        img.parentElement.classList.remove('border-dark-lime');
-        img.classList.add('opacity-60');
-      });
-      el.classList.add('opacity-100');
-      el.parentElement.classList.add('border-dark-lime');
-    }
-
-    let quantity = 1;
-
-    function incrementQty() {
-      if (quantity < 5) {
-        if (selectedVariant && quantity >= selectedVariant.stock) {
-           alert("Cannot exceed available stock");
-           return;
-        }
-        quantity++;
-        document.getElementById('qtyDisplay').innerText = quantity;
       } else {
-        alert("Maximum 5 items allowed");
+        wrapper.classList.add('hidden');
       }
-    }
-
-    function decrementQty() {
-      if (quantity > 1) {
-        quantity--;
-        document.getElementById('qtyDisplay').innerText = quantity;
-      }
-    }
-
-    function addToCart() {
-      if (!selectedColor) return alert('Please select a color');
-      if (!selectedSize) return alert('Please select a size');
-
-      if (!selectedVariant) {
-        return alert('This combination is unavailable');
-      }
-
-      if (selectedVariant.stock === 0) {
-        return alert('This item is out of stock');
-      }
-
-      const formData = new FormData();
-      formData.append('variant_id', selectedVariant.id);
-      formData.append('quantity', quantity);
-      formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-      fetch('{% url "products:add_to_cart" %}', {
-        method: 'POST',
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'error') {
-          alert(data.message);
-        } else {
-          alert('Added to cart successfully!');
-          window.location.href = "{% url 'products:cart' %}";
-        }
-      })
-      .catch(() => alert('Something went wrong'));
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      initDrift();
-      // Auto-select first color
-      const firstColor = document.querySelector('.color-btn');
-      if (firstColor) firstColor.click();
     });
-  </script>
+
+    if (firstVisibleThumb) {
+      changeImage(firstVisibleThumb);
+    }
+  }
+  function updateSizes() {
+    const sizeButtons = document.querySelectorAll('.size-btn');
+
+    sizeButtons.forEach(btn => {
+      const size = btn.dataset.size;
+      const variant = variants.find(v => v.size == size);
+
+      btn.classList.remove('bg-lime-dark', 'text-white');
+      btn.disabled = false;
+
+      if (!variant) {
+        btn.disabled = true;
+        btn.classList.add('opacity-30');
+        btn.title = "Unavailable";
+      }
+      else if (variant.stock === 0) {
+        btn.disabled = true;
+        btn.classList.add('opacity-30', 'line-through');
+        btn.title = "Out of stock";
+      }
+      else {
+        btn.classList.remove('opacity-30', 'line-through');
+        btn.title = "In stock";
+      }
+    });
+  }
+
+
+  function changeImage(el) {
+    const mainImage = document.getElementById('mainImage');
+    mainImage.src = el.src;
+    mainImage.setAttribute('data-zoom', el.src);
+    initDrift();
+
+    document.querySelectorAll('.thumb').forEach(img => {
+      img.classList.remove('opacity-100');
+      img.parentElement.classList.remove('border-lime-dark');
+      img.classList.add('opacity-60');
+    });
+    el.classList.add('opacity-100');
+    el.parentElement.classList.add('border-lime-dark');
+  }
+
+  let quantity = 1;
+
+  function incrementQty() {
+    if (quantity < 5) {
+      if (selectedVariant && quantity >= selectedVariant.stock) {
+        alert("Cannot exceed available stock");
+        return;
+      }
+      quantity++;
+      document.getElementById('qtyDisplay').innerText = quantity;
+    } else {
+      alert("Maximum 5 items allowed");
+    }
+  }
+
+  function decrementQty() {
+    if (quantity > 1) {
+      quantity--;
+      document.getElementById('qtyDisplay').innerText = quantity;
+    }
+  }
+
+  function submitCartForm(e) {
+    if (!selectedSize) {
+      alert('Please select a size');
+      e.preventDefault();
+      return false;
+    }
+
+    if (selectedVariant && selectedVariant.stock === 0) {
+      alert('This item is out of stock');
+      e.preventDefault();
+      return false;
+    }
+
+    document.getElementById('formVariantId').value = selectedVariant.id;
+    document.getElementById('formQuantity').value = quantity;
+    return true;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initDrift();
+    updateSizes();
+
+    const defaultBtn = document.querySelector('.size-btn[data-size="{{ default_variant.size }}"]');
+    if (defaultBtn) defaultBtn.click();
+  });
+</script>
 {% endblock %}

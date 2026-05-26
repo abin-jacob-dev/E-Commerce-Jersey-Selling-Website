@@ -1,112 +1,170 @@
-<body class="bg-gray-50 min-h-screen py-20 px-4 font-montserrat antialiased">
-  <div class="max-w-4xl mx-auto bg-white p-12 md:p-20 shadow-2xl rounded-sm print-border">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
-      <div>
-        <h1 class="text-4xl font-black uppercase italic tracking-tighter mb-2 tracking-tightest">Campeón Sports</h1>
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">High Performance Editorial</p>
-      </div>
-      <div class="text-right">
-        <h2 class="text-6xl font-black uppercase tracking-tighter text-gray-100 tracking-tightest">INVOICE</h2>
-        <p class="text-xs font-black uppercase tracking-widest">#CS-2024-001</p>
-      </div>
-    </div>
+{% extends 'user/partials/base.html' %}
+{% load static %}
+{% block content %}
+  <body class="bg-gray-50 min-h-screen py-20 px-4 font-montserrat antialiased">
+    <div class="max-w-5xl mx-auto bg-white p-10 md:p-20 shadow-2xl rounded-sm print-border">
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
+        <!-- Brand -->
+        <div>
+          <h1 class="text-4xl font-black uppercase tracking-tighter mb-2 tracking-tightest">Campeon</h1>
 
-    <div class="grid grid-cols-2 gap-12 mb-16">
-      <div>
-        <h4 class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-4 tracking-tightest">Billed To</h4>
-        <div class="text-sm font-bold space-y-1">
-          <p class="text-lg font-black uppercase tracking-tighter">Alex Morgan</p>
-          <p>Street 12, Pitch Editorial District</p>
-          <p>Palakkad, Kerala 628015</p>
-          <p>India</p>
-          <p class="text-gray-400 mt-2">alex.morgan@example.com</p>
+          {% comment %} <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">High Performance Editorial</p> {% endcomment %}
+        </div>
+
+        <!-- Invoice -->
+        <div class="text-left md:text-right">
+          <h2 class="text-5xl md:text-7xl font-black uppercase tracking-tighter text-gray-100 tracking-tightest leading-none">INVOICE</h2>
+
+          <p class="text-xs font-black uppercase tracking-widest mt-2">{{ order.order_id }}</p>
         </div>
       </div>
-      <div class="text-right">
-        <h4 class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-4 tracking-tightest">Invoice Details</h4>
-        <div class="text-sm font-bold space-y-1">
-          <p>
-            <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Date:</span> Oct 24, 2024
-          </p>
-          <p>
-            <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Payment:</span> Credit Card (**** 4242)
-          </p>
-          <p>
-            <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Status:</span> <span class="text-green-600">Paid</span>
-          </p>
-        </div>
-      </div>
-    </div>
 
-    <!-- Table -->
-    <div class="mb-16">
-      <div class="grid grid-cols-12 border-b-2 border-black pb-4 mb-6 text-[10px] font-black uppercase tracking-widest">
-        <div class="col-span-6">Description</div>
-        <div class="col-span-2 text-center">Price</div>
-        <div class="col-span-2 text-center">Qty</div>
-        <div class="col-span-2 text-right">Total</div>
-      </div>
+      <!-- Billing + Details -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+        <!-- Billing -->
+        <div>
+          <h4 class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-4 tracking-tightest">Billed To</h4>
 
-      <div class="space-y-6">
-        <div class="grid grid-cols-12 text-sm font-bold items-center">
-          <div class="col-span-6">
-            <p class="font-black uppercase tracking-tighter">Brasil '70 Authentic Home</p>
-            <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Size: M • Retro Collection</p>
+          <div class="text-sm font-bold space-y-1">
+            <p class="text-lg font-black uppercase tracking-tighter">{{ order.full_name }}</p>
+
+            <p>{{ order.address_line_1 }}</p>
+            <p>{{ order.address_line_2 }}</p>
+
+            <p>{{ order.city }}, {{ order.state }} {{ order.postal_code }}</p>
+
+            <p>{{ order.place }}</p>
+
+            <p class="text-gray-400 mt-2 lowercase">{{ order.user.email }}</p>
+
+            <p class="text-gray-400">{{ order.phone_number }}</p>
           </div>
-          <div class="col-span-2 text-center">$189.99</div>
-          <div class="col-span-2 text-center">1</div>
-          <div class="col-span-2 text-right font-black">$189.99</div>
         </div>
 
-        <div class="grid grid-cols-12 text-sm font-bold items-center">
-          <div class="col-span-6">
-            <p class="font-black uppercase tracking-tighter">Paris Elite 24/25 Away</p>
-            <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Size: L • Elite Performance</p>
+        <!-- Invoice Details -->
+        <div class="text-left md:text-right">
+          <h4 class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-4 tracking-tightest">Invoice Details</h4>
+
+          <div class="text-sm font-bold space-y-3">
+            <p>
+              <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Date:</span>
+
+              {{ order.created_at|date:'F d, Y' }}
+            </p>
+
+            <p>
+              <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Payment:</span>
+
+              {{ order.get_payment_method_display }}
+            </p>
+
+            <p>
+              <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Payment Status:</span>
+
+              <span class="text-black">{{ order.get_payment_status_display }}</span>
+            </p>
+
+            <p>
+              <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Order Status:</span>
+
+              {{ order.get_order_status_display }}
+            </p>
           </div>
-          <div class="col-span-2 text-center">$145.00</div>
-          <div class="col-span-2 text-center">1</div>
-          <div class="col-span-2 text-right font-black">$145.00</div>
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <div class="mb-16">
+        <!-- Header -->
+        <div class="grid grid-cols-12 border-b-2 border-black pb-4 mb-6 text-[10px] font-black uppercase tracking-widest">
+          <div class="col-span-5">Description</div>
+
+          <div class="col-span-2 text-center">Price</div>
+
+          <div class="col-span-1 text-center">Qty</div>
+
+          <div class="col-span-2 text-center">Status</div>
+
+          <div class="col-span-2 text-right">Total</div>
+        </div>
+
+        <!-- Items -->
+        {% if items %}
+          {% for item in items %}
+            <div class="space-y-8">
+              <!-- Item 1 -->
+              <div class="grid grid-cols-12 text-sm font-bold items-center gap-y-4">
+                <div class="col-span-5 flex items-center gap-4">
+                  <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                    {% with image=item.variant.images.first %}
+                      {% if image %}
+                        <img src="{{ image.image.url }}" />
+                      {% endif %}
+                    {% endwith %}
+                  </div>
+
+                  <div>
+                    <p class="font-black uppercase tracking-tighter">{{ item.product_name }}</p>
+
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Size : {{ item.size }} • {{ item.variant.product.category.name }}</p>
+                  </div>
+                </div>
+
+                <div class="col-span-2 text-center">₹{{ item.price }}</div>
+
+                <div class="col-span-1 text-center">{{ item.quantity }}</div>
+
+                <div class="col-span-2 text-center">
+                  <span class="px-2 py-1 rounded-full text-[9px] uppercase tracking-widest font-black bg-black text-white">{{ item.get_status_display }}</span>
+                </div>
+
+                <div class="col-span-2 text-right font-black">₹{{ item.subtotal }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <!-- Totals -->
+      <div class="flex justify-end mb-20">
+        <div class="w-full max-w-sm space-y-4">
+          <div class="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
+            <span>Subtotal</span>
+            <span class="text-black">₹{{ order.total_amount }}</span>
+          </div>
+
+          <div class="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
+            <span>Shipping</span>
+
+            <span class="text-black">FREE</span>
+          </div>
+
+          <div class="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
+            <span>Tax</span>
+
+            <span class="text-black">₹0</span>
+          </div>
+
+          <div class="flex justify-between pt-4 border-t-2 border-black text-lg font-black uppercase tracking-tighter">
+            <span>Total</span>
+
+            <span>₹{{ order.total_amount }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="border-t border-gray-100 pt-12 flex flex-col md:flex-row justify-between items-center gap-8">
+        <!-- Notes -->
+        <div class="text-[10px] font-bold text-gray-300 uppercase tracking-widest leading-loose">
+          <p>Thank you for choosing Campeón Sports.</p>
+
+          <p>All returns must be within 30 days of delivery.</p>
+
+          {% comment %} <p class="text-black- mt-2">NOTE : Product delivered successfully on {{ order.updated_at|date:'F d, Y' }}.</p> {% endcomment %}
         </div>
       </div>
     </div>
-
-    <!-- Totals -->
-    <div class="flex justify-end mb-20">
-      <div class="w-64 space-y-4">
-        <div class="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
-          <span>Subtotal</span>
-          <span class="text-black">$334.99</span>
-        </div>
-        <div class="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
-          <span>Shipping</span>
-          <span class="text-black">FREE</span>
-        </div>
-        <div class="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
-          <span>Tax (5%)</span>
-          <span class="text-black">$16.75</span>
-        </div>
-        <div class="flex justify-between pt-4 border-t-2 border-black text-lg font-black uppercase tracking-tighter">
-          <span>Total</span>
-          <span>$351.74</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="border-t border-gray-100 pt-12 flex flex-col md:flex-row justify-between items-center gap-8">
-      <div class="text-[10px] font-bold text-gray-300 uppercase tracking-widest leading-loose">
-        <p>Thank you for choosing Campeón Sports.</p>
-        <p>All returns must be within 30 days of delivery.</p>
-      </div>
-      <div class="no-print flex gap-4">
-        <button onclick="window.print()" class="bg-black text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-800 transition-all">Print Invoice</button>
-        <button class="bg-gray-100 text-black px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-200 transition-all">Download PDF</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="no-print text-center mt-12">
-    <a href="Landing Page.html" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black">Back to Home</a>
-  </div>
-</body>
+  </body>
+{% endblock %}

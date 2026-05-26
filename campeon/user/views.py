@@ -27,6 +27,7 @@ def profile(request):
         address = None
     return render(request, "user/profile.html", {"address": address})
 
+
 @user_login_required
 def edit_profile(request):
     if request.method == "POST":
@@ -48,6 +49,7 @@ def edit_profile(request):
         return redirect("user:profile")
     return render(request, "user/edit_profile.html")
 
+
 @user_login_required
 def remove_photo(request):
     user = request.user
@@ -60,6 +62,7 @@ def remove_photo(request):
         user.save()
 
     return redirect("user:edit_profile")
+
 
 @user_login_required
 def change_email(request):
@@ -123,6 +126,7 @@ def change_email(request):
         {"otp_expiry": request.session.get("otp_expiry")},
     )
 
+
 @user_login_required
 def set_default_address(request, address_id):
     address = get_object_or_404(Addresses, id=address_id, user=request.user)
@@ -131,47 +135,6 @@ def set_default_address(request, address_id):
     address.save()
     return redirect("user:address")
 
-
-# def edit_profile(request):
-#     if request.method == "POST":
-
-#         full_name = request.POST.get("full_name", "")
-#         email = request.POST.get("email", "")
-#         phone_number = request.POST.get("phone_number", "")
-#         print(full_name, email, phone_number)
-#         otp = OTP.objects.filter(
-#             user=request.user, otp=request.POST.get("otp", "")
-#         ).first()
-#         if "send_otp" in request.POST:
-#             if otp and not otp.is_expired():
-#                 messages.info(
-#                     request,
-#                     "You have already requested an OTP. Please verify the previous one.",
-#                 )
-#                 return redirect("user:edit_profile")
-
-#             otp = OTP.objects.create(user=request.user)
-#             otp.generate_otp()
-#             otp.send_otp_email(email)
-#             messages.info(request, "OTP has successfully send to your email")
-#             return redirect("user:edit_profile")
-#         elif "otp" in request.POST:
-#             if otp and otp.otp == request.POST.get("otp", "") and not otp.is_expired():
-
-#                 request.user.full_name = full_name
-#                 request.user.email = email
-#                 request.user.username = email.split("@")[0]
-#                 request.user.phone_number = phone_number
-#                 request.user.save()
-#                 messages.success(request, "Your profile has been updated Successfully")
-#                 return redirect("user:profile")
-#             elif otp and otp.is_expired():
-#                 messages.error(request, "Your OTP has expired")
-#                 return redirect("user:edit_profile")
-#             else:
-#                 messages.error(request, "Invalid OTP. Please try again")
-
-#     return render(request, "user/edit_profile.html")
 
 
 @user_login_required
@@ -201,6 +164,7 @@ def change_password(request):
                 return redirect("user:change_password")
     return render(request, "user/change_password.html")
 
+
 @user_login_required
 def address(request):
     user_id = request.user.id
@@ -208,10 +172,13 @@ def address(request):
     address_list = Addresses.objects.filter(user=request.user.id)
     return render(request, "user/address.html", {"address_list": address_list})
 
+
 @user_login_required
 def add_address(request):
+    next_url = request.GET.get("next") or reverse("user:address")
     if request.method == "POST":
         form = AddressesForm(request.POST)
+        next_url = request.POST.get("next") or reverse("user:address")
         if form.is_valid():
             address = form.save(commit=False)
 
@@ -222,7 +189,7 @@ def add_address(request):
                 )
 
             address.save()
-            return redirect("user:address")
+            return redirect(next_url)
         # full_name = request.POST.get("full_name", "")
         # phone_number = request.POST.get("phone_number", "")
         # address_line_1 = request.POST.get("address_line_1", "")
@@ -237,7 +204,8 @@ def add_address(request):
         # print(request.user.id)
     else:
         form = AddressesForm()
-    return render(request, "user/add_address.html", {"form": form})
+    return render(request, "user/add_address.html", {"form": form, "next_url": next_url})
+
 
 @user_login_required
 def edit_address(request, id):
@@ -256,10 +224,17 @@ def edit_address(request, id):
         form = AddressesForm(instance=address)
     return render(request, "user/edit_address.html", {"form": form, "address": address})
 
+
 @user_login_required
 def delete_address(request, id):
     address = Addresses.objects.get(id=id)
     if request.method == "POST":
-        address.delete()
+        if not address.is_default:
+            address.delete()
+            messages.success(request, "Address deleted Successfully")
+        else:
+            address.delete()
+
+            messages.error(request, "Default Address cannot be deleted")
         return redirect("user:address")
     return render(request, "user/delete_address.html", {"address": address})

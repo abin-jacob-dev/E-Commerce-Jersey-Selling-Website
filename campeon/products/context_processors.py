@@ -8,7 +8,7 @@ def cart_data(request):
         return {
             "global_cart": cart,
             "global_cart_items": cart.items.select_related(
-                "variant_product", "variant_color"
+                "variant_product"
             ).prefetch_related("variant_images"),
             "global_cart_count": cart.items.count(),
         }

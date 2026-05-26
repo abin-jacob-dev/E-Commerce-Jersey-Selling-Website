@@ -1,16 +1,72 @@
 {% if messages %}
-
-{% for message in messages %}
-    <div id="message" class="container">
-
+<div class="fixed bottom-5 right-5 z-50 flex flex-col gap-3">
     
-    <div{% if message.tags %}
-     class="alert alert-{{ message.tags }}"
-    {% endif %} 
-        role = 'alert'>
-        <button type="button" class="close" data-dismiss='alert'><span aria-hidden="true">&times;</span></button>
-        {{ message }}
+    {% for message in messages %}
+    
+    <div
+        class="
+            message-alert
+            min-w-[300px]
+            px-4
+            py-3
+            rounded-xl
+            shadow-lg
+            flex
+            items-center
+            justify-between
+            animate-[slideIn_.4s_ease]
+            
+            {% if message.tags == 'success' %}
+                bg-green-500 text-white
+            {% elif message.tags == 'error' %}
+                bg-red-500 text-white
+            {% elif message.tags == 'warning' %}
+                bg-yellow-400 text-black
+            {% else %}
+                bg-blue-500 text-white
+            {% endif %}
+        "
+    >
+        <span>{{ message }}</span>
+
+        <button
+            onclick="this.parentElement.remove()"
+            class="ml-3 text-xl font-bold"
+        >
+            &times;
+        </button>
     </div>
+
     {% endfor %}
+
 </div>
+
+<style>
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+</style>
+
+<script>
+setTimeout(() => {
+    document.querySelectorAll('.message-alert').forEach((alert) => {
+
+        alert.style.transition = 'all 0.5s ease';
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(100%)';
+
+        setTimeout(() => {
+            alert.remove();
+        }, 500);
+
+    });
+}, 3000);
+</script>
 {% endif %}

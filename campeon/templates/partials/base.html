@@ -8,52 +8,50 @@
     <script src="{% static 'vendor/tailwind.min.js' %}"></script>
     <script src="{% static 'js/tailwind-config.js' %}"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
     {% comment %} <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" /> {% endcomment %}
   </head>
-  <body class="bg-white text-black font-montserrat antialiased">
+  {% include 'components/alert.html' %}
+  <body class="bg-white text-black font-montserrat antialiased overflow-x-hidden">
     <!-- Header -->
     <header class="border-b border-gray-100 sticky top-0 bg-white z-50">
-      <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-        <nav class="hidden md:flex space-x-6 text-sm font-bold uppercase tracking-wider">
-          <a href="{% url "core:home" %}" class="hover:text-lime transition-colors">Home</a>
-          <a href="{% url "products:all_products" %}" class="hover:text-lime transition-colors">Shop</a>
-          <a href="{% url "core:contact" %}" class="hover:text-lime transition-colors">Contact</a>
-          <a href="{% url "core:about" %}" class="hover:text-lime transition-colors">About us</a>
-          <a href="{% url "user:profile" %}" class="hover:text-lime transition-colors">Account</a>
+      <div class="max-w-screen-2xl mx-auto px-6 py-4 grid grid-cols-[1fr_auto_1fr] items-center gap-6">
+        <!-- Left Navigation -->
+        <nav class="hidden lg:flex items-center gap-6 text-sm font-bold uppercase tracking-wider whitespace-nowrap">
+          <a href="{% url 'core:home' %}" class="hover:text-lime-500 transition-colors">Home</a>
+          <a href="{% url 'products:all_products' %}" class="hover:text-lime-500 transition-colors">Shop</a>
+          <a href="{% url 'core:contact' %}" class="hover:text-lime-500 transition-colors">Contact</a>
+          <a href="{% url 'core:about' %}" class="hover:text-lime-500 transition-colors">About us</a>
+          {% comment %} <a href="{% url 'user:profile' %}" class="hover:text-lime-500 transition-colors">Account</a> {% endcomment %}
         </nav>
 
-        <div class="flex-1 flex justify-center">
-          <h1 class="text-2xl font-black uppercase tracking-tighter tracking-tightest">campeon</h1>
+        <!-- Logo -->
+        <div class="flex justify-center">
+          <h1 class="text-2xl font-black uppercase tracking-tight">campeon</h1>
         </div>
 
-        <div class="flex items-center space-x-4">
-          {% comment %} <div class="relative hidden sm:block">
-            <input type="text" placeholder="Search products..." class="bg-gray-100 rounded-full px-4 py-1 text-sm focus:outline-none w-48 focus:ring-2 focus:ring-lime/20" />
-            <button class="absolute right-3 top-1/2 -translate-y-1/2">
-              <svg class="w-4 h-4 text-black-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </button>
-          </div> {% endcomment %}
-          <div class="flex items-center space-x-3">
-            <a href="">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
-            </a>
-            <a href="{% url 'products:wishlist' %}">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-              </svg>
-            </a>
-            <a href="{% url 'products:cart' %}" class="relative">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-              </svg>
-              <span class="absolute -top-2 -right-2 bg-lime text-black text-[13px] font-bold w-4 h-4 rounded-full flex items-center justify-center">3</span>
-            </a>
-          </div>
+        <!-- Icons -->
+        <div class="flex justify-end items-center gap-4">
+          <a href="{% url 'user:profile' %}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7"></path>
+            </svg>
+          </a>
+
+          <a href="{% url 'products:wishlist' %}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0"></path>
+            </svg>
+          </a>
+
+          <a href="{% url 'products:cart' %}" class="relative">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9"></path>
+            </svg>
+            {% if global_cart_count > 0 %}
+              <span class="absolute -top-2 -right-2 bg-lime-400 text-black text-[11px] font-bold w-4 h-4 rounded-full flex items-center justify-center">{{ global_cart_count }}</span>
+            {% endif %}
+          </a>
         </div>
       </div>
     </header>
@@ -65,10 +63,10 @@
     {% endblock %}
     <!-- Footer -->
     <footer class="bg-[#f9fafb] pt-20 pb-10">
-      <div class="container mx-auto px-4">
+      <div class="max-w-screen-2xl mx-auto px-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
           <div>
-            <h5 class="font-black uppercase mb-6 tracking-tightest">Help Customers</h5>
+            <h5 class="font-black uppercase mb-6 tracking-tight">Help Customers</h5>
             <ul class="text-xs space-y-4 text-gray-600">
               <li>Find a location nearest to you reduce shipping costs and make shopping easier.</li>
               <li>
@@ -120,8 +118,8 @@
           </div>
         </div>
 
-        <div class="border-t border-gray-200 pt-10 flex flex-col md:flex-row justify-between items-center text-[13px] text-black-400 uppercase tracking-widest">
-          <p>© 2024 Campeon</p>
+        <div class="border-t border-gray-200 pt-10 flex flex-col md:flex-row justify-between items-center text-[13px] text-gray-500 uppercase tracking-widest">
+          <p>© 2026 Campeon</p>
           <div class="flex space-x-4 mt-4 md:mt-0">
             <svg class="w-8 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M2 4h20v16H2V4zm2 2v12h16V6H4zm3 3h2v2H7V9zm4 0h6v2h-6V9zm0 4h6v2h-6v-2z" />
@@ -133,6 +131,6 @@
         </div>
       </div>
     </footer>
-    <script src="{% static "js/script.js" %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
   </body>
 </html>
