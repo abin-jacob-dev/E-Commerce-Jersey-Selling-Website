@@ -156,7 +156,7 @@
     <div class="bg-white p-6 rounded-xl shadow-sm">
       <h3 class="text-sm font-black uppercase tracking-widest mb-4">Customer</h3>
 
-      <p class="font-black">{{ order.user.first_name }} {{ order.user.last_name }}</p>
+      <p class="font-black">{{ order.user.full_name}}</p>
       <p class="text-xs text-gray-400">{{ order.user.email }}</p>
       <p class="text-xs text-gray-400">{{ order.user.phone_number|default:"N/A" }}</p>
     </div>
@@ -165,15 +165,11 @@
       <h3 class="text-sm font-black uppercase tracking-widest mb-4">Shipping</h3>
 
       <p class="text-xs leading-relaxed">
-        {% if order.address %}
-          {{ order.address.full_name }}<br />
-          {{ order.address.address_line_1 }}<br />
-          {% if order.address.address_line_2 %}{{ order.address.address_line_2 }}<br />{% endif %}
-          {{ order.address.city }}, {{ order.address.state }} - {{ order.address.postal_code }}<br />
-          <span class="font-black uppercase">Phone: {{ order.address.phone_number }}</span>
-        {% else %}
-          N/A
-        {% endif %}
+          {{ order.full_name }}<br />
+          {{ order.address_line_1 }}<br />
+          {% if order.address_line_2 %}{{ order.address_line_2 }}<br />{% endif %}
+          {{ order.city }}, {{ order.address.state }} - {{ order.address.postal_code }}<br />
+          <span class="font-black uppercase">Phone: {{ order.phone_number }}</span>
       </p>
     </div>
 

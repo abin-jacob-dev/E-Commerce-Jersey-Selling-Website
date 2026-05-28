@@ -12,11 +12,11 @@ import os
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
-import re
+
 from user.utility import validate_password
 from user.utility import validate_name
 from userauths.views import user_login_required
-
+from django.urls import reverse
 # Create your views here.
 @never_cache
 @user_login_required
@@ -219,7 +219,6 @@ def edit_address(request, id):
                 ).update(is_default=False)
             form.save()
             return redirect("user:address")
-
     else:
         form = AddressesForm(instance=address)
     return render(request, "user/edit_address.html", {"form": form, "address": address})
@@ -233,8 +232,7 @@ def delete_address(request, id):
             address.delete()
             messages.success(request, "Address deleted Successfully")
         else:
-            address.delete()
-
+            # address.delete()
             messages.error(request, "Default Address cannot be deleted")
         return redirect("user:address")
     return render(request, "user/delete_address.html", {"address": address})

@@ -25,6 +25,8 @@ from django.template.loader import get_template
 from django.http import HttpResponse
 from userauths.views import superuser_required, user_login_required
 from django.urls import reverse
+from django.template.loader import render_to_string
+from weasyprint import HTML
 
 
 # Create your views here.
@@ -62,17 +64,17 @@ def add_new_category(request):
     form = CategoryForm()
     if request.method == "POST":
 
+        name = request.POST.get("name")
+        if Category.objects.filter(name__iexact=name, is_deleted=False).exists():
+            messages.error(request, "Category already exists")
+            return render(
+                request,
+                "admin/products/categories/add_new_category.html",
+                {"form": form},
+            )
         form = CategoryForm(request.POST, request.FILES)
 
         if form.is_valid():
-            name = form.cleaned_data.get("name")
-            if Category.objects.filter(name__iexact=name, is_deleted=False).exists():
-                messages.error(request, "Category already exists")
-                return render(
-                    request,
-                    "admin/products/categories/add_new_category.html",
-                    {"form": form},
-                )
             form.save()
             messages.success(request, "New Category Added")
             return redirect("products:categories")
@@ -88,7 +90,20 @@ def add_new_category(request):
 def edit_category(request, slug):
     category = get_object_or_404(Category, slug=slug)
     if request.method == "POST":
+
         form = CategoryForm(request.POST, request.FILES, instance=category)
+        name = request.POST.get("name")
+        if (
+            Category.objects.filter(name__iexact=name, is_deleted=False)
+            .exclude(id=category.id)
+            .exists()
+        ):
+            messages.error(request, "Category already exists")
+            return render(
+                request,
+                "admin/products/categories/edit_category.html",
+                {"form": form, "category": category},
+            )
         if form.is_valid():
             form.save()
             messages.success(request, "Updated the Category")
@@ -198,7 +213,7 @@ def add_product(request):
                     for size in sizes:
                         if size in seen_sizes:
                             messages.error(request, f"Duplicate size:{size}")
-                            return redirect("prdouct:add_product")
+                            return redirect("products:add_product")
 
                     variant = Variant.objects.create(
                         product=product,
@@ -932,33 +947,37 @@ def cancel_order_item_request(request, item_id):
     return redirect("products:order_details", order_id=order.order_id)
 
 
-# @user_login_required
-# def download_invoice(request, order_id):
+# def view_invoice(request, order_id):
 #     order = get_object_or_404(Order, order_id=order_id, user=request.user)
-
-#     return response
-
-
-def view_invoice(request, order_id):
-    order = get_object_or_404(Order, order_id=order_id, user=request.user)
-    context = {"order": order}
-    return render(request, "user/orders/order_invoice.html", context)
+#     context = {"order": order}
+#     return render(request, "user/orders/order_invoice.html", context)
 
 
 def download_invoice(request, order_id):
+
     order = get_object_or_404(
         Order.objects.prefetch_related("items__variant__images").select_related("user"),
         order_id=order_id,
         user=request.user,
     )
+
     items = order.items.select_related("variant__product__category").prefetch_related(
         "variant__images"
     )
+
     context = {
         "order": order,
         "items": items,
     }
-    return render(request, "user/orders/order_invoice_pdf.html", context)
+
+    html_string = render_to_string("user/orders/order_invoice_pdf.html", context)
+
+    pdf = HTML(string=html_string, base_url=request.build_absolute_uri("/")).write_pdf()
+    response = HttpResponse(pdf, content_type="application/pdf")
+
+    response["Content-Disposition"] = f'attachment; filename="ORD-{order_id}.pdf"'
+
+    return response
 
 
 @superuser_required
@@ -984,8 +1003,18 @@ def order_view(request, order_id):
     )
 
     if request.method == "POST":
+
         if "update_order" in request.POST:
+
+            if order.order_status == "cancelled":
+                messages.error(request, "Cancelled orders cannot be modified.")
+                return redirect(
+                    "products:order_view",
+                    order_id=order.order_id,
+                )
+
             order_status = request.POST.get("order_status")
+
             if order_status:
                 order.order_status = order_status
                 order.save()
@@ -996,20 +1025,48 @@ def order_view(request, order_id):
                     request,
                     f"Order status updated to {order.get_order_status_display()}",
                 )
-                return redirect("products:order_view", order_id=order.order_id)
+
+                return redirect(
+                    "products:order_view",
+                    order_id=order.order_id,
+                )
 
         elif "update_item_status" in request.POST:
+
             item_id = request.POST.get("item_id")
             item_status = request.POST.get("status")
+
             if item_id and item_status:
-                item = get_object_or_404(OrderItem, id=item_id, order=order)
+
+                item = get_object_or_404(
+                    OrderItem,
+                    id=item_id,
+                    order=order,
+                )
+
+                if item.status == "cancelled":
+                    messages.error(request, "Cancelled items cannot be modified.")
+
+                    return redirect(
+                        "products:order_view",
+                        order_id=order.order_id,
+                    )
+
                 item.status = item_status
                 item.save()
 
-                messages.success(
-                    request, f"Item status updated to {item.get_status_display()}"
-                )
-                return redirect("products:order_view", order_id=order.order_id)
+                if order.items.count() == 1:
+                    order.order_status = item_status
+                    order.save()
 
+                messages.success(
+                    request,
+                    f"Item status updated to {item.get_status_display()}",
+                )
+
+                return redirect(
+                    "products:order_view",
+                    order_id=order.order_id,
+                )
     context = {"order": order}
     return render(request, "admin/orders/order_view.html", context)

@@ -1,170 +1,463 @@
-{% extends 'user/partials/base.html' %}
-{% load static %}
-{% block content %}
-  <body class="bg-gray-50 min-h-screen py-20 px-4 font-montserrat antialiased">
-    <div class="max-w-5xl mx-auto bg-white p-10 md:p-20 shadow-2xl rounded-sm print-border">
-      <!-- Header -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
-        <!-- Brand -->
-        <div>
-          <h1 class="text-4xl font-black uppercase tracking-tighter mb-2 tracking-tightest">Campeon</h1>
+<!DOCTYPE html>
+<html>
 
-          {% comment %} <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">High Performance Editorial</p> {% endcomment %}
-        </div>
+<head>
+    <meta charset="UTF-8">
 
-        <!-- Invoice -->
-        <div class="text-left md:text-right">
-          <h2 class="text-5xl md:text-7xl font-black uppercase tracking-tighter text-gray-100 tracking-tightest leading-none">INVOICE</h2>
+    <style>
 
-          <p class="text-xs font-black uppercase tracking-widest mt-2">{{ order.order_id }}</p>
-        </div>
-      </div>
+        @page {
+            size: A4;
+            margin: 25px;
+        }
 
-      <!-- Billing + Details -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
-        <!-- Billing -->
-        <div>
-          <h4 class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-4 tracking-tightest">Billed To</h4>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #111;
+        }
 
-          <div class="text-sm font-bold space-y-1">
-            <p class="text-lg font-black uppercase tracking-tighter">{{ order.full_name }}</p>
+        .container {
+            width: 100%;
+        }
 
-            <p>{{ order.address_line_1 }}</p>
-            <p>{{ order.address_line_2 }}</p>
+        /* HEADER */
 
-            <p>{{ order.city }}, {{ order.state }} {{ order.postal_code }}</p>
+        .header-table {
+            width: 100%;
+            margin-bottom: 40px;
+        }
 
-            <p>{{ order.place }}</p>
+        .brand {
+            font-size: 36px;
+            font-weight: bold;
+        }
 
-            <p class="text-gray-400 mt-2 lowercase">{{ order.user.email }}</p>
+        .invoice-title {
+            text-align: right;
+        }
 
-            <p class="text-gray-400">{{ order.phone_number }}</p>
-          </div>
-        </div>
+        .invoice-title h1 {
+            margin: 0;
+            font-size: 42px;
+            color: #d1d5db;
+        }
 
-        <!-- Invoice Details -->
-        <div class="text-left md:text-right">
-          <h4 class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-4 tracking-tightest">Invoice Details</h4>
+        .invoice-id {
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
 
-          <div class="text-sm font-bold space-y-3">
-            <p>
-              <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Date:</span>
+        /* BILLING */
 
-              {{ order.created_at|date:'F d, Y' }}
-            </p>
+        .billing-table {
+            width: 100%;
+            margin-bottom: 40px;
+        }
 
-            <p>
-              <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Payment:</span>
+        .billing-table td {
+            vertical-align: top;
+            width: 50%;
+        }
 
-              {{ order.get_payment_method_display }}
-            </p>
+        .section-title {
+            font-size: 11px;
+            color: #777;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
 
-            <p>
-              <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Payment Status:</span>
+        .customer-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
 
-              <span class="text-black">{{ order.get_payment_status_display }}</span>
-            </p>
+        .details p {
+            margin: 5px 0;
+        }
 
-            <p>
-              <span class="text-gray-400 uppercase tracking-widest text-[9px] mr-2">Order Status:</span>
+        /* ITEMS */
 
-              {{ order.get_order_status_display }}
-            </p>
-          </div>
-        </div>
-      </div>
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
 
-      <!-- Items Table -->
-      <div class="mb-16">
-        <!-- Header -->
-        <div class="grid grid-cols-12 border-b-2 border-black pb-4 mb-6 text-[10px] font-black uppercase tracking-widest">
-          <div class="col-span-5">Description</div>
+        .items-table thead th {
+            border-bottom: 2px solid black;
+            padding: 12px 8px;
+            text-transform: uppercase;
+            font-size: 11px;
+            text-align: left;
+        }
 
-          <div class="col-span-2 text-center">Price</div>
+        .items-table tbody td {
+            padding: 15px 8px;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle;
+        }
 
-          <div class="col-span-1 text-center">Qty</div>
+        .center {
+            text-align: center;
+        }
 
-          <div class="col-span-2 text-center">Status</div>
+        .right {
+            text-align: right;
+        }
 
-          <div class="col-span-2 text-right">Total</div>
-        </div>
+        /* PRODUCT */
 
-        <!-- Items -->
-        {% if items %}
-          {% for item in items %}
-            <div class="space-y-8">
-              <!-- Item 1 -->
-              <div class="grid grid-cols-12 text-sm font-bold items-center gap-y-4">
-                <div class="col-span-5 flex items-center gap-4">
-                  <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                    {% with image=item.variant.images.first %}
-                      {% if image %}
-                        <img src="{{ image.image.url }}" />
-                      {% endif %}
-                    {% endwith %}
-                  </div>
+        .product-table {
+            width: 100%;
+        }
 
-                  <div>
-                    <p class="font-black uppercase tracking-tighter">{{ item.product_name }}</p>
+        .product-image-cell {
+            width: 70px;
+        }
 
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Size : {{ item.size }} • {{ item.variant.product.category.name }}</p>
-                  </div>
+        .product-image {
+            width: 55px;
+            height: 55px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .product-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .product-meta {
+            font-size: 10px;
+            color: #777;
+        }
+
+        /* STATUS */
+
+        .status {
+            background: black;
+            color: white;
+            padding: 4px 10px;
+            font-size: 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* TOTALS */
+
+        .totals {
+            width: 320px;
+            margin-left: auto;
+            border-collapse: collapse;
+            margin-bottom: 50px;
+        }
+
+        .totals td {
+            padding: 10px 0;
+        }
+
+        .totals-label {
+            color: #777;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .grand-total td {
+            border-top: 2px solid black;
+            font-size: 18px;
+            font-weight: bold;
+            padding-top: 15px;
+        }
+
+        /* FOOTER */
+
+        .footer {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            color: #777;
+            font-size: 10px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+
+    <table class="header-table">
+
+        <tr>
+
+            <td>
+                <div class="brand">
+                    Campeon
+                </div>
+            </td>
+
+            <td class="invoice-title">
+
+                <h1>INVOICE</h1>
+
+                <div class="invoice-id">
+                    {{ order.order_id }}
                 </div>
 
-                <div class="col-span-2 text-center">₹{{ item.price }}</div>
+            </td>
 
-                <div class="col-span-1 text-center">{{ item.quantity }}</div>
+        </tr>
 
-                <div class="col-span-2 text-center">
-                  <span class="px-2 py-1 rounded-full text-[9px] uppercase tracking-widest font-black bg-black text-white">{{ item.get_status_display }}</span>
+    </table>
+
+    <!-- BILLING -->
+
+    <table class="billing-table">
+
+        <tr>
+
+            <td>
+
+                <div class="section-title">
+                    Billed To
                 </div>
 
-                <div class="col-span-2 text-right font-black">₹{{ item.subtotal }}</div>
-              </div>
-            </div>
-          {% endfor %}
-        {% endif %}
-      </div>
+                <div class="customer-name">
+                    {{ order.full_name }}
+                </div>
 
-      <!-- Totals -->
-      <div class="flex justify-end mb-20">
-        <div class="w-full max-w-sm space-y-4">
-          <div class="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
-            <span>Subtotal</span>
-            <span class="text-black">₹{{ order.total_amount }}</span>
-          </div>
+                <div class="details">
 
-          <div class="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
-            <span>Shipping</span>
+                    <p>{{ order.address_line_1 }}</p>
 
-            <span class="text-black">FREE</span>
-          </div>
+                    <p>{{ order.address_line_2 }}</p>
 
-          <div class="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
-            <span>Tax</span>
+                    <p>
+                        {{ order.city }},
+                        {{ order.state }}
+                        {{ order.postal_code }}
+                    </p>
 
-            <span class="text-black">₹0</span>
-          </div>
+                    <p>{{ order.place }}</p>
 
-          <div class="flex justify-between pt-4 border-t-2 border-black text-lg font-black uppercase tracking-tighter">
-            <span>Total</span>
+                    <p>{{ order.user.email }}</p>
 
-            <span>₹{{ order.total_amount }}</span>
-          </div>
-        </div>
-      </div>
+                    <p>{{ order.phone_number }}</p>
 
-      <!-- Footer -->
-      <div class="border-t border-gray-100 pt-12 flex flex-col md:flex-row justify-between items-center gap-8">
-        <!-- Notes -->
-        <div class="text-[10px] font-bold text-gray-300 uppercase tracking-widest leading-loose">
-          <p>Thank you for choosing Campeón Sports.</p>
+                </div>
 
-          <p>All returns must be within 30 days of delivery.</p>
+            </td>
 
-          {% comment %} <p class="text-black- mt-2">NOTE : Product delivered successfully on {{ order.updated_at|date:'F d, Y' }}.</p> {% endcomment %}
-        </div>
-      </div>
+            <td>
+
+                <div class="section-title">
+                    Invoice Details
+                </div>
+
+                <div class="details">
+
+                    <p>
+                        <strong>Date:</strong>
+                        {{ order.created_at|date:'F d, Y' }}
+                    </p>
+
+                    <p>
+                        <strong>Payment:</strong>
+                        {{ order.get_payment_method_display }}
+                    </p>
+
+                    <p>
+                        <strong>Payment Status:</strong>
+                        {{ order.get_payment_status_display }}
+                    </p>
+
+                    <p>
+                        <strong>Order Status:</strong>
+                        {{ order.get_order_status_display }}
+                    </p>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    </table>
+
+    <!-- ITEMS -->
+
+    <table class="items-table">
+
+        <thead>
+
+            <tr>
+
+                <th>Description</th>
+
+                <th class="center">Price</th>
+
+                <th class="center">Qty</th>
+
+                <th class="center">Status</th>
+
+                <th class="right">Total</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for item in items %}
+
+            <tr>
+
+                <td>
+
+                    <table class="product-table">
+
+                        <tr>
+
+                            {% comment %} <td class="product-image-cell">
+
+                                {% with image=item.variant.images.first %}
+
+                                {% if image %}
+
+                                <img
+                                    src="{{ request.scheme }}://{{ request.get_host }}{{ image.image.url }}"
+                                    class="product-image"
+                                >
+
+                                {% endif %}
+
+                                {% endwith %}
+
+                            </td> {% endcomment %}
+
+                            <td>
+
+                                <div class="product-name">
+                                    {{ item.product_name }}
+                                </div>
+
+                                <div class="product-meta">
+                                    Size : {{ item.size }}
+                                    •
+                                    {{ item.variant.product.category.name }}
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </table>
+
+                </td>
+
+                <td class="center">
+                    ₹{{ item.price }}
+                </td>
+
+                <td class="center">
+                    {{ item.quantity }}
+                </td>
+
+                <td class="center">
+
+                    <span class="status">
+                        {{ item.get_status_display }}
+                    </span>
+
+                </td>
+
+                <td class="right">
+                    ₹{{ item.subtotal }}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <!-- TOTALS -->
+
+    <table class="totals">
+
+        <tr>
+
+            <td class="totals-label">
+                Subtotal
+            </td>
+
+            <td class="right">
+                ₹{{ order.total_amount }}
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td class="totals-label">
+                Shipping
+            </td>
+
+            <td class="right">
+                FREE
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td class="totals-label">
+                Tax
+            </td>
+
+            <td class="right">
+                ₹0
+            </td>
+
+        </tr>
+
+        <tr class="grand-total">
+
+            <td>Total</td>
+
+            <td class="right">
+                ₹{{ order.total_amount }}
+            </td>
+
+        </tr>
+
+    </table>
+
+    <!-- FOOTER -->
+
+    <div class="footer">
+
+        <p>
+            Thank you for choosing Campeón Sports.
+        </p>
+
+        <p>
+            All returns must be within 30 days of delivery.
+        </p>
+
     </div>
-  </body>
-{% endblock %}
+
+</div>
+
+</body>
+
+</html>

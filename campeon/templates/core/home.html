@@ -23,9 +23,9 @@
         <p class="text-sm text-gray-500 mt-3">Explore collections by category</p>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 ">
         {% for category in categories %}
-          <a href="{% url 'products:all_products' %}?category={{category.slug|urlencode}}" class="group flex flex-col items-center text-center">
+          <a href="{% url 'products:all_products' %}?category={{ category.slug|urlencode }}" class="group flex flex-col items-center justify-center text-center">
             <!-- Category Image -->
             <div class="w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden bg-black/5 border-4 border-transparent group-hover:border-lime transition-all duration-300 shadow-sm">
               {% if category.image %}
@@ -59,7 +59,7 @@
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12">
         {% for product in products %}
-          <a href="{% url 'products:product_detail' product.slug %}"  class="block">
+          <a href="{% url 'products:product_detail' product.slug %}" class="block">
             <div class="text-left group cursor-pointer">
               <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
                 {% if product.get_primary_image %}
