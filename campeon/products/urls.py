@@ -76,9 +76,14 @@ urlpatterns = [
         name="order_details",
     ),
     path(
-        "return-order",
-        views.return_order,
-        name="return_order",
+        "return-order-item/<int:item_id>/",
+        views.return_order_item,
+        name="return_order_item",
+    ),
+    path(
+        "return-order-item-request/<int:item_id>/",
+        views.return_order_item_request,
+        name="return_order_item_request",
     ),
     path(
         "cancel-order-item/<int:item_id>/",
@@ -110,5 +115,26 @@ urlpatterns = [
         "order-view/<str:order_id>",
         views.order_view,
         name="order_view",
+    ),
+    # ---------------------------------coupons ------------------------------------------
+    path(
+        "coupons/",
+        views.coupons,
+        name="coupons",
+    ),
+    path(
+        "add-coupon/",
+        views.add_coupon,
+        name="add_coupon",
+    ),
+    path(
+        "edit-coupon/<int:id>",
+        views.edit_coupon,
+        name="edit_coupon",
+    ),
+    path(
+        "delete-coupon/<int:id>",
+        views.delete_coupon,
+        name="delete_coupon",
     ),
 ]

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "user",
     "admin_panel",
     "products",
+    'payment',
     # AllAuth
     "django.contrib.sites",
     "allauth",
@@ -188,6 +189,9 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
 
+#Razorpay
+RAZORPAY_KEY_ID = os.getenv('RAZOR_KEY_ID')
+RAZORPAY_KEY_SECRET = os.getenv('RAZOR_KEY_SECRET')
 
 SITE_ID = 1
 SOCIALACCOUNT_PROVIDERS = {

@@ -15,6 +15,7 @@ from products.models import (
     Wishlist,
     Order,
     OrderItem,
+    Coupon,
 )
 from user.models import Addresses
 from django.db.models import Prefetch
@@ -27,6 +28,7 @@ from userauths.views import superuser_required, user_login_required
 from django.urls import reverse
 from django.template.loader import render_to_string
 from weasyprint import HTML
+from decimal import Decimal
 
 
 # Create your views here.
@@ -898,9 +900,35 @@ def order_details(request, order_id):
     return render(request, "user/orders/order_details.html", context)
 
 
-def return_order(request):
+def return_order_item(request, item_id):
+    item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
+    context = {"item": item, "order": item.order}
+    return render(request, "user/orders/return_request.html", context)
 
-    pass
+
+def return_order_item_request(request, item_id):
+    item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
+    if request.method != "POST":
+        return redirect("products:order_details", order_id=item.order.order_id)
+    if item.variant:
+        item.variant.stock += item.quantity
+        item.variant.save()
+        item.status = "partially_returned"
+        item.returned_at = timezone.now()
+        reason = request.POST.get("reason", "")
+        if reason == "other":
+            reason = request.POST.get("reason_other", "Other")
+        item.returned_reason = reason
+        item.save()
+
+        order = item.order
+        active_items = order.items.exclude(status="returned")
+        if not active_items:
+            order.order_status = "returned"
+        else:
+            order.order_status = "partially_returned"
+        order.save()
+        return redirect("products:order_details", order_id=order.order_id)
 
 
 @user_login_required
@@ -1070,3 +1098,61 @@ def order_view(request, order_id):
                 )
     context = {"order": order}
     return render(request, "admin/orders/order_view.html", context)
+
+
+def coupons(request):
+    coupons = Coupon.objects.order_by("-created_at")
+    context = {
+        "coupons": coupons,
+    }
+    return render(request, "admin/coupons/coupons.html", context)
+
+
+def add_coupon(request):
+    if request.method == "POST":
+        coupon = Coupon.objects.create(
+            code=request.POST.get("code"),
+            is_active=request.POST.get("is_active") == "on",
+            discount_type=request.POST.get("discount_type"),
+            discount_value=Decimal(request.POST.get("discount_value", 0.00)),
+            min_purchase_amount=Decimal(request.POST.get("min_purchase_amount", 0.00)),
+            start_date=request.POST.get("start_date"),
+            end_date=request.POST.get("end_date"),
+        )
+        messages.success(request, "New Coupon Created Successfully")
+        return redirect("products:coupons")
+    return render(request, "admin/coupons/add_coupon.html")
+
+
+def edit_coupon(request, id):
+    coupon = get_object_or_404(
+        Coupon,
+        id=id,
+    )
+    if request.method == "POST":
+
+        coupon.code = request.POST.get("code")
+        coupon.is_active = request.POST.get("is_active") == "on"
+        coupon.discount_type = request.POST.get("discount_type")
+        coupon.discount_value = Decimal(request.POST.get("discount_value") or 0)
+        coupon.min_purchase_amount = Decimal(
+            request.POST.get("min_purchase_amount") or 0
+        )
+        coupon.start_date = request.POST.get("start_date") or None
+        coupon.end_date = request.POST.get("end_date") or None
+        coupon.save()
+
+        messages.success(request, "Coupon Updated Successfully")
+        return redirect("products:coupons")
+
+    return render(request, "admin/coupons/edit_coupon.html", {"coupon": coupon})
+
+
+def delete_coupon(request, id):
+    coupon = get_object_or_404(Coupon, id=id)
+    if request.method == "POST":
+        coupon.delete()
+        messages.success(request, "Coupon Deleted Successfully")
+        return redirect("products:coupons")
+
+    return render(request, "admin/coupons/delete_coupon.html", {"coupon": coupon})

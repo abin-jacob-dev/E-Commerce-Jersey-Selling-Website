@@ -2,125 +2,174 @@
 {% load static %}
 
 {% block content %}
-  <main class="container mx-auto px-4 max-w-6xl">
-        <h2 class="text-7xl font-black uppercase tracking-tighter mb-4 tracking-tightest">REQUEST <span class="text-lime-bright">RETURN</span></h2>
-        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest max-w-md leading-relaxed mb-16">
-            Every elite move counts. If it's not the perfect fit for your game, we'll help you reset.
-        </p>
+  <main class="flex-1 bg-lime-light p-4 md:p-8 xl:p-12">
+    {% include 'partials/alert.html' %}
+    <div class="max-w-[1500px] mx-auto">
+      <!-- HEADER -->
+      <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6 mb-12">
+        <!-- LEFT -->
+        <div>
+          <h2 class="text-[28px] sm:text-[38px] lg:text-[48px] font-black uppercase tracking-[-0.03em] leading-none text-black">RETURN ORDER ITEM</h2>
 
-        <div class="flex flex-col lg:flex-row gap-12">
-            <!-- Left Side: Product and Reason -->
-            <div class="flex-1 space-y-8">
-                <!-- Product Card -->
-                <div class="bg-white rounded-sm overflow-hidden flex shadow-sm">
-                    <div class="w-48 bg-white p-6 relative">
-                        <span class="absolute top-4 left-4 bg-lime-bright text-black text-[8px] font-black uppercase px-2 py-1 z-10">Match Ready</span>
-                        <img src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=200&h=200&auto=format&fit=crop" alt="Product" class="w-full grayscale">
-                    </div>
-                    <div class="flex-1 bg-[#e2ead8] p-8">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-2xl font-black uppercase tracking-tighter leading-none tracking-tightest">ARGENTINA 2024<br>HOME KIT</h3>
-                            <span class="text-xl font-black">$145.00</span>
-                        </div>
-                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-8">Lionel Messi #10 | Size: M</p>
-                        <div class="grid grid-cols-2 gap-8">
-                            <div>
-                                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400">Order ID</span>
-                                <p class="text-xs font-black mt-1">#EP-7729-MSG</p>
-                            </div>
-                            <div>
-                                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400">Ordered On</span>
-                                <p class="text-xs font-black mt-1 uppercase">Oct 14, 2023</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Reason Section -->
-                <div class="bg-white p-10 shadow-sm rounded-sm">
-                    <div class="flex items-center gap-3 mb-10">
-                        <div class="w-1.5 h-6 bg-lime-bright"></div>
-                        <h3 class="text-xl font-black uppercase tracking-widest tracking-tightest">Select Reason</h3>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                        <label class="flex items-center gap-4 bg-[#eff6e9] p-5 rounded-lg border-2 border-dark-lime cursor-pointer">
-                            <div class="w-4 h-4 border-2 border-dark-lime rounded-full flex items-center justify-center">
-                                <div class="w-2 h-2 bg-lime-dark rounded-full"></div>
-                            </div>
-                            <span class="text-[10px] font-black uppercase tracking-widest">Ordered Wrong Size</span>
-                        </label>
-                        <label class="flex items-center gap-4 bg-[#eff6e9] p-5 rounded-lg border border-gray-100 cursor-pointer hover:bg-white transition-colors">
-                            <div class="w-4 h-4 border-2 border-gray-200 rounded-full"></div>
-                            <span class="text-[10px] font-black uppercase tracking-widest">Defective / Damaged</span>
-                        </label>
-                        <label class="flex items-center gap-4 bg-[#eff6e9] p-5 rounded-lg border border-gray-100 cursor-pointer hover:bg-white transition-colors">
-                            <div class="w-4 h-4 border-2 border-gray-200 rounded-full"></div>
-                            <span class="text-[10px] font-black uppercase tracking-widest">Changed My Mind</span>
-                        </label>
-                        <label class="flex items-center gap-4 bg-[#eff6e9] p-5 rounded-lg border border-gray-100 cursor-pointer hover:bg-white transition-colors">
-                            <div class="w-4 h-4 border-2 border-gray-200 rounded-full"></div>
-                            <span class="text-[10px] font-black uppercase tracking-widest">Not as Described</span>
-                        </label>
-                    </div>
-
-                    <textarea placeholder="REASON IN DETAIL" class="w-full bg-[#eff6e9] rounded-lg p-6 text-[10px] font-black uppercase tracking-widest focus:outline-none min-h-[150px] placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20"></textarea>
-                </div>
-            </div>
-
-            <!-- Right Side: Quality Check and Refund -->
-            <div class="w-full lg:w-96 space-y-8">
-                <!-- Quality Verification -->
-                <div class="bg-white p-10 border-2 border-dashed border-gray-200 rounded-sm text-center">
-                    <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-8 tracking-tightest">Quality Verification</h4>
-                    <div class="mb-8 flex flex-col items-center">
-                        <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Drag & Drop Photos</p>
-                        <p class="text-[8px] font-bold text-gray-300 uppercase tracking-wider">Max 3 Images (JPG, PNG)</p>
-                    </div>
-                    <button class="w-full bg-black text-white text-[9px] font-black uppercase py-4 tracking-widest hover:bg-gray-800">Browse Files</button>
-                    <div class="grid grid-cols-3 gap-2 mt-6">
-                        <div class="aspect-square bg-[#eff6e9] rounded-sm"></div>
-                        <div class="aspect-square bg-[#eff6e9] rounded-sm"></div>
-                        <div class="aspect-square bg-[#eff6e9] rounded-sm"></div>
-                    </div>
-                </div>
-
-                <!-- Refund Method -->
-                <div class="bg-white p-10 shadow-sm rounded-sm">
-                    <h4 class="text-[10px] font-black uppercase tracking-[0.2em] mb-8 tracking-tightest">Refund Method</h4>
-                    <div class="space-y-3 mb-8">
-                        <label class="flex items-center justify-between p-5 bg-[#eff6e9] rounded-lg border-2 border-dark-lime cursor-pointer">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                                <span class="text-[10px] font-black uppercase tracking-widest">Wallet</span>
-                            </div>
-                            <div class="w-4 h-4 border-2 border-dark-lime rounded-full flex items-center justify-center">
-                                <div class="w-2 h-2 bg-lime-dark rounded-full"></div>
-                            </div>
-                        </label>
-                        <label class="flex items-center justify-between p-5 bg-[#eff6e9] rounded-lg border border-gray-100 cursor-pointer hover:bg-white transition-colors">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                                <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Card</span>
-                            </div>
-                            <div class="w-4 h-4 border-2 border-gray-200 rounded-full"></div>
-                        </label>
-                    </div>
-                    <div class="bg-green-50 border border-green-200 p-4 rounded-lg flex items-center gap-3">
-                        <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path></svg>
-                        <p class="text-[8px] font-black uppercase text-green-600 tracking-widest leading-relaxed">Store credit is processed instantly after verification.</p>
-                    </div>
-                </div>
-
-                <button class="w-full bg-lime-bright text-black font-black uppercase py-6 rounded-sm shadow-xl hover:bg-black hover:text-white transition-all transform hover:-translate-y-1 tracking-[0.2em] text-sm">
-                    Submit Return Request
-                </button>
-                
-                <div class="text-center">
-                    <a href="Order History.html" class="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-black">Cancel & Return to Orders</a>
-                </div>
-            </div>
+          <p class="text-[11px] md:text-[12px] font-bold text-gray-500 uppercase tracking-widest mt-5 max-w-md">Please confirm your return request before proceeding.</p>
         </div>
-    </main>
+
+        <!-- RIGHT -->
+        {% comment %} <div class="xl:text-right">
+          <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">ITEM ID</p>
+
+          <p class="text-2xl sm:text-3xl lg:text-4xl font-black text-[#008000] tracking-tight">#{{ item.id }}</p>
+        </div> {% endcomment %}
+      </div>
+
+      <!-- GRID -->
+      <div class="grid grid-cols-12 gap-8">
+        <!-- LEFT FORM -->
+        <div class="col-span-12 xl:col-span-8">
+          <form method="post" class="flex flex-col gap-8" action="{% url 'products:return_order_item_request' item.id %}">
+            {% csrf_token %}
+
+            <!-- REASON -->
+            <div class="bg-white rounded-[2rem] shadow-sm p-6 md:p-8">
+              <div class="flex items-center justify-between mb-8">
+                <h3 class="text-2xl font-black uppercase tracking-tight text-black">Return Reason</h3>
+                <div class="h-1 w-20 bg-[#008000]"></div>
+              </div>
+
+              <div class="space-y-3">
+                <label class="flex items-center gap-4 bg-lime-light p-4 rounded-xl cursor-pointer">
+                  <input type="radio" name="reason" value="wrong_size" class="w-5 h-5 accent-black" />
+                  <span class="text-[11px] font-black uppercase tracking-widest">WRONG SIZE</span>
+                </label>
+
+                <label class="flex items-center gap-4 bg-lime-light p-4 rounded-xl cursor-pointer">
+                  <input type="radio" name="reason" value="defective" class="w-5 h-5 accent-black" />
+                  <span class="text-[11px] font-black uppercase tracking-widest">DEFECTIVE / DAMAGED</span>
+                </label>
+
+                <label class="flex items-center gap-4 bg-lime-light p-4 rounded-xl cursor-pointer">
+                  <input type="radio" name="reason" value="not_as_described" class="w-5 h-5 accent-black" />
+                  <span class="text-[11px] font-black uppercase tracking-widest">NOT AS DESCRIBED</span>
+                </label>
+
+                <label class="flex items-center gap-4 bg-lime-light p-4 rounded-xl cursor-pointer">
+                  <input type="radio" name="reason" value="changed_mind" class="w-5 h-5 accent-black" />
+                  <span class="text-[11px] font-black uppercase tracking-widest">CHANGED MY MIND</span>
+                </label>
+
+                <!-- OTHER -->
+                <label class="flex items-start gap-4 bg-lime-light p-4 rounded-xl cursor-pointer">
+                  <input type="radio" name="reason" value="other" id="reason_other" class="w-5 h-5 accent-black mt-1" />
+
+                  <div class="w-full">
+                    <span class="text-[11px] font-black uppercase tracking-widest">OTHER</span>
+
+                    <textarea name="other_reason" id="other_reason_textarea" placeholder="PLEASE SPECIFY YOUR REASON..." class="mt-3 w-full h-28 hidden bg-white border border-gray-200 rounded-lg p-4 text-[11px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[#008000]"></textarea>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <script>
+              const otherRadio = document.getElementById('reason_other')
+              const textarea = document.getElementById('other_reason_textarea')
+              
+              document.querySelectorAll('input[name="reason"]').forEach((radio) => {
+                radio.addEventListener('change', () => {
+                  if (otherRadio.checked) {
+                    textarea.classList.remove('hidden')
+                  } else {
+                    textarea.classList.add('hidden')
+                    textarea.value = ''
+                  }
+                })
+              })
+            </script>
+
+            <!-- TEXTAREA -->
+            {% comment %} <div class="bg-white rounded-[2rem] shadow-sm p-6 md:p-8">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-black uppercase tracking-tight text-black">Additional Details</h3>
+                <div class="h-1 w-20 bg-[#008000]"></div>
+              </div>
+
+              <textarea name="note" placeholder="TELL US MORE..." class="w-full h-40 bg-[#f0fdf4] border border-gray-100 rounded-xl p-5 text-[11px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[#008000]"></textarea>
+            </div> {% endcomment %}
+
+            <!-- POLICY -->
+            <div class="bg-lime-light p-6 rounded-xl">
+              <p class="text-[11px] font-bold text-gray-600 uppercase tracking-widest leading-relaxed">RETURN POLICY: RETURNS ARE REVIEWED AFTER SUBMISSION. ONCE APPROVED, REFUNDS WILL BE PROCESSED TO YOUR ORIGINAL PAYMENT METHOD WITHIN 5–7 BUSINESS DAYS.</p>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="flex items-center gap-4 pt-2">
+              <!-- Confirm Cancel -->
+              <button type="submit" class="flex-1 h-12 bg-[#008000] text-white rounded-xl font-black uppercase tracking-[0.14em] text-[11px] hover:bg-black transition-all flex items-center justify-center">CONFIRM</button>
+
+              <!-- Keep Order -->
+              <a href="{% url 'products:order_details' order.order_id %}" class="flex-1 h-12 bg-white border border-gray-200 text-black rounded-xl font-black uppercase tracking-[0.14em] text-[11px] hover:bg-gray-100 transition-all flex items-center justify-center">GO BACK</a>
+            </div>
+          </form>
+        </div>
+
+        <!-- RIGHT SUMMARY -->
+        <div class="col-span-12 xl:col-span-4">
+          <div class="bg-white rounded-[2rem] shadow-sm p-6 md:p-8">
+            <h3 class="text-xl font-black uppercase tracking-tight mb-8 text-black">ORDER SUMMARY</h3>
+
+            <!-- ITEM -->
+            <div class="flex gap-5 mb-8">
+              <div class="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                {% if item.variant and item.variant.images.first %}
+                  <img src="{{ item.variant.images.first.image.url }}" class="w-full h-full object-cover" />
+                {% else %}
+                  <div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-gray-400">NO IMAGE</div>
+                {% endif %}
+              </div>
+
+              <div class="min-w-0">
+                <h4 class="text-[12px] font-black uppercase tracking-widest leading-tight">{{ item.product_name }}</h4>
+
+                <p class="text-[10px] font-bold text-gray-400 uppercase mt-2">
+                  SIZE: {{ item.size }}
+                  {% if item.color %}
+                    / {{ item.color }}
+                  {% endif %}
+                </p>
+
+                <p class="text-xl font-black text-[#008000] mt-3">₹{{ item.subtotal }}</p>
+              </div>
+            </div>
+
+            <!-- TOTAL -->
+            <div class="border-t pt-6 space-y-3">
+              <div class="flex justify-between text-[11px] font-bold uppercase text-gray-500">
+                <span>SUBTOTAL</span>
+                <span>₹{{ item.subtotal }}</span>
+              </div>
+
+              <div class="flex justify-between text-[11px] font-bold uppercase text-gray-500">
+                <span>SHIPPING</span>
+                <span class="text-[#008000]">FREE</span>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-end mt-6">
+              <span class="text-[11px] font-black uppercase tracking-widest">TOTAL REFUND</span>
+              <span class="text-2xl font-black text-[#008000]">₹{{ item.subtotal }}</span>
+            </div>
+          </div>
+
+          <!-- SECURITY -->
+          <div class="mt-6 bg-lime-light rounded-xl p-4 flex items-start gap-3">
+            <svg class="w-5 h-5 text-[#008000] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+
+            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">SECURE TRANSACTION & GUARANTEED REFUND PROCESSING</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 {% endblock %}

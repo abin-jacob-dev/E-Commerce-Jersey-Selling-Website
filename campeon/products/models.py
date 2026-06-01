@@ -7,7 +7,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import Sum
 from userauths.models import Account
 from user.models import Addresses
-
+from django.utils import timezone
 
 # Create your models here.
 class Category(models.Model):
@@ -198,9 +198,8 @@ class Wishlist(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("user", 
-        "variant")
-        ordering= ['-created_at']
+        unique_together = ("user", "variant")
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.user.username} - {self.variant.product.name}"
@@ -249,7 +248,6 @@ class Order(models.Model):
     place = models.CharField(max_length=150, blank=True, null=True)
     state = models.CharField(max_length=150, blank=True, null=True)
     postal_code = models.CharField(max_length=20, blank=True, null=True)
-    
 
     order_id = models.CharField(max_length=20, unique=True, blank=True)
 
@@ -295,7 +293,7 @@ class OrderItem(models.Model):
         ("cancelled", "Cancelled"),
         ("partially_cancel", "Partially Cancelled"),
         ("returned", "Returned"),
-        ("partially_return", "Partially Returned"),
+        ("partially_returned", "Partially Returned"),
     ]
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
@@ -317,7 +315,52 @@ class OrderItem(models.Model):
 
     cancel_reason = models.TextField(blank=True, null=True)
     cancelled_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    returned_reason = models.TextField(blank=True, null=True)
+    returned_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return f"{self.product_name} x {self.quantity}"
 
+
+class Coupon(models.Model):
+
+    DISCOUNT_TYPE_CHOICES = [
+        ("percentage", "Percentage"),
+        ("fixed", "Fixed Amount"),
+    ]
+
+    code = models.CharField(max_length=50, unique=True)
+    is_active = models.BooleanField(default=True)
+    discount_type = models.CharField(
+        max_length=20, choices=DISCOUNT_TYPE_CHOICES, default="percentage"
+    )
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    min_purchase_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00
+    )
+    start_date = models.DateField()
+    end_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.code
+
+    @property
+    def is_expired(self):
+        if self.end_date:
+            return timezone.now().date() > self.end_date
+        return False
+
+    def is_valid(self):
+        now = timezone.now().date()
+        if not self.is_active:
+            return False
+        if self.start_date and now < self.start_date:
+            return False
+        if self.end_date and now > self.end_date:
+            return False
+        return True
