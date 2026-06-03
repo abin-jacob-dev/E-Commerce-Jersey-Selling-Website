@@ -117,6 +117,7 @@ urlpatterns = [
         name="order_view",
     ),
     # ---------------------------------coupons ------------------------------------------
+    # admin side
     path(
         "coupons/",
         views.coupons,
@@ -136,5 +137,37 @@ urlpatterns = [
         "delete-coupon/<int:id>",
         views.delete_coupon,
         name="delete_coupon",
+    ),
+    # userside
+    path(
+        "apply-coupon/",
+        views.apply_coupon,
+        name="apply_coupon",
+    ),
+    path(
+        "remove-coupon/",
+        views.remove_coupon,
+        name="remove_coupon",
+    ),
+    # -------------------------------offer-------------------------
+    path(
+        "offers",
+        views.offers,
+        name="offers",
+    ),
+    path(
+        "add-offer/",
+        views.add_offer,
+        name="add_offer",
+    ),
+    path(
+        "edit-offer/<int:id>/",
+        views.edit_offer,
+        name="edit_offer",
+    ),
+    path(
+        "delete-offer/<int:id>/",
+        views.delete_offer,
+        name="delete_offer",
     ),
 ]

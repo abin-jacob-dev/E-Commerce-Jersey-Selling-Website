@@ -23,7 +23,6 @@
             <tr>
               <th class="px-6 py-6">Code Name</th>
               <th class="px-6 py-6">Discount</th>
-              <th class="px-6 py-6">Type</th>
               <th class="px-6 py-6">Min Purchase</th>
               <th class="px-6 py-6">Start Date</th>
               <th class="px-6 py-6">Expiry Date</th>
@@ -34,10 +33,10 @@
 
           <tbody>
             {% for coupon in coupons %}
-              <tr class="border-b border-gray-100 hover:bg-gray-50">
-                <td class="px-6 py-6 font-black text-black">{{ coupon.code }}</td>
+              <tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+                <td class="px-6 py-6 font-semibold text-black">{{ coupon.code }}</td>
 
-                <td class="px-6 py-6 font-black text-green-700">
+                <td class="px-6 py-6 font-semibold text-green-700">
                   {% if coupon.discount_type == 'percentage' %}
                     {{ coupon.discount_value }}%
                   {% else %}
@@ -45,31 +44,29 @@
                   {% endif %}
                 </td>
 
-                <td class="px-6 py-6 text-black whitespace-nowrap align-middle">{{ coupon.get_discount_type_display }}</td>
+                <td class="px-6 py-6 font-medium text-black">₹{{ coupon.min_purchase_amount }}</td>
 
-                <td class="px-6 py-6 text-black">₹{{ coupon.min_purchase_amount }}</td>
+                <td class="px-6 py-6 font-medium text-black whitespace-nowrap">{{ coupon.start_date|date:'d M Y' }}</td>
 
-                <td class="px-6 py-6 text-black whitespace-nowrap align-middle">{{ coupon.start_date|date:'d M Y' }}</td>
-
-                <td class="px-6 py-6 text-black whitespace-nowrap align-middle">{{ coupon.end_date|date:'d M Y' }}</td>
+                <td class="px-6 py-6 font-medium text-black whitespace-nowrap">{{ coupon.end_date|date:'d M Y' }}</td>
 
                 <td class="px-6 py-6">
                   {% if coupon.is_active %}
-                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold">Active</span>
+                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Active</span>
                   {% else %}
-                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold">Inactive</span>
+                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold">Inactive</span>
                   {% endif %}
                 </td>
 
                 <td class="px-6 py-6">
                   <div class="flex justify-end gap-3">
-                    <a href="{% url "products:edit_coupon" coupon.id %}" class="text-gray-400 hover:text-black">
+                    <a href="{% url 'products:edit_coupon' coupon.id %}" class="text-gray-500 hover:text-black">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                       </svg>
                     </a>
 
-                    <a href="{% url 'products:delete_coupon' coupon.id %}" class="text-gray-400 hover:text-red-500">
+                    <a href="{% url 'products:delete_coupon' coupon.id %}" class="text-gray-500 hover:text-red-500">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                       </svg>

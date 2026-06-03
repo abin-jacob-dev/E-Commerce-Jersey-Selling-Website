@@ -16,6 +16,7 @@ from products.models import (
     Order,
     OrderItem,
     Coupon,
+    Offer,
 )
 from user.models import Addresses
 from django.db.models import Prefetch
@@ -29,6 +30,8 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 from weasyprint import HTML
 from decimal import Decimal
+from datetime import datetime
+from django.core.exceptions import ValidationError
 
 
 # Create your views here.
@@ -506,7 +509,17 @@ def cart(request):
             item.error = "Unavailable or Out of stock"
             checkout_disabled = True
 
-    context = {"cart": cart_obj, "items": items, "checkout_disabled": checkout_disabled}
+    coupons = Coupon.objects.filter(is_active=True)
+    summary = calculate_cart_summary(cart_obj, request)
+    context = {
+        "cart": cart_obj,
+        "items": items,
+        "checkout_disabled": checkout_disabled,
+        "coupons": coupons,
+        "coupon_discount": summary["coupon_discount"],
+        "applied_coupon": summary["applied_coupon"],
+        "final_total": summary["final_total"],
+    }
     return render(request, "products/cart.html", context)
 
 
@@ -587,6 +600,32 @@ def remove_from_cart(request, item_id):
     return redirect("products:cart")
 
 
+def calculate_cart_summary(cart, request=None):
+    subtotal = cart.total_price
+    coupon_discount = Decimal("0.00")
+    applied_coupon = None
+    coupon_id = request.session.get("coupon_id") if request else None
+    if coupon_id:
+        try:
+            applied_coupon = Coupon.objects.get(id=coupon_id, is_active=True)
+            if (
+                applied_coupon and subtotal >= applied_coupon.min_purchase_amount
+            ):
+                if applied_coupon.discount_type == "percentage":
+                    coupon_discount = (subtotal * applied_coupon.discount_value) / 100
+                elif applied_coupon.discount_type == "fixed":
+                    coupon_discount = applied_coupon.discount_value
+        except Coupon.DoesNotExist:
+            pass
+    final_total = max(subtotal - coupon_discount, 0)
+    return {
+        "subtotal": subtotal,
+        "coupon_discount": coupon_discount,
+        "applied_coupon": applied_coupon,
+        "final_total": final_total,
+    }
+
+
 @user_login_required
 def update_cart_quantity(request):
     if request.method == "POST":
@@ -614,14 +653,20 @@ def update_cart_quantity(request):
                 return JsonResponse(
                     {"status": "error", "message": "Minimum quantity is 1."}
                 )
-
         cart_item.save()
+        summary = calculate_cart_summary(cart_item.cart, request)
         return JsonResponse(
             {
                 "status": "success",
                 "quantity": cart_item.quantity,
-                "subtotal": float(cart_item.subtotal),
-                "total_price": float(cart_item.cart.total_price),
+                "item_subtotal": float(cart_item.subtotal),
+                "cart_subtotal": float(summary["subtotal"]),
+                "coupon_discount": float(summary["coupon_discount"]),
+                "final_total": float(summary["final_total"]),
+                "has_coupon": request.session.get("coupon_id") is not None,
+                "coupon_code": (
+                    summary["applied_coupon"].code if summary["applied_coupon"] else ""
+                ),
             }
         )
     return JsonResponse({"status": "error", "message": "Invalid request."})
@@ -779,6 +824,7 @@ def checkout(request):
         request.session["address_id"] = address.id
         messages.success(request, "Address selected successfully.")
         return redirect("products:select_payment")
+
     context = {"items": items, "addresses": addresses, "cart": cart}
     return render(request, "products/checkout.html", context)
 
@@ -1110,8 +1156,8 @@ def coupons(request):
 
 def add_coupon(request):
     if request.method == "POST":
-        coupon = Coupon.objects.create(
-            code=request.POST.get("code"),
+        coupon = Coupon(
+            code=request.POST.get("code").upper(),
             is_active=request.POST.get("is_active") == "on",
             discount_type=request.POST.get("discount_type"),
             discount_value=Decimal(request.POST.get("discount_value", 0.00)),
@@ -1119,8 +1165,14 @@ def add_coupon(request):
             start_date=request.POST.get("start_date"),
             end_date=request.POST.get("end_date"),
         )
-        messages.success(request, "New Coupon Created Successfully")
-        return redirect("products:coupons")
+        try:
+            coupon.full_clean()
+            coupon.save()
+            messages.success(request, "New Coupon Created Successfully")
+            return redirect("products:coupons")
+        except ValidationError as e:
+            messages.error(request, "".join(e.messages))
+            return redirect("products:add_coupon")
     return render(request, "admin/coupons/add_coupon.html")
 
 
@@ -1131,7 +1183,7 @@ def edit_coupon(request, id):
     )
     if request.method == "POST":
 
-        coupon.code = request.POST.get("code")
+        coupon.code = request.POST.get("code").upper()
         coupon.is_active = request.POST.get("is_active") == "on"
         coupon.discount_type = request.POST.get("discount_type")
         coupon.discount_value = Decimal(request.POST.get("discount_value") or 0)
@@ -1140,10 +1192,15 @@ def edit_coupon(request, id):
         )
         coupon.start_date = request.POST.get("start_date") or None
         coupon.end_date = request.POST.get("end_date") or None
-        coupon.save()
+        try:
+            coupon.full_clean()
+            coupon.save()
 
-        messages.success(request, "Coupon Updated Successfully")
-        return redirect("products:coupons")
+            messages.success(request, "Coupon Updated Successfully")
+            return redirect("products:coupons")
+        except ValidationError as e:
+            messages.error(request, "".join(e.messages))
+            return redirect("products:edit_coupon", coupon.id)
 
     return render(request, "admin/coupons/edit_coupon.html", {"coupon": coupon})
 
@@ -1156,3 +1213,87 @@ def delete_coupon(request, id):
         return redirect("products:coupons")
 
     return render(request, "admin/coupons/delete_coupon.html", {"coupon": coupon})
+
+
+def apply_coupon(request):
+    if request.method == "POST":
+        code = request.POST.get("code", "").strip().upper()
+        try:
+            coupon = Coupon.objects.get(code=code, is_active=True)
+            request.session["coupon_id"] = coupon.id
+            messages.success(request, f"Coupon {coupon.code} applied")
+        except:
+            messages.error(request, "Invalid Coupon")
+
+    return redirect("products:cart")
+
+
+def remove_coupon(request):
+    request.session.pop("coupon_id", None)
+    messages.success(request, "Coupon removed")
+    return redirect("products:cart")
+
+
+def offers(request):
+    offers = Offer.objects.all()
+
+    return render(request, "admin/offers/offers.html", {"offers": offers})
+
+
+def add_offer(request):
+    if request.method == "POST":
+        start_date = datetime.strptime(request.POST.get("start_date"), "%Y-%m-%dT%H:%M")
+
+        end_date = datetime.strptime(request.POST.get("end_date"), "%Y-%m-%dT%H:%M")
+
+        offer = Offer(
+            name=request.POST.get("name"),
+            discount_type=request.POST.get("discount_type"),
+            discount_value=Decimal(request.POST.get("discount_value") or 0),
+            start_date=start_date,
+            end_date=end_date,
+            is_active=request.POST.get("is_active") == "on",
+        )
+
+        try:
+            offer.save()
+            messages.success(request, "Offer has been Created Successfully")
+            return redirect("products:offers")
+        except ValidationError as e:
+            messages.error(request, "".join(e.messages))
+            return redirect("products:add_offer")
+
+    return render(request, "admin/offers/add_offer.html")
+
+
+def edit_offer(request, id):
+    offer = get_object_or_404(Offer, id=id)
+    if request.method == "POST":
+        start_date = datetime.strptime(request.POST.get("start_date"), "%Y-%m-%dT%H:%M")
+
+        end_date = datetime.strptime(request.POST.get("end_date"), "%Y-%m-%dT%H:%M")
+
+        offer.name = request.POST.get("name")
+        offer.discount_type = request.POST.get("discount_type")
+        offer.discount_value = Decimal(request.POST.get("discount_value") or 0)
+        offer.start_date = start_date
+        offer.end_date = end_date
+        offer.is_active = request.POST.get("is_active") == "on"
+        try:
+            offer.save()
+            messages.success(request, "Offer Updated Successfully")
+            return redirect("products:offers")
+        except ValidationError as e:
+            messages.error(request, "".join(e.messages))
+            return redirect("products:edit_offer", offer.id)
+
+    return render(request, "admin/offers/edit_offer.html", {"offer": offer})
+
+
+def delete_offer(request, id):
+    offer = get_object_or_404(Offer, id=id)
+    if request.method == "POST":
+        offer.delete()
+        messages.success(request, "Offer has been deleted Successfully")
+        return redirect("products:offers")
+    return render(request, "admin/offers/delete_offer.html", {"offer": offer})

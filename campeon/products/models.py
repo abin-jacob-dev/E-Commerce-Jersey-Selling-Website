@@ -8,8 +8,127 @@ from django.db.models import Sum
 from userauths.models import Account
 from user.models import Addresses
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+
 
 # Create your models here.
+
+
+
+class Coupon(models.Model):
+
+    DISCOUNT_TYPE_CHOICES = [
+        ("percentage", "Percentage"),
+        ("fixed", "Fixed Amount"),
+    ]
+
+    code = models.CharField(max_length=10, unique=True)
+    is_active = models.BooleanField(default=True)
+    discount_type = models.CharField(
+        max_length=20, choices=DISCOUNT_TYPE_CHOICES, default="percentage"
+    )
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    min_purchase_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00
+    )
+    start_date = models.DateField()
+    end_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.code
+
+    @property
+    def is_expired(self):
+        if self.end_date:
+            return timezone.now().date() > self.end_date
+        return False
+
+    def is_valid(self):
+        now = timezone.now().date()
+        if not self.is_active:
+            return False
+        if self.start_date and now < self.start_date:
+            return False
+        if self.end_date and now > self.end_date:
+            return False
+        return True
+
+    def clean(self):
+        if self.start_date and self.end_date:
+            if self.start_date >= self.end_date:
+                raise ValidationError("End date must be after start date")
+        if self.discount_value <= 0:
+            raise ValidationError("Discount Value must be greater than zero")
+        if self.discount_type == "percentage" and self.discount_value > 100:
+            raise ValidationError("Percentage discount cannot be greater than 100%")
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+class Offer(models.Model):
+
+    DISCOUNT_TYPE_CHOICES = [
+        ("percentage", "Percentage"),
+        ("fixed", "Fixed Amount"),
+    ]
+
+    name = models.CharField(max_length=20)
+
+    discount_type = models.CharField(max_length=20, choices=DISCOUNT_TYPE_CHOICES)
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def is_expired(self):
+
+        return timezone.now() > self.end_date
+
+    @property
+    def is_valid(self):
+        now = timezone.now()
+        if not self.is_active:
+            return False
+        if self.start_date and now < self.start_date:
+            return False
+        if self.end_date and now > self.end_date:
+            return False
+        return True
+
+    def clean(self):
+        if self.start_date and self.end_date:
+            if self.start_date >= self.end_date:
+                raise ValidationError("End date must be after start date")
+        if self.discount_value <= 0:
+            raise ValidationError("Discount Value must be greater than zero")
+        if self.discount_type == "percentage" and self.discount_value > 100:
+            raise ValidationError("Percentage discount cannot be greater than 100%")
+        # active_offer = Offer.objects.filter(is_active = True,start_date__lt = self.end_date,end_date__gt=self.end_date).exclude(pk=self.pk)
+        # if self.is_active and active_offer.exists():
+        #     raise ValidationError('Only one active offer is allowed.')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+
+
 class Category(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
@@ -57,6 +176,7 @@ class Product(models.Model):
         blank=True,
         related_name="products",
     )
+
     description = models.TextField(blank=True)
     highlights = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
@@ -163,7 +283,7 @@ class Cart(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name="cart")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    coupon = models.ForeignKey(Coupon , null=True,blank=True,on_delete=models.SET_NULL)
     def __str__(self):
         return f"Cart of {self.user.username}"
 
@@ -232,13 +352,6 @@ class Order(models.Model):
 
     user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="orders")
 
-    # address = models.ForeignKey(
-    #     Addresses,
-    #     on_delete=models.SET_NULL,
-    #     null=True,
-    #     blank=True,
-    #     related_name="orders",
-    # )
     full_name = models.CharField(max_length=50, blank=True, null=True)
     phone_number = models.CharField(max_length=25, blank=True, null=True)
 
@@ -320,47 +433,3 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product_name} x {self.quantity}"
-
-
-class Coupon(models.Model):
-
-    DISCOUNT_TYPE_CHOICES = [
-        ("percentage", "Percentage"),
-        ("fixed", "Fixed Amount"),
-    ]
-
-    code = models.CharField(max_length=50, unique=True)
-    is_active = models.BooleanField(default=True)
-    discount_type = models.CharField(
-        max_length=20, choices=DISCOUNT_TYPE_CHOICES, default="percentage"
-    )
-    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
-    min_purchase_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0.00
-    )
-    start_date = models.DateField()
-    end_date = models.DateField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return self.code
-
-    @property
-    def is_expired(self):
-        if self.end_date:
-            return timezone.now().date() > self.end_date
-        return False
-
-    def is_valid(self):
-        now = timezone.now().date()
-        if not self.is_active:
-            return False
-        if self.start_date and now < self.start_date:
-            return False
-        if self.end_date and now > self.end_date:
-            return False
-        return True

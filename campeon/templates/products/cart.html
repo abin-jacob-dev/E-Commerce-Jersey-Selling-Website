@@ -1,6 +1,23 @@
 {% extends 'partials/base.html' %}
 {% load static %}
 {% block content %}
+  {% comment %} {{ cart_subtotal }}
+  {{ cart_total }}
+  {{ cart_count }}
+  {{ coupon_discount }}
+  {{ applied_coupon }} {% endcomment %}
+  <script>
+    const couponAmount = document.getElementById('coupon-amount')
+    const couponSection = document.getElementById('coupon-section')
+    
+    if (couponAmount) {
+      couponAmount.innerText = data.has_coupon ? `- ₹${data.coupon_discount.toFixed(2)}` : `₹0`
+    }
+    
+    if (couponSection) {
+      couponSection.style.display = data.has_coupon ? 'block' : 'none'
+    }
+  </script>
   <main class="bg-[#e9f5db] min-h-screen py-16">
     <div class="container mx-auto px-6">
       <h2 class="text-6xl font-black uppercase mb-12 tracking-tightest">Cart ({{ items.count }} item{{ items.count|pluralize }})</h2>
@@ -33,7 +50,7 @@
                       <span class="text-[8px] font-black uppercase tracking-widest text-gray-400">SKU</span>
                       <span class="text-[10px] font-black uppercase">{{ item.variant.sku }}</span>
                     </div>
-                    
+
                     <div class="flex flex-col">
                       <span class="text-[8px] font-black uppercase tracking-widest text-gray-400">Size</span>
                       <span class="text-[10px] font-black uppercase">{{ item.variant.get_size_display }}</span>
@@ -52,7 +69,7 @@
                   <span class="text-xl font-black text-black mb-6">₹{{ item.variant.price }}</span>
                   <div class="mt-auto">
                     <p class="text-[9px] font-black uppercase tracking-widest text-gray-300 mb-1">Total</p>
-                    <span id="subtotal-{{ item.id }}" class="text-3xl font-black text-lime-dark">₹{{ item.subtotal }}</span>
+                    <span id="item-subtotal-{{ item.id }}" class="text-3xl font-black text-lime-dark">₹{{ item.subtotal }}</span>
                   </div>
                 </div>
                 <a href="{% url 'products:remove_from_cart' item.id %}" class="absolute top-6 right-6 text-gray-400 hover:text-red-500 transition-colors">
@@ -71,6 +88,57 @@
               </svg>Continue Shopping
             </a>
           </div>
+          {% if coupons %}
+            <div class="bg-white p-8 rounded-xl shadow-sm mt-8">
+              <div class="flex items-center justify-between mb-6">
+                <h4 class="text-base font-semibold uppercase tracking-[0.15em]">Available Coupons</h4>
+
+                <span class="text-sm font-medium text-gray-500 uppercase">{{ coupons|length }} Coupon{{ coupons|length|pluralize }}</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {% for coupon in coupons %}
+                  <div class="border border-gray-200 rounded-xl p-5 bg-gray-50 hover:border-lime-dark hover:shadow-md transition-all">
+                    <!-- Header -->
+                    <form action="{% url 'products:apply_coupon' %}" method="post">
+                      {% csrf_token %}
+                      <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                          <p class="text-base font-semibold text-lime-dark uppercase">{{ coupon.code }}</p>
+                          <input type="hidden" name="code" value="{{ coupon.code }}" />
+
+                          {% if coupon.description %}
+                            <p class="text-sm text-gray-500 mt-1">{{ coupon.description }}</p>
+                          {% endif %}
+                        </div>
+
+                        <button type="submit" class="shrink-0 bg-lime-bright hover:bg-lime-dark hover:text-white transition-all px-4 py-2 rounded-lg text-sm font-medium uppercase">Apply</button>
+                      </div>
+                    </form>
+
+                    <!-- Footer -->
+                    <div class="mt-4 pt-4 border-t border-gray-200 space-y-3">
+                      <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500 uppercase">Discount</span>
+
+                        {% if coupon.discount_type == 'percentage' %}
+                          <span class="font-semibold text-black">{{ coupon.discount_value }}% OFF</span>
+                        {% else %}
+                          <span class="font-semibold text-black">₹{{ coupon.discount_value }} OFF</span>
+                        {% endif %}
+                      </div>
+
+                      <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500 uppercase">Valid Till</span>
+
+                        <span class="font-semibold text-black">{{ coupon.end_date|date:'d M Y' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
         </div>
 
         <!-- Order Summary Panel -->
@@ -83,6 +151,26 @@
                 <span class="uppercase tracking-[0.2em] opacity-60 text-xs">Subtotal ({{ items.count }} item{{ items.count|pluralize }})</span>
                 <span id="summary-subtotal" class="text-lg font-black">₹{{ cart.total_price }}</span>
               </div>
+              <div class="coupon-section">
+                {% if applied_coupon %}
+                  <div class="flex justify-between items-start">
+                    <div class="flex flex-col">
+                      <span class="uppercase tracking-[0.2em] opacity-60 text-xs">Coupon <br />({{ applied_coupon.code }})</span>
+                    </div>
+
+                    <div class="flex flex-col items-end">
+                      <span id="coupon-amount">
+                        {% if applied_coupon %}
+                          - ₹{{ coupon_discount|default:0 }}
+                        {% else %}
+                          ₹0
+                        {% endif %}
+                      </span>
+                      <a href="{% url 'products:remove_coupon' %}" class="mt-2 text-[10px] uppercase font-black text-gray-300 hover:text-red-500 text-right">Remove Coupon</a>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
 
               <div class="flex justify-between items-center">
                 <span class="uppercase tracking-[0.2em] opacity-60 text-xs">Shipping</span>
@@ -93,7 +181,7 @@
             <!-- TOTAL -->
             <div class="mb-8">
               <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-50">ESTIMATED TOTAL</span>
-              <div id="summary-total" class="text-5xl font-black text-lime-bright mt-2 leading-none">₹{{ cart.total_price }}</div>
+              <div id="summary-total" class="text-5xl font-black text-lime-bright mt-2 leading-none">₹{{ final_total|default:cart.total_price }}</div>
             </div>
 
             <!-- CHECKOUT BUTTON -->
@@ -148,15 +236,36 @@
         .then((res) => res.json())
         .then((data) => {
           if (data.status === 'success') {
+            // Quantity
             document.getElementById(`qty-${itemId}`).innerText = data.quantity
-            document.getElementById(`subtotal-${itemId}`).innerText = `₹${data.subtotal.toFixed(2)}`
-            document.getElementById('summary-subtotal').innerText = `₹${data.total_price.toFixed(2)}`
-            document.getElementById('summary-total').innerText = `₹${data.total_price.toFixed(2)}`
+    
+            // Item subtotal
+            document.getElementById(`item-subtotal-${itemId}`).innerText = `₹${data.item_subtotal.toFixed(2)}`
+    
+            // Cart subtotal
+            document.getElementById('summary-subtotal').innerText = `₹${data.cart_subtotal.toFixed(2)}`
+    
+            // Final total
+            document.getElementById('summary-total').innerText = `₹${data.final_total.toFixed(2)}`
+    
+            // Coupon discount (if coupon exists)
+            const discountEl = document.getElementById('coupon-amount')
+    
+            if (discountEl) {
+              if (data.has_coupon && data.coupon_discount > 0) {
+                discountEl.innerText = `- ₹${data.coupon_discount.toFixed(2)}`
+              } else {
+                discountEl.innerText = `- ₹0.00`
+              }
+            }
           } else {
             alert(data.message)
           }
         })
-        .catch(() => alert('Something went wrong'))
+        .catch((error) => {
+          console.error(error)
+          alert('Something went wrong')
+        })
     }
   </script>
 {% endblock %}

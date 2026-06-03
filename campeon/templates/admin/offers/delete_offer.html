@@ -1,0 +1,67 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="relative">
+
+  <!-- PAGE CONTENT -->
+  <div class="p-6">
+    <!-- your page content -->
+  </div>
+
+  <!-- MODAL OVERLAY -->
+  <div class="fixed inset-0 bg-gray-900/70 flex items-center justify-center z-50">
+
+    <form action="{% url 'products:delete_offer' offer.id %}"
+          method="post"
+          class="w-full flex items-center justify-center">
+
+      {% csrf_token %}
+
+      <div class="bg-white rounded-[2rem] p-12 max-w-md w-full shadow-2xl relative">
+
+        <!-- ICON -->
+        <div class="flex justify-center mb-8">
+          <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-600">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- TITLE -->
+        <h2 class="text-2xl font-black uppercase text-center mb-4">
+          DELETE OFFER
+        </h2>
+
+        <!-- DESCRIPTION -->
+        <p class="text-center text-sm font-semibold text-gray-600 mb-8">
+          You are about to permanently delete this offer. This action cannot be undone.
+        </p>
+
+        <!-- BUTTONS -->
+        <div class="flex gap-4">
+
+          <!-- CANCEL -->
+          <a href="{% url 'products:offers' %}"
+             class="flex-1 bg-gray-100 text-black py-4 rounded-xl font-black uppercase text-[10px] hover:bg-gray-200 text-center">
+            Cancel
+          </a>
+
+          <!-- CONFIRM -->
+          <button type="submit"
+                  class="flex-1 bg-black text-white py-4 rounded-xl font-black uppercase text-[10px] hover:bg-red-600">
+            Confirm
+          </button>
+
+        </div>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+{% endblock %}
