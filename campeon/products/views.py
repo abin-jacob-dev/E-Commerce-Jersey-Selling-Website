@@ -18,6 +18,7 @@ from products.models import (
     Coupon,
     Offer,
 )
+from payment.models import Payment
 from user.models import Addresses
 from django.db.models import Prefetch
 from django.db.models import Min, Q
@@ -32,9 +33,15 @@ from weasyprint import HTML
 from decimal import Decimal
 from datetime import datetime
 from django.core.exceptions import ValidationError
-
+from payment.services import create_order
+from django.conf import settings
+import razorpay
 
 # Create your views here.
+
+client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+
 @superuser_required
 def categories(request):
     categories_list = Category.objects.filter(is_deleted=False).order_by("-created_at")
@@ -608,9 +615,7 @@ def calculate_cart_summary(cart, request=None):
     if coupon_id:
         try:
             applied_coupon = Coupon.objects.get(id=coupon_id, is_active=True)
-            if (
-                applied_coupon and subtotal >= applied_coupon.min_purchase_amount
-            ):
+            if applied_coupon and subtotal >= applied_coupon.min_purchase_amount:
                 if applied_coupon.discount_type == "percentage":
                     coupon_discount = (subtotal * applied_coupon.discount_value) / 100
                 elif applied_coupon.discount_type == "fixed":
@@ -830,32 +835,94 @@ def checkout(request):
 
 
 @user_login_required
+@transaction.atomic
+def verify_payment(request):
+
+    razorpay_payment_id = request.POST.get("razorpay_payment_id")
+    razorpay_order_id = request.POST.get("razorpay_order_id")
+    razorpay_signature = request.POST.get("razorpay_signature")
+
+    payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
+
+    order = payment.order
+
+    if payment.status == "paid":
+        return JsonResponse({"success": True, "order_id": order.order_id})
+
+    try:
+
+        client.utility.verify_payment_signature(
+            {
+                "razorpay_payment_id": razorpay_payment_id,
+                "razorpay_order_id": razorpay_order_id,
+                "razorpay_signature": razorpay_signature,
+            }
+        )
+
+        for item in order.items.all():
+
+            if item.variant.stock < item.quantity:
+                return JsonResponse({"success": False, "message": "Out of stock"})
+
+            item.variant.stock -= item.quantity
+            item.variant.save()
+
+        payment.razorpay_payment_id = razorpay_payment_id
+        payment.razorpay_signature = razorpay_signature
+        payment.status = "paid"
+        payment.save()
+
+        order.payment_status = "paid"
+        order.save()
+
+        CartItem.objects.filter(cart__user=order.user).delete()
+
+        return JsonResponse({"success": True, "order_id": order.order_id})
+
+    except Exception as e:
+
+        payment.status = "failed"
+        payment.save()
+
+        order.payment_status = "failed"
+        order.save()
+
+        return JsonResponse({"success": False})
+
+
+@user_login_required
 def select_payment(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
 
-    cart_items = cart.items.select_related(
-        "variant__product",
-    ).prefetch_related("variant__images")
+    cart_items = cart.items.select_related("variant__product").prefetch_related(
+        "variant__images"
+    )
+
     if not cart_items.exists():
         messages.error(request, "Your cart is empty")
         return redirect("products:cart")
+
     subtotal = cart.total_price
     shipping = 0
     total = subtotal + shipping
 
+    address_id = request.session.get("address_id")
+    if not address_id:
+        messages.error(request, "Select address first")
+        return redirect("product:checkout")
+
+    address = get_object_or_404(Addresses, id=address_id, user=request.user)
+
     if request.method == "POST":
+
         payment_method = request.POST.get("payment_method")
-        request.session["payment_method"] = payment_method
+
         if not payment_method:
-            messages.error(request, "Please select the payment method.")
+            messages.error(request, "Select payment method")
             return redirect("products:select_payment")
 
-        address_id = request.session.get("address_id")
-        if not address_id:
-            messages.error(request, "Please select an address.")
-            return redirect("product:checkout")
-        address = get_object_or_404(Addresses, id=address_id, user=request.user)
         with transaction.atomic():
+
             order = Order.objects.create(
                 user=request.user,
                 full_name=address.full_name,
@@ -870,10 +937,11 @@ def select_payment(request):
                 subtotal=subtotal,
                 shipping=shipping,
                 total_amount=total,
+                payment_status="pending",
             )
 
+            # save items
             for item in cart_items:
-
                 OrderItem.objects.create(
                     order=order,
                     variant=item.variant,
@@ -884,27 +952,74 @@ def select_payment(request):
                     subtotal=item.subtotal,
                 )
 
-                # REDUCE STOCK
-                item.variant.stock -= item.quantity
-                item.variant.save()
+            #     item.variant.stock -= item.quantity
+            #     item.variant.save()
+
+            # COD
             if payment_method == "cod":
                 order.payment_status = "pending"
-            elif payment_method == "wallet":
-                # make the validattion if the ruppes is there or not
+                order.save()
+                variant = item.variant
 
+                if variant.stock < item.quantity:
+                    messages.error(request, "Stock unavailable")
+                    return redirect("products:cart")
+
+                variant.stock -= item.quantity
+                variant.save()
+                cart.items.all().delete()
+
+                return redirect("products:payment_successful", order_id=order.order_id)
+            # WALLET
+            if payment_method == "wallet":
+
+                cart.items.all().delete()
+                for item in order.items.all():
+                    variant = item.variant
+
+                    if variant.stock < item.quantity:
+                        messages.error(request, "Stock unavailable")
+                        return redirect("products:cart")
+
+                    variant.stock -= item.quantity
+                    variant.save()
                 order.payment_status = "paid"
-            elif payment_method == "razorpay":
-                # payment integration with razorpay
+                order.save()
 
-                order.payment_status = "pending"
-            order.save()
-            cart.items.all().delete()
-            messages.success(request, "Order placed Successfully")
-            return redirect("products:payment_successful", order_id=order.order_id)
+                return redirect("products:payment_successful", order_id=order.order_id)
+            # RAZORPAY
+            if payment_method == "razorpay":
+                razorpay_order = client.order.create(
+                    {
+                        "amount": int(total * 100),
+                        "currency": "INR",
+                        "payment_capture": 1,
+                    }
+                )
+                print(razorpay_order)
+                Payment.objects.create(
+                    order=order,
+                    amount=int(total * 100),
+                    status="created",
+                    razorpay_order_id=razorpay_order["id"],
+                )
+
+                request.session["order_id"] = order.order_id
+                request.session["razorpay_order_id"] = razorpay_order["id"]
+
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "razorpay_order_id": razorpay_order["id"],
+                        "amount": int(total * 100),
+                        "key": settings.RAZORPAY_KEY_ID,
+                        "order_id": order.order_id,
+                    }
+                )
+
     context = {
         "cart_items": cart_items,
         "subtotal": subtotal,
-        "shipping": shipping,
         "total": total,
     }
 
@@ -915,6 +1030,13 @@ def select_payment(request):
 def payment_successful(request, order_id):
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
 
+    if order.payment_status != "paid":
+        messages.error(request, "Payment not completed")
+        return redirect("products:select_payment")
+    if request.session.get("payment_success_order") != order_id:
+        return redirect("products:orders")
+
+    del request.session["payment_success_order"]
     context = {
         "order": order,
         "order_items": order.items.all(),

@@ -2,48 +2,60 @@ from django.shortcuts import render
 from django.conf import settings
 from .services import create_order
 from .models import Payment
-
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import razorpay
+from products.models import Cart, Order
 
 # Create your views here.
 
 
 def payment_page(request):
-    order = create_order(50000)
-    print(order)
-    Payment.objects.create(razorpay_order_id=order["id"], amount=50000)
+    order_id = request.session.get("order_id")
+    razorpay_order_id = request.session.get("razorpay_order_id")
+
+    if not razorpay_order_id:
+        return redirect("products:cart")
+
+    order = Order.objects.get(id=order_id)
+
     context = {
-        "razorpay_order_id": order["id"],
-        "amount": 50000,
+        "razorpay_order_id": razorpay_order_id,
+        "amount": int(order.total_amount * 100),
         "key_id": settings.RAZORPAY_KEY_ID,
     }
+
     return render(request, "payments/payment.html", context)
 
 
 @csrf_exempt
 def verify_payment(request):
-    data = json.loads(request.body)
-    client = razorpay.Client(
-        auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-    )
-    params = {
-        "razorpay_order_id": data["razorpay_order_id"],
-        "razorpay_payment_id": data["razorpay_payment_id"],
-        "razorpay_signature": data["razorpay_signature"],
-    }
-    try:
-        client.utility.verify_payment_signature(params)
-        payment = Payment.objects.get(razorpay_order_id=data["razorpay_order_id"])
+    if request.method == "POST":
 
-        payment.razorpay_payment_id = data["razorpay_payment_id"]
-        payment.razorpay_signature = data['razorpay_signature']
-        payment.status = "Paid"
+        data = json.loads(request.body.decode("utf-8"))
+
+        payment_id = data.get("razorpay_payment_id")
+        razorpay_order_id = data.get("razorpay_order_id")
+        signature = data.get("razorpay_signature")
+
+        order_id = request.session.get("order_id")
+
+        order = get_object_or_404(Order, id=order_id)
+
+        payment = get_object_or_404(Payment, razorpay_order_id=razorpay_order_id)
+        payment.razorpay_payment_id = payment_id
+        payment.razorpay_signature = signature
+        payment.status = "paid"
         payment.save()
-        return JsonResponse({"success": True})
-    except Exception:
-        return JsonResponse({"success": False})
 
+        order.payment_status = "paid"
+        order.save()
+
+        cart = Cart.objects.get(user=request.user)
+        cart.items.all().delete()
+
+        return JsonResponse({"success": True})
+
+    return JsonResponse({"success": False})

@@ -5,200 +5,223 @@
     <div class="container mx-auto px-6">
       <h2 class="text-6xl font-black uppercase mb-12 tracking-tightest">SELECT PAYMENT METHOD</h2>
 
-      <form method="POST" class="flex flex-col lg:flex-row gap-12 items-start w-full">
+      <form id="checkout-form" method="POST" class="flex flex-col lg:flex-row gap-12 items-start w-full">
         {% csrf_token %}
-        <input type="hidden" name="payment_method" id="payment_method" value="wallet" />
+        <input type="hidden" name="payment_method" id="payment_method" value="razorpay" />
 
-        <div class="flex flex-col lg:flex-row gap-12 items-start w-full">
-          <!-- Payment Methods -->
-          <div class="flex-[1_1_0%] w-full space-y-6">
-            <!-- Razorpay -->
-            <div class="payment-method selected bg-[#d9f99d] border-2 border-[#166534] p-10 rounded-2xl flex items-center gap-8 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md" data-method="razorpay">
-              <div class="icon-box w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                <svg class="icon w-8 h-8 text-[#166534]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                </svg>
-              </div>
-
-              <div class="flex-1">
-                <h3 class="text-xl font-black uppercase tracking-tightest">RAZORPAY</h3>
-
-                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-1">Cards, UPI, Net Banking, Wallets</p>
-              </div>
+        <!-- LEFT: PAYMENT METHODS -->
+        <div class="flex-[1_1_0%] w-full space-y-6">
+          <!-- Razorpay -->
+          <div class="payment-method selected bg-[#d9f99d] border-2 border-[#166534] p-10 rounded-2xl flex items-center gap-8 cursor-pointer" data-method="razorpay">
+            <div class="icon-box w-16 h-16 bg-white rounded-xl flex items-center justify-center">
+              <svg class="icon w-8 h-8 text-[#166534]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
             </div>
 
-            <!-- Wallet -->
-            <div class="payment-method bg-white p-10 rounded-2xl flex items-center gap-8 shadow-sm cursor-pointer transition-all duration-200 hover:bg-gray-50 relative" data-method="wallet">
-              <div class="icon-box w-16 h-16 bg-[#f3f4f6] rounded-xl flex items-center justify-center">
-                <svg class="icon w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <!-- Wallet body -->
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7a2 2 0 012-2h11a2 2 0 012 2v1h1a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
-
-                  <!-- Wallet flap/card slot -->
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13h4" />
-
-                  <!-- Button/detail -->
-                  <circle cx="15" cy="13" r="0.8" fill="currentColor" />
-                </svg>
-              </div>
-
-              <div class="flex-1">
-                <h3 class="text-xl font-black uppercase tracking-tightest">WALLET</h3>
-
-                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-1">Pay instantly from your account balance</p>
-              </div>
-
-              <div class="absolute top-10 right-10">
-                <span class="bg-[#fee2e2] text-black text-[9px] font-black px-4 py-1.5 rounded-sm uppercase tracking-widest">Wallet Balance: $0.00</span>
-              </div>
-            </div>
-
-            <!-- Cash on Delivery -->
-            <div class="payment-method bg-white p-10 rounded-2xl flex items-center gap-8 shadow-sm cursor-pointer transition-all duration-200 hover:bg-gray-50" data-method="cod">
-              <div class="icon-box w-16 h-16 bg-[#f3f4f6] rounded-xl flex items-center justify-center">
-                <svg class="icon w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-              </div>
-
-              <div class="flex-1">
-                <h3 class="text-xl font-black uppercase tracking-tightest">CASH ON DELIVERY</h3>
-
-                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-1">Pay when your order arrives</p>
-              </div>
+            <div>
+              <h3 class="text-xl font-black uppercase">RAZORPAY</h3>
+              <p class="text-[11px] text-gray-500 font-bold uppercase">Cards, UPI, Net Banking</p>
             </div>
           </div>
 
-          <!-- Order Summary Panel -->
-          <div class="w-full lg:w-[450px] shrink-0">
-            <div class="bg-white p-10 rounded-2xl shadow-sm border border-white">
-              <h3 class="text-2xl font-black uppercase mb-10 tracking-tightest border-b border-gray-100 pb-6">ORDER SUMMARY</h3>
-
-              <!-- ITEMS -->
-              <div class="space-y-8 mb-10 max-h-[400px] overflow-y-auto">
-                {% for item in cart_items %}
-                  <div class="flex items-center gap-5">
-                    <!-- IMAGE -->
-                    <div class="w-24 h-24  rounded-xl flex items-center justify-center p-3 overflow-hidden">
-                      {% with image=item.variant.images.first %}
-                        {% if image %}
-                          <img src="{{ image.image.url }}" alt="{{ item.variant.product.name }}" class="w-full h-full object-cover rounded-lg" />
-                        {% else %}
-                          <img src="{% static 'images/placeholder.png' %}" class="w-full h-full object-cover rounded-lg" />
-                        {% endif %}
-                      {% endwith %}
-                    </div>
-
-                    <!-- INFO -->
-                    <div class="flex-1 min-w-0">
-                      <h4 class="text-sm font-black uppercase tracking-tightest leading-tight">{{ item.variant.product.name }}</h4>
-
-                      <div class="flex flex-wrap items-center gap-2 mt-2">
-                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{{ item.variant.get_size_display }}</span>
-
-                        {% if item.variant.color %}
-                          <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">/ {{ item.variant.color.name }}</span>
-                        {% endif %}
-                      </div>
-
-                      <div class="flex items-center gap-3 mt-3">
-                        <span class="bg-[#121212] text-white text-[8px] font-black px-2 py-1 rounded-sm">Qty: {{ item.quantity }}</span>
-                      </div>
-                    </div>
-
-                    <!-- PRICE -->
-                    <div class="text-right">
-                      <p class="text-lime-dark font-black text-lg">₹{{ item.subtotal }}</p>
-                    </div>
-                  </div>
-                {% endfor %}
-              </div>
-
-              <!-- PRICE DETAILS -->
-              <div class="space-y-6 text-sm font-bold border-t border-gray-100 pt-10 mb-10">
-                <div class="flex justify-between items-center text-gray-500">
-                  <span class="uppercase tracking-[0.1em] text-xs">Subtotal</span>
-
-                  <span class="text-black font-black">₹{{ subtotal }}</span>
-                </div>
-
-                <div class="flex justify-between items-center text-gray-500">
-                  <span class="uppercase tracking-[0.1em] text-xs">Shipping</span>
-
-                  <span class="text-lime-dark uppercase tracking-[0.2em] font-black">FREE</span>
-                </div>
-              </div>
-
-              <!-- TOTAL -->
-              <div class="flex justify-between items-end mb-10">
-                <span class="text-2xl font-black uppercase tracking-tightest">TOTAL</span>
-
-                <div class="text-5xl font-black tracking-tightest leading-none">₹{{ total }}</div>
-              </div>
-
-              <!-- BUTTON -->
-              <button type="submit" class="w-full bg-[#006400] text-white font-black uppercase py-6 flex items-center justify-center gap-4 hover:bg-black transition-all shadow-xl rounded-xl text-sm tracking-[0.2em]">
-                PLACE ORDER<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </button>
-
-              <!-- SECURITY -->
-              <div class="text-center mt-10 text-[9px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 text-gray-400">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
-                </svg>YOUR PAYMENT INFORMATION IS SECURE
-              </div>
+          <!-- Wallet -->
+          <div class="payment-method bg-white p-10 rounded-2xl flex items-center gap-8 cursor-pointer" data-method="wallet">
+            <div class="icon-box w-16 h-16 bg-[#f3f4f6] rounded-xl flex items-center justify-center">
+              <svg class="icon w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7a2 2 0 012-2h11a2 2 0 012 2v1h1a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+              </svg>
             </div>
+
+            <div>
+              <h3 class="text-xl font-black uppercase">WALLET</h3>
+              <p class="text-[11px] text-gray-500 font-bold uppercase">Pay from balance</p>
+            </div>
+          </div>
+
+          <!-- COD -->
+          <div class="payment-method bg-white p-10 rounded-2xl flex items-center gap-8 cursor-pointer" data-method="cod">
+            <div class="icon-box w-16 h-16 bg-[#f3f4f6] rounded-xl flex items-center justify-center">
+              <svg class="icon w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+              </svg>
+            </div>
+
+            <div>
+              <h3 class="text-xl font-black uppercase">CASH ON DELIVERY</h3>
+              <p class="text-[11px] text-gray-500 font-bold uppercase">Pay on delivery</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: ORDER SUMMARY -->
+        <div class="w-full lg:w-[450px]">
+          <div class="bg-white p-10 rounded-2xl shadow-sm">
+            <h3 class="text-2xl font-black uppercase mb-8">ORDER SUMMARY</h3>
+
+            <div class="space-y-6 mb-8">
+              {% for item in cart_items %}
+                <div class="flex justify-between items-center">
+                  <div>
+                    <p class="font-black text-sm uppercase">{{ item.variant.product.name }}</p>
+                    <p class="text-xs text-gray-500">Qty: {{ item.quantity }}</p>
+                  </div>
+
+                  <p class="font-black">₹{{ item.subtotal }}</p>
+                </div>
+              {% endfor %}
+            </div>
+
+            <hr class="mb-6" />
+
+            <div class="flex justify-between font-bold mb-2">
+              <span>Subtotal</span>
+              <span>₹{{ subtotal }}</span>
+            </div>
+
+            <div class="flex justify-between font-bold mb-6">
+              <span>Shipping</span>
+              <span>FREE</span>
+            </div>
+
+            <div class="flex justify-between text-2xl font-black mb-8">
+              <span>Total</span>
+              <span>₹{{ total }}</span>
+            </div>
+
+            <button type="submit" class="w-full bg-[#006400] text-white font-black py-5 uppercase tracking-widest">PLACE ORDER</button>
           </div>
         </div>
       </form>
     </div>
   </main>
 
-  <style>
-    .payment-method.selected:hover {
-      background-color: #d9f99d !important;
-    }
-  </style>
+  <!-- ================= JS ================= -->
 
   <script>
     const paymentMethods = document.querySelectorAll('.payment-method')
+    const paymentInput = document.getElementById('payment_method')
     
     paymentMethods.forEach((method) => {
       method.addEventListener('click', function () {
-        document.getElementById('payment_method').value = this.dataset.method
+        paymentInput.value = this.dataset.method
     
         paymentMethods.forEach((item) => {
-          item.classList.remove('bg-[#d9f99d]', 'border-2', 'border-[#166534]', 'selected')
-    
+          item.classList.remove('bg-[#d9f99d]', 'border-2', 'border-[#166534]')
           item.classList.add('bg-white')
     
           const iconBox = item.querySelector('.icon-box')
-    
           iconBox.classList.remove('bg-white')
           iconBox.classList.add('bg-[#f3f4f6]')
     
           const icon = item.querySelector('.icon')
-    
-          icon.classList.remove('text-[#166534]')
-          icon.classList.add('text-gray-400')
+          if (icon) {
+            icon.classList.remove('text-[#166534]')
+            icon.classList.add('text-gray-400')
+          }
         })
     
+        this.classList.add('bg-[#d9f99d]', 'border-2', 'border-[#166534]')
         this.classList.remove('bg-white')
     
-        this.classList.add('bg-[#d9f99d]', 'border-2', 'border-[#166534]', 'selected')
+        const iconBox = this.querySelector('.icon-box')
+        iconBox.classList.remove('bg-[#f3f4f6]')
+        iconBox.classList.add('bg-white')
     
-        const selectedIconBox = this.querySelector('.icon-box')
-    
-        selectedIconBox.classList.remove('bg-[#f3f4f6]')
-        selectedIconBox.classList.add('bg-white')
-    
-        const selectedIcon = this.querySelector('.icon')
-    
-        selectedIcon.classList.remove('text-gray-400')
-        selectedIcon.classList.add('text-[#166534]')
+        const icon = this.querySelector('.icon')
+        if (icon) {
+          icon.classList.add('text-[#166534]')
+          icon.classList.remove('text-gray-400')
+        }
       })
+    })
+  </script>
+
+  <script>
+    function getCookie(name) {
+      let cookieValue = null
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';')
+        for (let cookie of cookies) {
+          cookie = cookie.trim()
+          if (cookie.startsWith(name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+            break
+          }
+        }
+      }
+      return cookieValue
+    }
+    
+    const csrftoken = getCookie('csrftoken')
+  </script>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <script>
+    const form = document.getElementById('checkout-form')
+    
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault()
+    
+      const paymentMethod = document.getElementById('payment_method').value
+      const formData = new FormData(form)
+    
+      if (paymentMethod !== 'razorpay') {
+        form.submit()
+        return
+      }
+    
+      const response = await fetch("{% url 'products:select_payment' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken')
+        }
+      })
+    
+      const data = await response.json()
+    
+      if (!data.success) return
+    
+      const options = {
+        key: data.key,
+        amount: data.amount,
+        currency: 'INR',
+        order_id: data.razorpay_order_id,
+    
+        handler: function (response) {
+          fetch('/products/verify-payment/', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrftoken,
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                window.location.href = `/products/payment-successful/${data.order_id}`
+              } else {
+                alert('Payment failed')
+              }
+            })
+        },
+    
+        modal: {
+          ondismiss: function () {
+            alert('Payment cancelled by user')
+          }
+        }
+      }
+    
+      const rzp = new Razorpay(options)
+      rzp.open()
     })
   </script>
 {% endblock %}
