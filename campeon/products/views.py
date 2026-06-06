@@ -617,7 +617,9 @@ def calculate_cart_summary(cart, request=None):
             applied_coupon = Coupon.objects.get(id=coupon_id, is_active=True)
             if applied_coupon and subtotal >= applied_coupon.min_purchase_amount:
                 if applied_coupon.discount_type == "percentage":
-                    coupon_discount = (subtotal * applied_coupon.discount_value) / 100
+                    coupon_discount = round(
+                        (subtotal * applied_coupon.discount_value) / 100, 2
+                    )
                 elif applied_coupon.discount_type == "fixed":
                     coupon_discount = applied_coupon.discount_value
         except Coupon.DoesNotExist:
@@ -1033,15 +1035,15 @@ def payment_successful(request, order_id):
     if order.payment_status != "paid":
         messages.error(request, "Payment not completed")
         return redirect("products:select_payment")
-    if request.session.get("payment_success_order") != order_id:
-        return redirect("products:orders")
-
-    del request.session["payment_success_order"]
     context = {
         "order": order,
         "order_items": order.items.all(),
         "payment_method": request.session.get("payment_method"),
     }
+    # if request.session.get("payment_success_order") != order_id:
+    #     return redirect("products:orders")
+
+    # del request.session["payment_success_order"]
     return render(request, "products/payment_successful.html", context)
 
 

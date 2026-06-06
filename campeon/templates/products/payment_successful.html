@@ -1,5 +1,6 @@
 {% extends 'partials/base.html' %}
 {% load static %}
+
 {% block content %}
   <div class="min-h-screen bg-[#e9f5db] flex items-center justify-center px-4 py-10">
     <div class="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl">
@@ -12,94 +13,37 @@
             </svg>
           </div>
         </div>
+
         <h2 class="text-5xl font-black uppercase tracking-tightest leading-none mb-4">Payment Successful</h2>
+
         <p class="text-sm font-bold opacity-80 uppercase tracking-widest">Your order has been placed successfully</p>
       </div>
 
       <!-- Body Section -->
       <div class="p-12 space-y-10">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-10">
-          <!-- Left: Order Info -->
-          <div class="md:col-span-7 space-y-8">
-            <div>
-              <div class="flex items-center gap-3 mb-6">
-                <div class="w-1.5 h-6 bg-[#008000] rounded-full"></div>
-                <h3 class="text-xl font-black uppercase tracking-tightest">Order Details</h3>
-              </div>
-              <div class="space-y-4">
-                <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
-                  <span class="text-gray-400">Order Number</span>
-                  <span class="text-black">{{ order.order_id }}</span>
-                </div>
-                <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
-                  <span class="text-gray-400">Order Date</span>
-                  <span class="text-black">{{ order.created_at|date }}</span>
-                </div>
-                <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
-                  <span class="text-gray-400">Payment Method</span>
-                  <span class="bg-[#f3f4f6] px-3 py-1 rounded-full text-[9px]">{{ order.get_payment_method_display }}</span>
-                </div>
-              </div>
+        <div class="space-y-8">
+          <!-- Order Details -->
+          <div>
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-1.5 h-6 bg-[#008000] rounded-full"></div>
+              <h3 class="text-xl font-black uppercase tracking-tightest">Order Details</h3>
             </div>
 
-            <!-- Product Item -->
-            {% for item in order_items %}
-              <div class="bg-[#e9f5db] p-6 rounded-2xl flex items-center gap-6">
-                <div class="w-16 h-16 bg-black rounded-xl overflow-hidden flex-shrink-0">
-                  {% if item.variant %}
-                    {% with image=item.variant.images.first %}
-                      {% if image %}
-                        <img src="{{ image.image.url }}" class="w-full h-full object-cover" />
-                      {% endif %}
-                    {% endwith %}
-                  {% endif %}
-                </div>
-                <div class="flex-1">
-                  <h4 class="text-sm font-black uppercase tracking-tightest leading-tight">{{ item.product_name }} × {{ item.quantity }}</h4>
-                  <p class="text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-1">
-                    Size: {{ item.size }}
+            <div class="space-y-4">
+              <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
+                <span class="text-gray-400">Order Number</span>
+                <span class="text-black">{{ order.order_id }}</span>
+              </div>
 
-                    {% if item.color %}
-                      | Color: {{ item.color }}
-                    {% endif %}
-                  </p>
-                </div>
-                <span class="text-lg font-black text-[#008000] tracking-tightest">₹{{ item.subtotal }}</span>
+              <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
+                <span class="text-gray-400">Order Date</span>
+                <span class="text-black">{{ order.created_at|date }}</span>
               </div>
-            {% endfor %}
-          </div>
 
-          <!-- Right: Shipping & Total -->
-          <div class="md:col-span-5 space-y-6">
-            <!-- Shipping Info Box -->
-            <div class="bg-[#fdf2f2] p-8 rounded-2xl border border-pink-50">
-              <div class="flex items-center gap-3 mb-6 text-[#92400e]">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1m-6-1a1 1 0 001 1h1m-6-1v1a1 1 0 01-1 1H4a1 1 0 01-1-1v-1m10-4h3m-6-4h.01"></path>
-                </svg>
-                <span class="text-[9px] font-black uppercase tracking-widest">Shipping To</span>
+              <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
+                <span class="text-gray-400">Payment Method</span>
+                <span class="bg-[#f3f4f6] px-3 py-1 rounded-full text-[9px]">{{ order.get_payment_method_display }}</span>
               </div>
-              <div class="space-y-1 mb-6">
-                <p class="text-sm font-black uppercase tracking-tightest">{{ order.full_name }}</p>
-                <p class="text-sm font-black uppercase tracking-tightest">{{ order.phone_number }}</p>
-                <p class="text-sm font-black uppercase tracking-tightest">{{ order.address_line_1 }}</p>
-                <p class="text-sm font-black uppercase tracking-tightest">{{ order.address_line_2 }}</p>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.city }}</p>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.place }}</p>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.state }}</p>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.postal_code }}</p>
-              </div>
-              <div class="pt-6 border-t border-pink-100">
-                <p class="text-[8px] font-black text-gray-300 uppercase tracking-widest mb-1">Estimated Delivery</p>
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">3-5 Business Days</p>
-              </div>
-            </div>
-
-            <!-- Total Paid Box -->
-            <div class="bg-[#f1f4f0] p-8 rounded-2xl">
-              <span class="text-[9px] font-black text-[#008000] uppercase tracking-widest block mb-2">Total Paid</span>
-              <div class="text-4xl font-black tracking-tightest text-black">₹{{ order.total_amount }}</div>
             </div>
           </div>
         </div>
@@ -108,6 +52,7 @@
         <div class="space-y-8 pt-4">
           <div class="flex flex-col sm:flex-row gap-4">
             <a href="{% url 'products:orders' %}" class="text-center flex-1 bg-[#008000] text-white py-6 rounded-xl font-black uppercase text-[11px] tracking-[0.2em] shadow-xl hover:bg-black transition-all transform hover:-translate-y-1">View Order Details</a>
+
             <a href="{% url 'products:download_invoice' order.order_id %}" class="flex-1 bg-[#e9f5db] text-black py-6 rounded-xl font-black uppercase text-[11px] tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#d9e6d1] transition-all">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -116,6 +61,7 @@
               <span class="leading-none">Download Invoice</span>
             </a>
           </div>
+
           <div class="text-center">
             <a href="{% url 'products:all_products' %}" class="text-[10px] font-black uppercase tracking-[0.3em] text-[#008000] hover:underline">Continue Shopping</a>
           </div>

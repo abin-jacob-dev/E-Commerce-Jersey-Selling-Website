@@ -2,6 +2,11 @@
 {% load static %}
 
 {% block content %}
+  {{ cart_subtotal }}
+  {{ cart_total }}
+  {{ cart_count }}
+  {{ coupon_discount }}
+  {{ applied_coupon }}
 	<main class="bg-[#e9f5db] min-h-screen py-16">
 		<div
 			class="container mx-auto px-4 sm:px-6">
@@ -127,7 +132,13 @@
 										<span class="text-[10px] uppercase opacity-60 font-black">Subtotal</span>
 										<span class="font-black text-lg">₹{{ cart.total_price }}</span>
 									</div>
-									
+
+									{% if applied_coupon %}
+									<div class="flex justify-between">
+										<span class="text-[10px] uppercase opacity-60 font-black">Coupon ({{applied_coupon}})</span>
+										<span class="font-black text-lg">- ₹{{ coupon_discount|default:"0" }}</span>
+									</div>
+									{% endif %}
 
 									<div class="flex justify-between">
 										<span class="text-[10px] uppercase opacity-60 font-black">Shipping</span>
@@ -141,7 +152,7 @@
 									<div>
 										<span class="text-[10px] uppercase tracking-[0.3em] opacity-50 font-black">Estimated Total</span>
 
-										<div class="text-5xl font-black text-lime-bright mt-2 leading-none">₹{{ cart.total_price }}</div>
+										<div class="text-5xl font-black text-lime-bright mt-2 leading-none">₹{{cart_total|default:'0'}}</div>
 									</div>
 								</div>
 
