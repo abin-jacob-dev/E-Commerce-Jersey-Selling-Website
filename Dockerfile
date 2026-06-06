@@ -2,9 +2,11 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY Campeon/ /app/
+COPY campeon/ /app/
 
 RUN pip install --no-cache-dir -r requirements.txt
+
+WORKDIR /app
 
 EXPOSE 8000
 
