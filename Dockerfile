@@ -1,6 +1,6 @@
-FROM python:3.12-slim
+FROM FROM python:3.13
 
-WORKDIR /app
+WORKDIR /campeon
 
 COPY requirements.txt .
 
