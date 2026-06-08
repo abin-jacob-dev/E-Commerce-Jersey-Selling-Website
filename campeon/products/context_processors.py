@@ -1,6 +1,7 @@
 from .models import Cart
 from products.models import Coupon
 
+
 def cart_data(request):
     user = request.user
     if user.is_authenticated:
@@ -23,9 +24,15 @@ def cart_summary(request):
     if not request.user.is_authenticated:
         return {"cart_subtotal": 0, "cart_total": 0, "count": 0}
     cart = Cart.objects.get(user=request.user)
-    
+
     if not Cart:
-        return {"cart_subtotal": 0, "cart_total": 0, "count": 0}
+        return {
+            "cart_subtotal": 0,
+            "cart_total": 0,
+            "count": 0,
+            "coupon_discount": 0,
+            "applied_coupon": None,
+        }
     subtotal = cart.total_price
     coupon_discount = 0
     applied_coupon = None
@@ -38,7 +45,7 @@ def cart_summary(request):
                 if applied_coupon.discount_type == "percentage":
                     coupon_discount = (subtotal * applied_coupon.discount_value) / 100
                 else:
-                    coupon_discount =  applied_coupon.discount_value
+                    coupon_discount = applied_coupon.discount_value
         except Coupon.DoesNotExist:
             request.session.pop("coupon_id", None)
 
@@ -47,7 +54,6 @@ def cart_summary(request):
         "cart_subtotal": subtotal,
         "cart_total": final_total,
         "count": cart.items.count(),
-        'coupon_discount':coupon_discount,
-        "applied_coupon" : applied_coupon,
-
+        "coupon_discount": coupon_discount,
+        "applied_coupon": applied_coupon,
     }

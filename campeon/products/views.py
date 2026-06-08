@@ -889,7 +889,14 @@ def verify_payment(request):
         order.payment_status = "failed"
         order.save()
 
-        return JsonResponse({"success": False})
+        return JsonResponse(
+            {
+                "success": False,
+                "redirect_url": reverse(
+                    "products:payment_failed", args=[order.order_id]
+                ),
+            }
+        )
 
 
 @user_login_required
@@ -904,9 +911,40 @@ def select_payment(request):
         messages.error(request, "Your cart is empty")
         return redirect("products:cart")
 
+    coupon = None
+    offer = None
+
     subtotal = cart.total_price
     shipping = 0
-    total = subtotal + shipping
+
+    # ---------------- COUPON ----------------
+    coupon_discount = Decimal("0.00")
+    coupon_id = request.session.get("coupon_id")
+
+    if coupon_id:
+        coupon = Coupon.objects.filter(id=coupon_id, is_active=True).first()
+        if coupon and subtotal >= coupon.min_purchase_amount:
+            if coupon and coupon.is_valid:
+                if coupon.discount_type == "percentage":
+                    coupon_discount = (subtotal * coupon.discount_value) / 100
+                else:
+                    coupon_discount = coupon.discount_value
+
+    # ---------------- OFFER ----------------
+    offer_discount = Decimal("0.00")
+    offer = Offer.objects.filter(
+        is_active=True, start_date__lte=timezone.now(), end_date__gte=timezone.now()
+    ).first()
+
+    if offer:
+        if offer.discount_type == "percentage":
+            offer_discount = (subtotal * offer.discount_value) / 100
+        else:
+            offer_discount = offer.discount_value
+
+    # ---------------- FINAL TOTAL ----------------
+    total = subtotal - coupon_discount - offer_discount + shipping
+    total = max(total, 0)
 
     address_id = request.session.get("address_id")
     if not address_id:
@@ -936,6 +974,8 @@ def select_payment(request):
                 state=address.state,
                 postal_code=address.postal_code,
                 payment_method=payment_method,
+                coupon=coupon,
+                offer=offer,
                 subtotal=subtotal,
                 shipping=shipping,
                 total_amount=total,
@@ -1047,6 +1087,12 @@ def payment_successful(request, order_id):
     return render(request, "products/payment_successful.html", context)
 
 
+def payment_failed(request, order_id):
+    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+    context = {"order": order}
+    return render(request, "products/payment_failed.html", context)
+
+
 @user_login_required
 def orders(request):
 
@@ -1154,27 +1200,24 @@ def cancel_order_item_request(request, item_id):
 def download_invoice(request, order_id):
 
     order = get_object_or_404(
-        Order.objects.prefetch_related("items__variant__images").select_related("user"),
+        Order.objects.prefetch_related("items__variant").select_related("user"),
         order_id=order_id,
         user=request.user,
     )
 
-    items = order.items.select_related("variant__product__category").prefetch_related(
-        "variant__images"
-    )
-
     context = {
         "order": order,
-        "items": items,
+        "items": order.items.all(),
     }
 
-    html_string = render_to_string("user/orders/order_invoice_pdf.html", context)
+    html_string = render_to_string(
+        "user/orders/order_invoice_pdf.html", context, request=request
+    )
 
-    pdf = HTML(string=html_string, base_url=request.build_absolute_uri("/")).write_pdf()
+    pdf = HTML(string=html_string).write_pdf()
     response = HttpResponse(pdf, content_type="application/pdf")
 
-    response["Content-Disposition"] = f'attachment; filename="ORD-{order_id}.pdf"'
-
+    response["Content-Disposition"] = f'attachment; filename="invoice_{order_id}.pdf"'
     return response
 
 
@@ -1344,9 +1387,18 @@ def apply_coupon(request):
         code = request.POST.get("code", "").strip().upper()
         try:
             coupon = Coupon.objects.get(code=code, is_active=True)
+            cart = Cart.objects.get(user=request.user)
+            if cart.total_price < coupon.min_purchase_amount:
+                messages.error(
+                    request, f"Minimum purchase ₹{coupon.min_purchase_amount}"
+                )
+                return redirect("products:cart")
+            if not coupon.is_valid:
+                messages.error(request, "Coupon expired")
+                return redirect("products:cart")
             request.session["coupon_id"] = coupon.id
             messages.success(request, f"Coupon {coupon.code} applied")
-        except:
+        except Coupon.DoesNotExist:
             messages.error(request, "Invalid Coupon")
 
     return redirect("products:cart")

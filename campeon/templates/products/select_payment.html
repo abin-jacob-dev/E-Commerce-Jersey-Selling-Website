@@ -186,6 +186,7 @@
       })
     
       const data = await response.json()
+      const orderId = data.order_id
     
       if (!data.success) return
     
@@ -213,14 +214,18 @@
               if (data.success) {
                 window.location.href = `/products/payment-successful/${data.order_id}`
               } else {
-                alert('Payment failed')
+                if (data.redirect_url) {
+                  window.location.href = data.redirect_url
+                } else {
+                  window.location.href = '/products/payment-failed/'
+                }
               }
             })
         },
     
         modal: {
           ondismiss: function () {
-            alert('Payment cancelled by user')
+            window.location.href = `/products/payment-failed/${data.order_id}`
           }
         }
       }

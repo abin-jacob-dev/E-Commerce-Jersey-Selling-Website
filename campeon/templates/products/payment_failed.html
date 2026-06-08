@@ -1,0 +1,61 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="min-h-screen bg-[#fde2e2] flex items-center justify-center px-4 py-10">
+    <div class="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl">
+      <!-- Failure Header -->
+      <div class="bg-[#ff0000] p-12 text-center text-white relative">
+        <div class="flex justify-center mb-6">
+          <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
+        </div>
+
+        <h2 class="text-5xl font-black uppercase tracking-tightest leading-none mb-4">Payment Failed</h2>
+        <p class="text-sm font-bold opacity-80 uppercase tracking-widest">Your payment could not be processed</p>
+      </div>
+
+      <!-- Body Section -->
+      <div class="p-12 space-y-10">
+        <!-- Order Details -->
+        <div>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-1.5 h-6 bg-[#ff0000] rounded-full"></div>
+            <h3 class="text-xl font-black uppercase tracking-tightest">Order Details</h3>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
+              <span class="text-gray-400">Order Number</span>
+              <span class="text-black">{{ order.order_id }}</span>
+            </div>
+
+            <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
+              <span class="text-gray-400">Order Date</span>
+              <span class="text-black">{{ order.created_at|date }}</span>
+            </div>
+
+            <div class="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
+              <span class="text-gray-400">Payment Method</span>
+              <span class="bg-[#f3f4f6] px-3 py-1 rounded-full text-[9px]">{{ order.get_payment_method_display }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="space-y-6 pt-4">
+          <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Retry Payment Button -->
+            <a href="{% url 'products:select_payment' %}?order_id={{ order.order_id }}" class="flex-1 text-center bg-[#ff0000] text-white py-6 rounded-xl font-black uppercase text-[11px] tracking-[0.2em] shadow-xl hover:bg-black transition-all transform hover:-translate-y-1">Retry Payment</a>
+
+            <!-- Go Back / Continue Shopping Button -->
+            <a href="{% url 'products:all_products' %}" class="flex-1 bg-[#fde2e2] text-black py-6 rounded-xl font-black uppercase text-[11px] tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#f8caca] transition-all"><span class="leading-none">Continue Shopping</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

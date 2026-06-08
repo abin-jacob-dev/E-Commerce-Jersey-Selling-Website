@@ -10,9 +10,7 @@ from user.models import Addresses
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
-
 # Create your models here.
-
 
 
 class Coupon(models.Model):
@@ -48,6 +46,7 @@ class Coupon(models.Model):
             return timezone.now().date() > self.end_date
         return False
 
+    @property
     def is_valid(self):
         now = timezone.now().date()
         if not self.is_active:
@@ -125,8 +124,6 @@ class Offer(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
-
-
 
 
 class Category(models.Model):
@@ -283,7 +280,7 @@ class Cart(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name="cart")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    coupon = models.ForeignKey(Coupon , null=True,blank=True,on_delete=models.SET_NULL)
+
     def __str__(self):
         return f"Cart of {self.user.username}"
 
@@ -344,13 +341,15 @@ class Order(models.Model):
         ("processing", "Processing"),
         ("shipped", "Shipped"),
         ("delivered", "Delivered"),
+        ("partially_cancelled", "Partially Cancelled"),
         ("cancelled", "Cancelled"),
-        ("partially_cancel", "Partially Cancelled"),
+        ("partially_returned", "Partially Returned"),
         ("returned", "Returned"),
-        ("partially_return", "Partially Returned"),
     ]
 
     user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="orders")
+    coupon = models.ForeignKey(Coupon, null=True, blank=True, on_delete=models.SET_NULL)
+    offer = models.ForeignKey(Offer, on_delete=models.SET_NULL, null=True, blank=True)
 
     full_name = models.CharField(max_length=50, blank=True, null=True)
     phone_number = models.CharField(max_length=25, blank=True, null=True)
@@ -391,6 +390,38 @@ class Order(models.Model):
             self.order_id = f"ORD-{get_random_string(8).upper()}"
 
         super().save(*args, **kwargs)
+
+    @property
+    def get_subtotal(self):
+        return sum(item.subtotal for item in self.items.all())
+
+    @property
+    def get_coupon_discount(self):
+        if not self.coupon:
+            return 0
+        subtotal = self.get_subtotal
+        if self.coupon.discount_type == "percentage":
+            return subtotal * (self.coupon.discount_value / 100)
+        else:
+            return self.coupon.discount_value
+
+    @property
+    def get_offer_discount(self):
+        if not self.offer:
+            return 0
+        subtotal = self.get_subtotal
+        if self.offer.discount_type == "percentage":
+            return subtotal * (self.offer.discount_value / 100)
+        else:
+            return self.offer.discount_value
+
+    @property
+    def get_total_after_discount(self):
+        return (
+            self.subtotal
+            - (self.get_coupon_discount + self.get_offer_discount)
+            + self.shipping
+        )
 
     def __str__(self):
         return self.order_id

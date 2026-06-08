@@ -70,6 +70,11 @@ urlpatterns = [
         views.payment_successful,
         name="payment_successful",
     ),
+    path(
+        "payment-failed/<str:order_id>",
+        views.payment_failed,
+        name="payment_failed",
+    ),
     # user orders
     path(
         "orders",

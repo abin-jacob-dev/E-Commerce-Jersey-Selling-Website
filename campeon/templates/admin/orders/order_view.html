@@ -40,7 +40,7 @@
               <p class="text-xs text-gray-400">Qty: {{ item.quantity }}{% if item.size %} | Size: {{ item.size }}{% endif %}{% if item.color %} | Color: {{ item.color }}{% endif %}</p>
             </div>
 
-            <p class="font-black">₹{{ item.subtotal }}</p>
+            <p class="font-black">₹{{ order.get_total_after_discount | floatformat:2 }}</p>
           </div>
 
           <!-- ITEM STATUS -->
@@ -92,10 +92,24 @@
         <span class="text-gray-400">Subtotal</span>
         <span class="font-black">₹{{ order.subtotal }}</span>
       </div>
+      {% if order.coupon %}
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-400">Coupon ({{order.coupon.code }})</span>
+        <span class="font-black">₹{{ order.get_coupon_discount|floatformat:2 }}</span>
+      </div>
+      {% endif %}
+      
+      {% if order.offer %}
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-400">Offer ({{order.offer.name}})</span>
+        <span class="font-black">₹{{ order.get_offer_discount }}</span>
+      </div>
+      {% endif %}
 
+      
       <div class="flex justify-between text-sm">
         <span class="text-gray-400">Shipping</span>
-        <span class="font-black">₹{{ order.shipping }}</span>
+        <span class="font-black">₹{{ order.shipping |default:'0'}}</span>
       </div>
 
       <div class="flex justify-between text-lg border-t pt-4">
