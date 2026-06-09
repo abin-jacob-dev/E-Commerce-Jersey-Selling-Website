@@ -383,7 +383,7 @@ class Order(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    total_refund_amount = models.DecimalField( max_digits=5, decimal_places=2,default=0)
     def save(self, *args, **kwargs):
 
         if not self.order_id:
@@ -435,7 +435,7 @@ class OrderItem(models.Model):
         ("shipped", "Shipped"),
         ("delivered", "Delivered"),
         ("cancelled", "Cancelled"),
-        ("partially_cancel", "Partially Cancelled"),
+        ("partially_cancelled", "Partially Cancelled"),
         ("returned", "Returned"),
         ("partially_returned", "Partially Returned"),
     ]
@@ -461,6 +461,6 @@ class OrderItem(models.Model):
     cancelled_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     returned_reason = models.TextField(blank=True, null=True)
     returned_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-
+    refund_amount = models.DecimalField( max_digits=10, decimal_places=2,default=0)
     def __str__(self):
         return f"{self.product_name} x {self.quantity}"

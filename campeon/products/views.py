@@ -1126,6 +1126,16 @@ def return_order_item_request(request, item_id):
     item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
     if request.method != "POST":
         return redirect("products:order_details", order_id=item.order.order_id)
+    if item.status not in ["delivered"]:
+        messages.error(request, "Return allowed only after delivery")
+        return redirect("products:order_details", order_id=item.order.order_id)
+    if item.status in [
+        "cancelled",
+        "partially_cancelled",
+        "returned",
+        "partially_returned",
+    ]:
+        return redirect("products:order_details", order_id=item.order.order_id)
     if item.variant:
         item.variant.stock += item.quantity
         item.variant.save()
@@ -1133,12 +1143,12 @@ def return_order_item_request(request, item_id):
         item.returned_at = timezone.now()
         reason = request.POST.get("reason", "")
         if reason == "other":
-            reason = request.POST.get("reason_other", "Other")
+            reason = request.POST.get("other_reason", "Other")
         item.returned_reason = reason
         item.save()
 
         order = item.order
-        active_items = order.items.exclude(status="returned")
+        active_items = order.items.exclude(status="partially_returned")
         if not active_items:
             order.order_status = "returned"
         else:
@@ -1155,23 +1165,29 @@ def cancel_order_item(request, item_id):
 
 
 @user_login_required
-@transaction.atomic
 def cancel_order_item_request(request, item_id):
     item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
 
     if request.method != "POST":
         return redirect("products:order_details", order_id=item.order.order_id)
 
-    if item.status in ["cancelled", "delivered"]:
-        messages.error(request, "This item cannot be cancelled.")
+    if item.status in ["shipped", "delivered"]:
+        messages.error(request, "Cannot cancel now")
+        return redirect("products:order_details", order_id=item.order.order_id)
+
+    if item.status in [
+        "cancelled",
+        "partially_cancelled",
+        "returned",
+        "partially_returned",
+    ]:
         return redirect("products:order_details", order_id=item.order.order_id)
 
     if item.variant:
         item.variant.stock += item.quantity
         item.variant.save()
 
-    item.status = "cancelled"
-    # item.is_cancelled = True
+    item.status = "partially_cancelled"
     item.cancelled_at = timezone.now()
 
     reason = request.POST.get("reason", "")
@@ -1181,11 +1197,11 @@ def cancel_order_item_request(request, item_id):
     item.save()
 
     order = item.order
-    active_items = order.items.exclude(status="cancelled")
+    active_items = order.items.exclude(status="partially_cancelled")
     if not active_items.exists():
         order.order_status = "cancelled"
     else:
-        order.order_status = "partially_cancel"
+        order.order_status = "partially_cancelled"
     order.save()
     messages.success(request, "Item cancelled successfully")
     return redirect("products:order_details", order_id=order.order_id)
@@ -1247,17 +1263,18 @@ def order_view(request, order_id):
 
         if "update_order" in request.POST:
 
-            if order.order_status == "cancelled":
-                messages.error(request, "Cancelled orders cannot be modified.")
-                return redirect(
-                    "products:order_view",
-                    order_id=order.order_id,
-                )
+            # if order.order_status == "cancelled":
+            #     messages.error(request, "Cancelled orders cannot be modified.")
+            #     return redirect(
+            #         "products:order_view",
+            #         order_id=order.order_id,
+            #     )
 
             order_status = request.POST.get("order_status")
 
             if order_status:
                 order.order_status = order_status
+
                 order.save()
 
                 order.items.all().update(status=order_status)
@@ -1285,19 +1302,20 @@ def order_view(request, order_id):
                     order=order,
                 )
 
-                if item.status == "cancelled":
-                    messages.error(request, "Cancelled items cannot be modified.")
+                # if item.status == "cancelled":
+                #     messages.error(request, "Cancelled items cannot be modified.")
 
-                    return redirect(
-                        "products:order_view",
-                        order_id=order.order_id,
-                    )
+                #     return redirect(
+                #         "products:order_view",
+                #         order_id=order.order_id,
+                #     )
 
                 item.status = item_status
                 item.save()
 
-                if order.items.count() == 1:
-                    order.order_status = item_status
+                statuses = set(order.items.values_list("status", flat=True))
+                if statuses == 1:
+                    order.order_status = statuses.pop()
                     order.save()
 
                 messages.success(
@@ -1309,6 +1327,75 @@ def order_view(request, order_id):
                     "products:order_view",
                     order_id=order.order_id,
                 )
+        elif "approve_cancel" in request.POST:
+            item_id = request.POST.get("item_id")
+            item_status = "cancelled"
+
+            if item_id and item_status:
+
+                item = get_object_or_404(
+                    OrderItem,
+                    id=item_id,
+                    order=order,
+                )
+                item.status = item_status
+                item.refund_amount = item.subtotal
+                item.save()
+
+                all_cancelled = order.items.exclude(status="cancelled").exists()
+
+                if not all_cancelled:
+                    order.order_status = "cancelled"
+                order.total_refund_amount = sum(
+                    item.refund_amount for item in order.items.all()
+                )
+                order.save()
+
+                messages.success(
+                    request,
+                    f"Item status updated to {item.get_status_display()}",
+                )
+
+                return redirect(
+                    "products:order_view",
+                    order_id=order.order_id,
+                )
+        elif "approve_return" in request.POST:
+
+            item_id = request.POST.get("item_id")
+
+            if item_id:
+
+                item = get_object_or_404(
+                    OrderItem,
+                    id=item_id,
+                    order=order,
+                )
+
+                item.status = "returned"
+                item.refund_amount = item.subtotal
+                item.save()
+
+                all_returned = order.items.exclude(status="returned").exists()
+
+                if not all_returned:
+                    order.order_status = "returned"
+
+                order.total_refund_amount = sum(
+                    item.refund_amount for item in order.items.all()
+                )
+
+                order.save()
+                messages.success(
+                    request,
+                    f"Item status updated to {item.get_status_display()}",
+                )
+
+                return redirect(
+                    "products:order_view",
+                    order_id=order.order_id,
+                )
+
     context = {"order": order}
     return render(request, "admin/orders/order_view.html", context)
 
