@@ -17,6 +17,14 @@ from user.utility import validate_password
 from user.utility import validate_name
 from userauths.views import user_login_required
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.conf import settings
+import razorpay
+from products.models import Wallet
+from payment.models import Payment
+
+
 # Create your views here.
 @never_cache
 @user_login_required
@@ -136,7 +144,6 @@ def set_default_address(request, address_id):
     return redirect("user:address")
 
 
-
 @user_login_required
 def change_password(request):
     if request.method == "POST":
@@ -204,7 +211,9 @@ def add_address(request):
         # print(request.user.id)
     else:
         form = AddressesForm()
-    return render(request, "user/add_address.html", {"form": form, "next_url": next_url})
+    return render(
+        request, "user/add_address.html", {"form": form, "next_url": next_url}
+    )
 
 
 @user_login_required
@@ -236,3 +245,9 @@ def delete_address(request, id):
             messages.error(request, "Default Address cannot be deleted")
         return redirect("user:address")
     return render(request, "user/delete_address.html", {"address": address})
+
+
+def wallet(request):
+    wallet = Wallet.objects.get(user=request.user)
+    context = {"wallet": wallet}
+    return render(request, "user/wallet/wallet.html", context)

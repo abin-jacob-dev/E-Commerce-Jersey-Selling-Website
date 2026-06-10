@@ -1,10 +1,12 @@
 from django.db import models
-from userauths.models import Account
 
+from userauths.models import Account
 
 # Create your models here.
 class Addresses(models.Model):
-    user = models.ForeignKey(Account, on_delete=models.CASCADE,related_name='addresses')
+    user = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="addresses"
+    )
     full_name = models.CharField(max_length=50, blank=True, null=True)
     phone_number = models.CharField(max_length=25, blank=True, null=True)
 
@@ -23,4 +25,5 @@ class Addresses(models.Model):
         return f"{self.full_name} - {self.address_line_1} "
 
     class Meta:
-        ordering = ['created_at']
+        ordering = ["created_at"]
+

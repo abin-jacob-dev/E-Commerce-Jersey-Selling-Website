@@ -464,3 +464,26 @@ class OrderItem(models.Model):
     refund_amount = models.DecimalField( max_digits=10, decimal_places=2,default=0)
     def __str__(self):
         return f"{self.product_name} x {self.quantity}"
+
+
+class Wallet(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE)
+    current_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} - ₹{self.current_balance}"
+
+
+class WalletTransaction(models.Model):
+    SOURCE_CHOICES = [("order_payment", "ORDER PAYMENT"), ("refund", "REFUND")]
+    TRANSACTION_TYPE = (
+        ("credit", "CREDIT"),
+        ("debit", "DEBIT"),
+    )
+    order = models.ForeignKey("Order", on_delete=models.SET_NULL, null=True, blank=True)
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name="wallet_transactions")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    source = models.CharField(choices=SOURCE_CHOICES, max_length=50)
+    transaction_type = models.CharField(choices=TRANSACTION_TYPE, max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)

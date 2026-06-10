@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
 from userauths.utility import OTP
+from products.models import Wallet,WalletTransaction
 
 
 # verification email import
@@ -66,6 +67,7 @@ def signup(request):
             user.referral_code = referral_code
             user.is_active = True  # Active when sigin
             user.save()
+            
             del request.session["is_email_verified"]
             del request.session["verified_email"]
             messages.success(request, "Account Created successfully")

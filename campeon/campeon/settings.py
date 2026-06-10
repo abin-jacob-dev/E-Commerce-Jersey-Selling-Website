@@ -50,10 +50,13 @@ INSTALLED_APPS = [
     # custom apps
     "core",
     "userauths",
-    "user",
+    # "user",
     "admin_panel",
-    "products",
+    # "products",
     "payment",
+    # signals
+    "products.apps.ProductsConfig",
+    "user.apps.UserConfig",
     # AllAuth
     "django.contrib.sites",
     "allauth",

@@ -17,6 +17,7 @@ from products.models import (
     OrderItem,
     Coupon,
     Offer,
+    Wallet,
 )
 from payment.models import Payment
 from user.models import Addresses
@@ -36,6 +37,7 @@ from django.core.exceptions import ValidationError
 from payment.services import create_order
 from django.conf import settings
 import razorpay
+from .service import WalletService
 
 # Create your views here.
 
@@ -1014,21 +1016,29 @@ def select_payment(request):
                 return redirect("products:payment_successful", order_id=order.order_id)
             # WALLET
             if payment_method == "wallet":
+                wallet = Wallet.objects.select_for_update().get(user=request.user)
+                try:
+                    WalletService.debit_wallet(request.user, order.total_amount, order)
 
-                cart.items.all().delete()
-                for item in order.items.all():
-                    variant = item.variant
+                    cart.items.all().delete()
+                    for item in order.items.all():
+                        variant = item.variant
 
-                    if variant.stock < item.quantity:
-                        messages.error(request, "Stock unavailable")
-                        return redirect("products:cart")
+                        if variant.stock < item.quantity:
+                            messages.error(request, "Stock unavailable")
+                            return redirect("products:cart")
 
-                    variant.stock -= item.quantity
-                    variant.save()
-                order.payment_status = "paid"
-                order.save()
+                        variant.stock -= item.quantity
+                        variant.save()
+                    order.payment_status = "paid"
+                    order.save()
+                    messages.success(request, "Payment Successful")
+                    return redirect(
+                        "products:payment_successful", order_id=order.order_id
+                    )
+                except ValueError as e:
+                    messages.error(request, str(e))
 
-                return redirect("products:payment_successful", order_id=order.order_id)
             # RAZORPAY
             if payment_method == "razorpay":
                 razorpay_order = client.order.create(
@@ -1350,7 +1360,9 @@ def order_view(request, order_id):
                     item.refund_amount for item in order.items.all()
                 )
                 order.save()
-
+                WalletService.credit_wallet(
+                    order.user, item.refund_amount, order, source="refund"
+                )
                 messages.success(
                     request,
                     f"Item status updated to {item.get_status_display()}",
@@ -1386,6 +1398,9 @@ def order_view(request, order_id):
                 )
 
                 order.save()
+                WalletService.credit_wallet(
+                    order.user, item.refund_amount, order, source="refund"
+                )
                 messages.success(
                     request,
                     f"Item status updated to {item.get_status_display()}",
