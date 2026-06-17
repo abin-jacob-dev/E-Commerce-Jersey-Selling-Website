@@ -94,7 +94,7 @@
 							<div class="bg-[#1f2937] text-white p-8 sm:p-10 rounded-sm shadow-xl">
 								<h3 class="text-2xl font-black uppercase tracking-[0.15em] mb-10">Order Summary</h3>
 
-								{% if items %}
+								{% comment %} {% if items %}
 									<div class="space-y-6 mb-10">
 										{% for item in items %}
 											<div class="flex gap-4 items-start">
@@ -118,19 +118,19 @@
 														{{ item.quantity }}</div>
 												</div>
 
-												<span class="text-sm font-black whitespace-nowrap">₹{{ item.subtotal }}</span>
+												<span class="text-sm font-black whitespace-nowrap">₹{{ item.offer_subtotal }}</span>
 											</div>
 										{% endfor %}
 									</div>
 								{% else %}
 									<p class="text-sm text-gray-400 uppercase font-bold mb-10">Your cart is empty</p>
-								{% endif %}
+								{% endif %} {% endcomment %}
 
 								<!-- PRICE -->
 								<div class="border-t border-white/10 pt-8 space-y-5 mb-8">
 									<div class="flex justify-between">
 										<span class="text-[10px] uppercase opacity-60 font-black">Subtotal</span>
-										<span class="font-black text-lg">₹{{ cart.total_price }}</span>
+										<span class="font-black text-lg">₹{{ cart_subtotal }}</span>
 									</div>
 
 									{% if applied_coupon %}

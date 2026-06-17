@@ -44,7 +44,7 @@
 
               <td class="px-10 py-8 text-gray-400">{{ order.created_at|date }}</td>
 
-              <td class="px-10 py-8 font-black text-black text-lg">₹{{ order.get_total_after_discount|floatformat:2 }}</td>
+              <td class="px-10 py-8 font-black text-black text-lg">₹{{ order.subtotal|floatformat:2 }}</td>
 
               <td class="px-10 py-8">
                 <span class="

@@ -70,62 +70,6 @@ class Coupon(models.Model):
         ordering = ["-created_at"]
 
 
-class Offer(models.Model):
-
-    DISCOUNT_TYPE_CHOICES = [
-        ("percentage", "Percentage"),
-        ("fixed", "Fixed Amount"),
-    ]
-
-    name = models.CharField(max_length=20)
-
-    discount_type = models.CharField(max_length=20, choices=DISCOUNT_TYPE_CHOICES)
-    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    @property
-    def is_expired(self):
-
-        return timezone.now() > self.end_date
-
-    @property
-    def is_valid(self):
-        now = timezone.now()
-        if not self.is_active:
-            return False
-        if self.start_date and now < self.start_date:
-            return False
-        if self.end_date and now > self.end_date:
-            return False
-        return True
-
-    def clean(self):
-        if self.start_date and self.end_date:
-            if self.start_date >= self.end_date:
-                raise ValidationError("End date must be after start date")
-        if self.discount_value <= 0:
-            raise ValidationError("Discount Value must be greater than zero")
-        if self.discount_type == "percentage" and self.discount_value > 100:
-            raise ValidationError("Percentage discount cannot be greater than 100%")
-        # active_offer = Offer.objects.filter(is_active = True,start_date__lt = self.end_date,end_date__gt=self.end_date).exclude(pk=self.pk)
-        # if self.is_active and active_offer.exists():
-        #     raise ValidationError('Only one active offer is allowed.')
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        ordering = ["-created_at"]
-
-
 class Category(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
@@ -223,6 +167,63 @@ class Product(models.Model):
         return self.name
 
 
+class Offer(models.Model):
+    DISCOUNT_TYPE_CHOICES = [
+        ("percentage", "Percentage"),
+        ("fixed", "Fixed Amount"),
+    ]
+
+    name = models.CharField(max_length=100)
+
+    discount_type = models.CharField(max_length=20, choices=DISCOUNT_TYPE_CHOICES)
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+
+    is_active = models.BooleanField(default=True)
+
+    product = models.OneToOneField(
+        Product, null=True, blank=True, on_delete=models.CASCADE
+    )
+    category = models.OneToOneField(
+        Category, null=True, blank=True, on_delete=models.CASCADE
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        if not self.product and not self.category:
+            raise ValidationError("Offer must belong to either a product or category")
+        if self.product and self.category:
+            raise ValidationError("Offer cannot belong to both product and category")
+        if self.end_date <= self.start_date:
+            raise ValidationError("The Date Should be greater that start date")
+        if self.discount_value <= 0:
+            raise ValidationError("The Value should be greater than  0")
+        if self.discount_type == "percentage":
+            if self.discount_value >= 100:
+                raise ValidationError(
+                    "Percentage cannot be greater than or equal to  100"
+                )
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def is_valid(self):
+        now = timezone.now()
+        if not self.is_active:
+            return False
+        if now < self.start_date:
+            return False
+        if now > self.end_date:
+            return False
+
+        return True
+
+
 class Variant(models.Model):
     SIZE_CHOICES = [
         ("S", "Small"),
@@ -308,6 +309,16 @@ class CartItem(models.Model):
     def subtotal(self):
         return self.variant.price * self.quantity
 
+    @property
+    def offer_price(self):
+        from products.offer_service import get_discount_price
+
+        return get_discount_price(self.variant)
+
+    @property
+    def offer_subtotal(self):
+        return self.offer_price * self.quantity
+
 
 class Wishlist(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="wishlist")
@@ -383,7 +394,12 @@ class Order(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    total_refund_amount = models.DecimalField( max_digits=5, decimal_places=2,default=0)
+    total_refund_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    coupon_name = models.CharField(max_length=255, null=True)
+
+    coupon_discount_type = models.CharField(max_length=20, null=True)  # percent/fixed
+    coupon_discount_value = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     def save(self, *args, **kwargs):
 
         if not self.order_id:
@@ -441,6 +457,7 @@ class OrderItem(models.Model):
     ]
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    offer = models.ForeignKey(Offer, on_delete=models.SET_NULL, null=True, blank=True)
 
     variant = models.ForeignKey(Variant, on_delete=models.SET_NULL, null=True)
 
@@ -461,7 +478,15 @@ class OrderItem(models.Model):
     cancelled_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     returned_reason = models.TextField(blank=True, null=True)
     returned_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    refund_amount = models.DecimalField( max_digits=10, decimal_places=2,default=0)
+    refund_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+    offer_name = models.CharField(max_length=255, null=True)
+
+    offer_discount_type = models.CharField(max_length=20, null=True)  # percent/fixed
+    offer_discount_value = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    offer_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+
     def __str__(self):
         return f"{self.product_name} x {self.quantity}"
 
@@ -482,7 +507,9 @@ class WalletTransaction(models.Model):
         ("debit", "DEBIT"),
     )
     order = models.ForeignKey("Order", on_delete=models.SET_NULL, null=True, blank=True)
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name="wallet_transactions")
+    wallet = models.ForeignKey(
+        Wallet, on_delete=models.CASCADE, related_name="wallet_transactions"
+    )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     source = models.CharField(choices=SOURCE_CHOICES, max_length=50)
     transaction_type = models.CharField(choices=TRANSACTION_TYPE, max_length=50)

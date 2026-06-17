@@ -1,6 +1,11 @@
 {% extends 'partials/base.html' %}
 {% load static %}
 {% block content %}
+  {{ cart_subtotal }}
+  {{ cart_total }}
+  {{ cart_count }}
+  {{ coupon_discount }}
+  {{ applied_coupon }}
   <main class="bg-[#e9f5db] min-h-screen py-16">
     <div class="container mx-auto px-6">
       <h2 class="text-6xl font-black uppercase mb-12 tracking-tightest">SELECT PAYMENT METHOD</h2>
@@ -78,12 +83,19 @@
               <span>Subtotal</span>
               <span>₹{{ subtotal }}</span>
             </div>
-            {% if applied_coupon %}
+            {% if offer %}
               <div class="flex justify-between font-bold mb-2">
-                <span>Coupon ({{ applied_coupon }})</span>
+                <span>Offer Discount</span>
+                <span>- ₹{{ offer_discount|default:'0' }}</span>
+              </div>
+            {% endif %}
+            {% if coupon %}
+              <div class="flex justify-between font-bold mb-2">
+                <span>Coupon ({{ coupon.code }})</span>
                 <span>- ₹{{ coupon_discount|default:'0' }}</span>
               </div>
             {% endif %}
+            
             <div class="flex justify-between font-bold mb-6">
               <span>Shipping</span>
               <span>FREE</span>

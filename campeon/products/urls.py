@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+# from .offer_service import variant_price
 
 app_name = "products"
 
@@ -54,7 +55,6 @@ urlpatterns = [
         views.checkout,
         name="checkout",
     ),
-
     path(
         "verify-payment/",
         views.verify_payment,
@@ -181,7 +181,10 @@ urlpatterns = [
         views.delete_offer,
         name="delete_offer",
     ),
-    #---------------------------Wallet-------------------------------------------------
-    
-
+    # path(
+    #     "variant-price/",
+    #     views.variant_price,
+    #     name="variant_price",
+    # ),
+    # ---------------------------Wallet-------------------------------------------------
 ]

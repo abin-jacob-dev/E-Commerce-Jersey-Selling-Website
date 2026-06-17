@@ -1,0 +1,228 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="flex-1 p-12 overflow-y-auto">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-12">
+        <div>
+            <h2 class="text-4xl font-black uppercase tracking-tighter">
+                Sales Report
+            </h2>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-2">
+                Performance Analysis & Revenue Metrics
+            </p>
+        </div>
+    </div>
+
+    {% comment %} <!-- Filters -->
+    <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm mb-10">
+        <form method="GET" class="flex flex-wrap items-end gap-6">
+
+            <div>
+                <label class="block text-xs font-black uppercase tracking-wider mb-2">
+                    Start Date
+                </label>
+                <input
+                    type="date"
+                    name="start_date"
+                    value="{{ start_date }}"
+                    class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
+                >
+            </div>
+
+            <div>
+                <label class="block text-xs font-black uppercase tracking-wider mb-2">
+                    End Date
+                </label>
+                <input
+                    type="date"
+                    name="end_date"
+                    value="{{ end_date }}"
+                    class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
+                >
+            </div>
+
+            <button
+                type="submit"
+                class="bg-black text-white px-8 py-3 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-lime hover:text-black transition"
+            >
+                Apply Filter
+            </button>
+
+            <a
+                href="{% url 'admin_panel:sales' %}"
+                class="bg-gray-100 px-8 py-3 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-gray-200 transition"
+            >
+                Reset
+            </a>
+
+        </form>
+    </div>
+
+    <!-- Top Actions -->
+    <div class="flex justify-between items-center mb-10">
+        <div>
+            {% if start_date or end_date %}
+            <p class="text-sm font-semibold text-gray-500">
+                Filtered Results
+            </p>
+            {% endif %}
+        </div>
+
+        <button class="bg-black text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-lime hover:text-black transition-all flex items-center gap-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                </path>
+            </svg>
+            Export Report
+        </button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+
+        <div class="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+            <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-4">
+                Total Revenue
+            </p>
+            <h3 class="text-4xl font-black tracking-tighter">
+                ₹{{ total_revenue|floatformat:2 }}
+            </h3>
+        </div>
+
+        <div class="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+            <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-4">
+                Total Orders
+            </p>
+            <h3 class="text-4xl font-black tracking-tighter">
+                {{ total_orders }}
+            </h3>
+        </div>
+
+        <div class="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+            <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-4">
+                Average Order Value
+            </p>
+            <h3 class="text-4xl font-black tracking-tighter">
+                ₹{{ avg_order_value|floatformat:2 }}
+            </h3>
+        </div>
+
+        <div class="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+            <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-4">
+                Report Days
+            </p>
+            <h3 class="text-4xl font-black tracking-tighter">
+                {{ report|length }}
+            </h3>
+        </div>
+
+    </div>
+
+    <!-- Daily Report Table -->
+    <div class="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm mb-12">
+
+        <div class="flex justify-between items-center mb-8">
+            <h3 class="text-sm font-black uppercase tracking-widest">
+                Daily Sales Report
+            </h3>
+        </div>
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full min-w-[1000px]">
+
+                <thead>
+                    <tr class="border-b border-gray-200">
+
+                        <th class="text-left py-4 font-black uppercase text-xs">
+                            Date
+                        </th>
+
+                        <th class="text-left py-4 font-black uppercase text-xs">
+                            Orders
+                        </th>
+
+                        <th class="text-left py-4 font-black uppercase text-xs">
+                            Gross Sales
+                        </th>
+
+                        <th class="text-left py-4 font-black uppercase text-xs">
+                            Coupon Discount
+                        </th>
+
+                        <th class="text-left py-4 font-black uppercase text-xs">
+                            Refunds
+                        </th>
+
+                        <th class="text-left py-4 font-black uppercase text-xs">
+                            Shipping
+                        </th>
+
+                        <th class="text-left py-4 font-black uppercase text-xs">
+                            Net Sales
+                        </th>
+
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for row in report %}
+                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+
+                        <td class="py-4">
+                            {{ row.date }}
+                        </td>
+
+                        <td class="py-4 font-semibold">
+                            {{ row.total_orders }}
+                        </td>
+
+                        <td class="py-4">
+                            ₹{{ row.gross_sales|floatformat:2 }}
+                        </td>
+
+                        <td class="py-4 text-red-500">
+                            ₹{{ row.coupon_discount|floatformat:2 }}
+                        </td>
+
+                        <td class="py-4 text-red-500">
+                            ₹{{ row.total_refunds|floatformat:2 }}
+                        </td>
+
+                        <td class="py-4">
+                            ₹{{ row.total_shipping|floatformat:2 }}
+                        </td>
+
+                        <td class="py-4 font-bold text-green-600">
+                            ₹{{ row.net_sales|floatformat:2 }}
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="7" class="py-10 text-center text-gray-500">
+                            No sales data available for the selected date range.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div> {% endcomment %}
+
+</main>
+{% endblock %}

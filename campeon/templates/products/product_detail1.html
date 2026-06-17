@@ -50,22 +50,17 @@
         <span class="text-[10px] font-black uppercase tracking-[0.3em] text-lime-dark mb-3 block">{{ product.category.name }}</span>
 
         <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black uppercase leading-tight mb-6 break-words">{{ product.name }}</h2>
-        <p id="stockStatus" class="text-xs font-bold text-gray-400 mt-2"></p>
 
-        <!-- PRICE BLOCK (ALWAYS SAME STRUCTURE) -->
-        <div class="mt-4">
-          <div class="flex items-center gap-3">
-            <div id="currentPrice" class="text-2xl font-black text-lime-dark">₹{{ discount_price|default:default_variant.price }}</div>
+        <div class="flex flex-wrap items-center gap-3 mb-8">
+          <span id="productPrice" class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ default_variant.price }}</span>
 
-            <div id="originalPrice" class="text-lg text-gray-400 line-through {% if not offer %}hidden{% endif %}">₹{{ default_variant.price }}</div>
-          </div>
-
-          <div id="savedAmount" class="text-sm text-lime-dark font-semibold mt-1 {% if not offer %}hidden{% endif %}">You save ₹{{ saved_amount|default:0 }}</div>
+          <p id="stockStatus" class="text-xs font-bold text-gray-400 mt-2"></p>
         </div>
+
         <div class="space-y-10">
           <div>
             <div class="flex justify-between items-end mb-4">
-              <h3 class="text-[10px] font-black uppercase tracking-widest tracking-tightest mt-5">Select Size</h3>
+              <h3 class="text-[10px] font-black uppercase tracking-widest tracking-tightest">Select Size</h3>
               <a href="#" class="text-[9px] font-black uppercase tracking-widest text-[#00a300] hover:underline">Size Guide</a>
             </div>
             <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -76,7 +71,38 @@
               <button onclick="selectSize('XXL', this)" data-size="XXL" class="size-btn border py-3 text-xs font-black uppercase">XXL</button>
             </div>
           </div>
+          {% if offer %}
+            <div class="bg-green-50 p-4 rounded-lg mb-4">
+              <div class="text-green-700 font-black uppercase text-sm">Special Offer Available</div>
 
+              <div class="text-lg font-bold text-red-600 mt-2">
+                {{ offer.discount_value }}
+
+                {% if offer.discount_type == 'percentage' %}
+                  % OFF
+                {% else %}
+                  ₹ OFF
+                {% endif %}
+              </div>
+
+              <div class="mt-2 text-sm text-gray-600">Valid until {{ offer.end_date|date:'d M Y' }}</div>
+            </div>
+          {% endif %}
+          <div class="mt-4">
+            {% if offer %}
+              <div class="flex items-center gap-3">
+                <div class="text-2xl font-black text-green-700">₹{{ discount_price }}</div>
+
+                <div class="text-lg text-gray-400 line-through">₹{{ default_variant.price }}</div>
+              </div>
+
+              {% if offer %}
+                <div class="text-sm text-green-600 font-semibold mt-1">You save ₹{{ saved_amount }}</div>
+              {% endif %}
+            {% else %}
+              <div class="text-2xl font-black">₹{{ default_variant.price }}</div>
+            {% endif %}
+          </div>
           <form method="POST" id="addToCartForm" action="{% url 'products:add_to_wishlist' product.slug %}" class="flex gap-4" onsubmit="return submitCartForm(event)">
             {% csrf_token %}
             <input type="hidden" name="variant_id" id="formVariantId" />
@@ -287,39 +313,29 @@
     }
     
     function selectSize(size, el) {
-  selectedSize = size
-
-  document.querySelectorAll('.size-btn')
-    .forEach(btn => btn.classList.remove('bg-lime-dark', 'text-white'))
-
-  el.classList.add('bg-lime-dark', 'text-white')
-
-  selectedVariant = variants.find(v => v.size == selectedSize)
-
-  if (!selectedVariant) return
-
-  document.getElementById('currentPrice').innerText =
-    `₹${selectedVariant.discount_price}`
-
-  document.getElementById('originalPrice').innerText =
-    `₹${selectedVariant.price}`
-
-  document.getElementById('savedAmount').innerText =
-    `You save ₹${selectedVariant.saved}`
-
-  // stock text
-  const stockText =
-    selectedVariant.stock > 5
-      ? 'In stock'
-      : selectedVariant.stock > 0
-        ? `Only ${selectedVariant.stock} left`
-        : 'Out of stock'
-
-  document.getElementById('stockStatus').innerText = stockText
-
-  updateGallery()
-  updateAddToCartState()
-}
+      selectedSize = size
+      document.querySelectorAll('.size-btn').forEach((btn) => btn.classList.remove('bg-lime-dark', 'text-white'))
+      el.classList.add('bg-lime-dark', 'text-white')
+    
+      selectedVariant = variants.find((v) => v.size == selectedSize)
+      if (selectedVariant) {
+        function updatePrice(v) {
+          document.getElementById('productPrice').innerText = `₹${v.discount_price}`
+    
+          const original = document.querySelector('.original-price')
+          const saved = document.querySelector('.saved-amount')
+    
+          if (original) original.innerText = `₹${v.price}`
+          if (saved) saved.innerText = `You save ₹${v.saved}`
+        }
+    
+        const stockText = selectedVariant.stock > 5 ? 'In stock' : selectedVariant.stock > 0 ? `Only ${selectedVariant.stock} left` : 'Out of stock'
+    
+        document.getElementById('stockStatus').innerText = stockText
+        updateGallery()
+      }
+      updateAddToCartState()
+    }
     function updateAddToCartState() {
       const btn = document.querySelector('#addToCartForm button[type="submit"]')
     

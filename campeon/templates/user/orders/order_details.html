@@ -73,7 +73,8 @@
                 <div class="lg:text-right lg:min-w-[140px]">
                   <p class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Qty {{ item.quantity|stringformat:'02d' }}</p>
 
-                  <p class="mt-2 text-3xl font-black text-[#008000]">₹{{ item.price|floatformat:2 }}</p>
+                  <p class="mt-2 text-3xl font-black text-[#008000]">₹{{ item.subtotal|floatformat:2 }}</p>
+                  <p class="mt-2 text font-black text-gray-400">₹{{ item.price|floatformat:2 }} / Qty</p>
                 </div>
               </div>
 

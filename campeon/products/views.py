@@ -38,6 +38,7 @@ from payment.services import create_order
 from django.conf import settings
 import razorpay
 from .service import WalletService
+from .offer_service import get_best_offer, get_discount_price
 
 # Create your views here.
 
@@ -170,7 +171,7 @@ def products_list(request):
     elif status == "Inactive":
         products_queryset = products_queryset.filter(is_active=False)
 
-    paginator = Paginator(products_queryset, 2)  # Show 1 products per page.
+    paginator = Paginator(products_queryset, 5)  # Show 1 products per page.
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -475,24 +476,42 @@ def product_detail(request, slug):
         return redirect("products:all_products")
 
     # Check if product has any active variants with stock
-    has_stock = any(
-        variant.stock > 0 and variant.is_active for variant in product.variants.all()
-    )
-    if not has_stock:
-        messages.warning(request, "This product is currently out of stock.")
-        return redirect("products:all_products")
+    # has_stock = any(
+    #     variant.stock > 0 and variant.is_active for variant in product.variants.all()
+    # )
+    # if not has_stock:
+    #     messages.warning(request, "This product is currently out of stock.")
+    #     return redirect("products:all_products")
 
     # Find default variant (lowest price with stock)
     active_variants = [v for v in product.variants.all() if v.stock > 0 and v.is_active]
-    default_variant = (
-        min(active_variants, key=lambda v: v.price)
-        if active_variants
-        else product.variants.first()
-    )
-
+    if not active_variants:
+        messages.warning(request, "This product is out of stock")
+        return redirect("products:all_products")
+    default_variant = min(active_variants, key=lambda v: v.price)
+    offer = get_best_offer(product)
+    discount_price = get_discount_price(default_variant)
+    variant_data = []
+    for v in product.variants.all():
+        discounted = get_discount_price(v)
+        variant_data.append(
+            {
+                "id": v.id,
+                "size": v.size,
+                "price": v.price,
+                "discount_price": discounted,
+                "saved": v.price - discounted,
+                "stock": v.stock,
+            }
+        )
+    saved_amount = default_variant.price - discount_price
     context = {
         "product": product,
         "default_variant": default_variant,
+        "offer": offer,
+        "discount_price": discount_price,
+        "saved_amount": saved_amount,
+        "variant_data": variant_data,
     }
     return render(request, "products/product_detail.html", context)
 
@@ -525,6 +544,7 @@ def cart(request):
         "items": items,
         "checkout_disabled": checkout_disabled,
         "coupons": coupons,
+        "cart_subtotal": summary["subtotal"],
         "coupon_discount": summary["coupon_discount"],
         "applied_coupon": summary["applied_coupon"],
         "final_total": summary["final_total"],
@@ -610,7 +630,9 @@ def remove_from_cart(request, item_id):
 
 
 def calculate_cart_summary(cart, request=None):
-    subtotal = cart.total_price
+    subtotal = sum(
+        get_discount_price(item.variant) * item.quantity for item in cart.items.all()
+    )
     coupon_discount = Decimal("0.00")
     applied_coupon = None
     coupon_id = request.session.get("coupon_id") if request else None
@@ -664,11 +686,12 @@ def update_cart_quantity(request):
                 )
         cart_item.save()
         summary = calculate_cart_summary(cart_item.cart, request)
+        offer_price = get_discount_price(cart_item.variant)
         return JsonResponse(
             {
                 "status": "success",
                 "quantity": cart_item.quantity,
-                "item_subtotal": float(cart_item.subtotal),
+                "item_subtotal": float(offer_price * cart_item.quantity),
                 "cart_subtotal": float(summary["subtotal"]),
                 "coupon_discount": float(summary["coupon_discount"]),
                 "final_total": float(summary["final_total"]),
@@ -913,40 +936,32 @@ def select_payment(request):
         messages.error(request, "Your cart is empty")
         return redirect("products:cart")
 
-    coupon = None
-    offer = None
-
-    subtotal = cart.total_price
-    shipping = 0
+    raw_subtotal = sum(item.subtotal for item in cart_items)
+    offer_subtotal = sum(item.offer_subtotal for item in cart_items)
+    offer_discount = raw_subtotal - offer_subtotal
+    
+    offer = True if offer_discount > 0 else None
 
     # ---------------- COUPON ----------------
+    coupon = None
     coupon_discount = Decimal("0.00")
     coupon_id = request.session.get("coupon_id")
 
     if coupon_id:
         coupon = Coupon.objects.filter(id=coupon_id, is_active=True).first()
-        if coupon and subtotal >= coupon.min_purchase_amount:
-            if coupon and coupon.is_valid:
+        if coupon and offer_subtotal >= coupon.min_purchase_amount:
+            if coupon.is_valid:
                 if coupon.discount_type == "percentage":
-                    coupon_discount = (subtotal * coupon.discount_value) / 100
+                    coupon_discount = (offer_subtotal * coupon.discount_value) / Decimal("100")
                 else:
                     coupon_discount = coupon.discount_value
+            else:
+                coupon = None
 
-    # ---------------- OFFER ----------------
-    offer_discount = Decimal("0.00")
-    offer = Offer.objects.filter(
-        is_active=True, start_date__lte=timezone.now(), end_date__gte=timezone.now()
-    ).first()
-
-    if offer:
-        if offer.discount_type == "percentage":
-            offer_discount = (subtotal * offer.discount_value) / 100
-        else:
-            offer_discount = offer.discount_value
+    shipping = Decimal("0.00")
 
     # ---------------- FINAL TOTAL ----------------
-    total = subtotal - coupon_discount - offer_discount + shipping
-    total = max(total, 0)
+    total = max(offer_subtotal - coupon_discount + shipping, Decimal("0.00"))
 
     address_id = request.session.get("address_id")
     if not address_id:
@@ -976,9 +991,11 @@ def select_payment(request):
                 state=address.state,
                 postal_code=address.postal_code,
                 payment_method=payment_method,
+                subtotal=raw_subtotal,
                 coupon=coupon,
-                offer=offer,
-                subtotal=subtotal,
+                coupon_name=coupon.code if coupon else None,
+                coupon_discount_type=coupon.discount_type if coupon else None,
+                coupon_discount_value=coupon_discount,
                 shipping=shipping,
                 total_amount=total,
                 payment_status="pending",
@@ -986,6 +1003,7 @@ def select_payment(request):
 
             # save items
             for item in cart_items:
+                item_offer = get_best_offer(item.variant.product)
                 OrderItem.objects.create(
                     order=order,
                     variant=item.variant,
@@ -994,25 +1012,28 @@ def select_payment(request):
                     price=item.variant.price,
                     quantity=item.quantity,
                     subtotal=item.subtotal,
+                    offer=item_offer,
+                    offer_name=item_offer.name if item_offer else None,
+                    offer_discount_type=item_offer.discount_type if item_offer else None,
+                    offer_discount_value=item_offer.discount_value if item_offer else None,
+                    offer_discount_amount=item.subtotal - item.offer_subtotal,
                 )
-
-            #     item.variant.stock -= item.quantity
-            #     item.variant.save()
 
             # COD
             if payment_method == "cod":
                 order.payment_status = "pending"
                 order.save()
-                variant = item.variant
+                
+                for item in cart_items:
+                    variant = item.variant
+                    if variant.stock < item.quantity:
+                        messages.error(request, "Stock unavailable")
+                        return redirect("products:cart")
+                    variant.stock -= item.quantity
+                    variant.save()
 
-                if variant.stock < item.quantity:
-                    messages.error(request, "Stock unavailable")
-                    return redirect("products:cart")
-
-                variant.stock -= item.quantity
-                variant.save()
                 cart.items.all().delete()
-
+                request.session.pop("coupon_id", None)
                 return redirect("products:payment_successful", order_id=order.order_id)
             # WALLET
             if payment_method == "wallet":
@@ -1071,8 +1092,12 @@ def select_payment(request):
 
     context = {
         "cart_items": cart_items,
-        "subtotal": subtotal,
+        "subtotal": raw_subtotal,
         "total": total,
+        "coupon_discount": coupon_discount,
+        "offer_discount": offer_discount,
+        "coupon": coupon,
+        "offer": offer,
     }
 
     return render(request, "products/select_payment.html", context)
@@ -1081,7 +1106,7 @@ def select_payment(request):
 @user_login_required
 def payment_successful(request, order_id):
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
-
+    request.session.pop("coupon_id", None)
     if order.payment_status != "paid":
         messages.error(request, "Payment not completed")
         return redirect("products:select_payment")
@@ -1520,52 +1545,123 @@ def offers(request):
 
 def add_offer(request):
     if request.method == "POST":
-        start_date = datetime.strptime(request.POST.get("start_date"), "%Y-%m-%dT%H:%M")
-
-        end_date = datetime.strptime(request.POST.get("end_date"), "%Y-%m-%dT%H:%M")
-
-        offer = Offer(
-            name=request.POST.get("name"),
-            discount_type=request.POST.get("discount_type"),
-            discount_value=Decimal(request.POST.get("discount_value") or 0),
-            start_date=start_date,
-            end_date=end_date,
-            is_active=request.POST.get("is_active") == "on",
-        )
+        product = None
+        category = None
 
         try:
+            product_id = request.POST.get("product_id")
+            category_id = request.POST.get("category_id")
+            product = (
+                Product.objects.filter(id=product_id).first() if product_id else None
+            )
+            category = (
+                Category.objects.filter(id=category_id).first() if category_id else None
+            )
+            start_date = datetime.strptime(
+                request.POST.get("start_date"), "%Y-%m-%dT%H:%M"
+            )
+
+            end_date = datetime.strptime(request.POST.get("end_date"), "%Y-%m-%dT%H:%M")
+
+            offer = Offer(
+                name=request.POST.get("name"),
+                discount_type=request.POST.get("discount_type"),
+                discount_value=Decimal(request.POST.get("discount_value") or 0),
+                start_date=start_date,
+                end_date=end_date,
+                is_active=request.POST.get("is_active") == "on",
+                product=product,
+                category=category,
+            )
+            target_type = request.POST.get("target_type")
+            if target_type == "product" and not product:
+                messages.error(request, "Please select a product.")
+                return redirect("products:add_offer")
+
+            if target_type == "category" and not category:
+                messages.error(request, "Please select a category.")
+                return redirect("products:add_offer")
+
+            offer.full_clean()
             offer.save()
             messages.success(request, "Offer has been Created Successfully")
             return redirect("products:offers")
+        except ValueError:
+            messages.error(request, "Invalid date format")
+            return redirect("products:add_offer")
         except ValidationError as e:
             messages.error(request, "".join(e.messages))
             return redirect("products:add_offer")
 
-    return render(request, "admin/offers/add_offer.html")
+    context = {
+        "products": Product.objects.filter(is_active=True, is_deleted=False),
+        "categories": Category.objects.filter(is_active=True, is_deleted=False),
+    }
+    return render(request, "admin/offers/add_offer.html", context)
 
 
 def edit_offer(request, id):
     offer = get_object_or_404(Offer, id=id)
+
     if request.method == "POST":
-        start_date = datetime.strptime(request.POST.get("start_date"), "%Y-%m-%dT%H:%M")
-
-        end_date = datetime.strptime(request.POST.get("end_date"), "%Y-%m-%dT%H:%M")
-
-        offer.name = request.POST.get("name")
-        offer.discount_type = request.POST.get("discount_type")
-        offer.discount_value = Decimal(request.POST.get("discount_value") or 0)
-        offer.start_date = start_date
-        offer.end_date = end_date
-        offer.is_active = request.POST.get("is_active") == "on"
         try:
+            product_id = request.POST.get("product_id")
+            category_id = request.POST.get("category_id")
+            target_type = request.POST.get("target_type")
+
+            product = (
+                Product.objects.filter(id=product_id).first() if product_id else None
+            )
+            category = (
+                Category.objects.filter(id=category_id).first() if category_id else None
+            )
+
+            # enforce single target
+            if target_type == "product":
+                category = None
+                if not product:
+                    messages.error(request, "Please select a product.")
+                    return redirect("products:edit_offer", offer.id)
+
+            elif target_type == "category":
+                product = None
+                if not category:
+                    messages.error(request, "Please select a category.")
+                    return redirect("products:edit_offer", offer.id)
+
+            offer.name = request.POST.get("name")
+            offer.discount_type = request.POST.get("discount_type")
+            offer.discount_value = Decimal(request.POST.get("discount_value") or 0)
+            offer.start_date = datetime.strptime(
+                request.POST.get("start_date"), "%Y-%m-%dT%H:%M"
+            )
+            offer.end_date = datetime.strptime(
+                request.POST.get("end_date"), "%Y-%m-%dT%H:%M"
+            )
+            offer.is_active = request.POST.get("is_active") == "on"
+
+            offer.product = product
+            offer.category = category
+
+            offer.full_clean()
             offer.save()
+
             messages.success(request, "Offer Updated Successfully")
             return redirect("products:offers")
-        except ValidationError as e:
-            messages.error(request, "".join(e.messages))
-            return redirect("products:edit_offer", offer.id)
 
-    return render(request, "admin/offers/edit_offer.html", {"offer": offer})
+        except ValidationError as e:
+            messages.error(request, ", ".join(e.messages))
+
+        except ValueError:
+            messages.error(request, "Invalid date format")
+
+    context = {
+        "offer": offer,
+        "products": Product.objects.filter(is_active=True, is_deleted=False),
+        "categories": Category.objects.filter(is_active=True, is_deleted=False),
+    }
+
+    return render(request, "admin/offers/edit_offer.html", context)
 
 
 def delete_offer(request, id):

@@ -8,6 +8,11 @@ from django.contrib.sessions.models import Session
 from django.utils.timezone import now
 from userauths.views import superuser_required
 
+from django.db.models import Sum, F, DecimalField
+from django.db.models.functions import TruncDate
+from products.models import Order, OrderItem  
+
+
 # Create your views here.
 @superuser_required
 def user_management_search(request):
@@ -38,7 +43,7 @@ def user_management_search(request):
 
 @superuser_required
 def users(request):
-    users = Account.objects.filter(is_superadmin=False).order_by('-full_name')
+    users = Account.objects.filter(is_superadmin=False).order_by("-full_name")
 
     paginator = Paginator(users, 2)  # same as search view
     page_number = request.GET.get("page")
@@ -78,5 +83,13 @@ def delete_user(request, id):
 
 @superuser_required
 def dashboard(request):
+    
     return render(request, "admin/dashboard.html")
 
+
+
+
+
+def sales(request):
+    
+    return render(request,'admin/sales/sales.html')
