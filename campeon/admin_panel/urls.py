@@ -16,6 +16,10 @@ urlpatterns = [
     ),
     path("block-user/<id>/", views.block_user, name="block_user"),
     path("delete-user/<id>/", views.delete_user, name="delete_user"),
+
     path("sales/", views.sales, name="sales"),
+    path("sales-report-pdf/", views.sales_report_pdf, name="sales_report_pdf"),
+    path("sales-report-excel/", views.sales_report_excel, name="sales_report_excel"),
+
     
 ]

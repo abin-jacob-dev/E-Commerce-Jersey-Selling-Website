@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #222;
+            margin: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            margin-top: 25px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        /* VERTICAL SUMMARY BOX */
+        .summary-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background: #f2f2f2;
+            text-align: left;
+        }
+
+        .total {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Sales Report</h2>
+
+<h3>Summary</h3>
+
+<div class="summary-box">
+
+    <div class="summary-item">
+        <span class="label">Total Orders</span>
+        <span>{{ total_orders }}</span>
+    </div>
+
+    <div class="summary-item">
+        <span class="label">Total Sales</span>
+        <span>₹{{ total_sales }}</span>
+    </div>
+
+    <div class="summary-item">
+        <span class="label">Total Offer Discount</span>
+        <span>₹{{ total_offer_discount }}</span>
+    </div>
+
+    <div class="summary-item">
+        <span class="label">Total Coupon Discount</span>
+        <span>₹{{ total_coupon_discount }}</span>
+    </div>
+
+    <div class="summary-item">
+        <span class="label">Total Revenue</span>
+        <span><strong>₹{{ total_revenue }}</strong></span>
+    </div>
+
+</div>
+
+<!-- BREAKDOWN -->
+<h3>Sales Breakdown</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Orders</th>
+            <th>Sales</th>
+            <th>Offer</th>
+            <th>Coupon</th>
+            <th>Net Revenue</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for row in sales_report %}
+        <tr>
+            <td>{{ row.date|date:"d M Y" }}</td>
+            <td>{{ row.orders }}</td>
+            <td>₹{{ row.sales }}</td>
+            <td>₹{{ row.offer_discount }}</td>
+            <td>₹{{ row.coupon_discount }}</td>
+            <td class="total">₹{{ row.net_revenue }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

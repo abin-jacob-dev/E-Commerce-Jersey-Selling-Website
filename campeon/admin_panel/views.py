@@ -1,16 +1,19 @@
 from django.shortcuts import render, redirect
 from userauths.models import Account
-from django.db.models import Q
+from django.db.models import Q, Sum, F, DecimalField, Count
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now
 from userauths.views import superuser_required
-
-from django.db.models import Sum, F, DecimalField
-from django.db.models.functions import TruncDate
-from products.models import Order, OrderItem  
+from products.models import Order
+from django.db.models.functions import TruncDay, TruncMonth, TruncYear
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+from weasyprint import HTML
+from openpyxl import Workbook
+from openpyxl.styles import Font
 
 
 # Create your views here.
@@ -83,13 +86,313 @@ def delete_user(request, id):
 
 @superuser_required
 def dashboard(request):
-    
+
     return render(request, "admin/dashboard.html")
 
 
-
-
-
 def sales(request):
+    period = request.GET.get("period", "daily")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
     
-    return render(request,'admin/sales/sales.html')
+    orders = Order.objects.filter(payment_status="paid").prefetch_related("items")
+    
+    if period == "custom" and start_date and end_date:
+        orders = orders.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
+        group_by = TruncDay("created_at")
+    elif period == "monthly":
+        group_by = TruncMonth("created_at")
+    elif period == "yearly":
+        group_by = TruncYear("created_at")
+    else:
+        group_by = TruncDay("created_at")
+
+    sales_date = (
+        orders.annotate(period=group_by)
+        .values("period")
+        .annotate(order_count=Count("id"), sales=Sum("subtotal"), net_revenue=Sum("total_amount"))
+        .order_by("period")
+    )
+
+    sales_report = []
+    for row in sales_date:
+        date = row["period"]
+        if period == "monthly":
+            daily_orders = orders.filter(created_at__year=date.year, created_at__month=date.month)
+        elif period == "yearly":
+            daily_orders = orders.filter(created_at__year=date.year)
+        else:
+            daily_orders = orders.filter(created_at__date=date.date())
+        offer_discount = sum(
+            sum(item.offer_discount_amount for item in order.items.all())
+            for order in daily_orders
+        )
+        coupon_discount = sum(
+            (order.coupon_discount_value or 0) for order in daily_orders
+        )
+        sales = row["sales"] or 0
+        net_revenue = row["net_revenue"] or 0
+
+        sales_report.append(
+            {
+                "date": date,
+                "orders": row["order_count"],
+                "sales": sales,
+                "offer_discount": offer_discount,
+                "coupon_discount": coupon_discount,
+                "net_revenue": net_revenue,
+            }
+        )
+    context = {
+        "sales_report": sales_report,
+        "period": period,
+        "start_date": start_date,
+        "end_date": end_date,
+        "total_orders": orders.count(),
+        "total_sales": sum(order.subtotal for order in orders),
+        "total_offer_discount": sum( 
+            sum(item.offer_discount_amount for item in order.items.all())
+            for order in orders
+        ),
+        "total_coupon_discount": sum(
+            (order.coupon_discount_value or 0) for order in orders
+        ),
+        "total_revenue": sum(order.total_amount for order in orders)
+    }
+    return render(request, "admin/sales/sales.html", context)
+
+
+def sales_report_pdf(request):
+    period = request.GET.get("period", "daily")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    orders = Order.objects.filter(payment_status="paid").prefetch_related("items")
+
+    if period == "custom" and start_date and end_date:
+        orders = orders.filter(
+            created_at__date__gte=start_date,
+            created_at__date__lte=end_date
+        )
+        group_by = TruncDay("created_at")
+    elif period == "monthly":
+        group_by = TruncMonth("created_at")
+    elif period == "yearly":
+        group_by = TruncYear("created_at")
+    else:
+        group_by = TruncDay("created_at")
+
+    sales_date = (
+        orders.annotate(period=group_by)
+        .values("period")
+        .annotate(
+            order_count=Count("id"),
+            sales=Sum("subtotal"),
+            net_revenue=Sum("total_amount"),
+        )
+        .order_by("period")
+    )
+
+    sales_report = []
+    for row in sales_date:
+        date = row["period"]
+
+        if period == "monthly":
+            daily_orders = orders.filter(created_at__year=date.year, created_at__month=date.month)
+        elif period == "yearly":
+            daily_orders = orders.filter(created_at__year=date.year)
+        else:
+            daily_orders = orders.filter(created_at__date=date.date())
+
+        offer_discount = sum(
+            sum(item.offer_discount_amount for item in order.items.all())
+            for order in daily_orders
+        )
+
+        coupon_discount = sum(
+            (order.coupon_discount_value or 0) for order in daily_orders
+        )
+
+        sales_report.append({
+            "date": date,
+            "orders": row["order_count"],
+            "sales": row["sales"] or 0,
+            "offer_discount": offer_discount,
+            "coupon_discount": coupon_discount,
+            "net_revenue": row["net_revenue"] or 0,
+        })
+
+    context = {
+        "sales_report": sales_report,
+        "total_orders": orders.count(),
+        "total_sales": sum(order.subtotal for order in orders),
+        "total_offer_discount": sum(
+            sum(item.offer_discount_amount for item in order.items.all())
+            for order in orders
+        ),
+        "total_coupon_discount": sum(
+            (order.coupon_discount_value or 0) for order in orders
+        ),
+        "total_revenue": sum(order.total_amount for order in orders),
+    }
+
+    html_string = render_to_string("admin/sales/sales_report_pdf.html", context)
+
+    html = HTML(string=html_string, base_url=request.build_absolute_uri())
+
+    result = html.write_pdf()
+
+    response = HttpResponse(result, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="sales_report.pdf"'
+
+    return response
+
+def sales_report_excel(request):
+    period = request.GET.get("period", "daily")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    orders = Order.objects.filter(payment_status="paid").prefetch_related("items")
+
+    if period == "custom" and start_date and end_date:
+        orders = orders.filter(
+            created_at__date__gte=start_date,
+            created_at__date__lte=end_date
+        )
+        group_by = TruncDay("created_at")
+
+    elif period == "monthly":
+        group_by = TruncMonth("created_at")
+
+    elif period == "yearly":
+        group_by = TruncYear("created_at")
+
+    else:
+        group_by = TruncDay("created_at")
+
+    sales_date = (
+        orders.annotate(period=group_by)
+        .values("period")
+        .annotate(
+            order_count=Count("id"),
+            sales=Sum("subtotal"),
+            net_revenue=Sum("total_amount"),
+        )
+        .order_by("period")
+    )
+
+    sales_report = []
+    for row in sales_date:
+        date = row["period"]
+
+        if period == "monthly":
+            grouped_orders = orders.filter(
+                created_at__year=date.year,
+                created_at__month=date.month
+            )
+        elif period == "yearly":
+            grouped_orders = orders.filter(created_at__year=date.year)
+        else:
+            grouped_orders = orders.filter(created_at__date=date.date())
+
+        offer_discount = sum(
+            sum(item.offer_discount_amount for item in order.items.all())
+            for order in grouped_orders
+        )
+
+        coupon_discount = sum(
+            (order.coupon_discount_value or 0) for order in grouped_orders
+        )
+
+        sales_report.append({
+            "date": date,
+            "orders": row["order_count"],
+            "sales": row["sales"] or 0,
+            "offer_discount": offer_discount,
+            "coupon_discount": coupon_discount,
+            "net_revenue": row["net_revenue"] or 0,
+        })
+
+    # SUMMARY (same as PDF)
+    total_sales = sum(r["sales"] for r in sales_report)
+    total_offer_discount = sum(r["offer_discount"] for r in sales_report)
+    total_coupon_discount = sum(r["coupon_discount"] for r in sales_report)
+    total_revenue = sum(r["net_revenue"] for r in sales_report)
+
+    # EXCEL FILE
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Sales Report"
+
+    bold = Font(bold=True)
+
+    row = 1
+
+    # ===== TITLE =====
+    ws.cell(row=row, column=1, value="SALES REPORT").font = bold
+    row += 2
+
+    # ===== SUMMARY =====
+    ws.cell(row=row, column=1, value="SUMMARY").font = bold
+    row += 1
+
+    summary_data = [
+        ("Total Orders", orders.count()),
+        ("Total Sales", total_sales),
+        ("Total Offer Discount", total_offer_discount),
+        ("Total Coupon Discount", total_coupon_discount),
+        ("Total Revenue", total_revenue),
+    ]
+
+    for label, value in summary_data:
+        ws.cell(row=row, column=1, value=label).font = bold
+        ws.cell(row=row, column=2, value=value)
+        row += 1
+
+    row += 2
+
+    # ===== BREAKDOWN HEADER =====
+    ws.cell(row=row, column=1, value="SALES BREAKDOWN").font = bold
+    row += 1
+
+    headers = [
+        "Date",
+        "Orders",
+        "Sales",
+        "Offer Discount",
+        "Coupon Discount",
+        "Net Revenue"
+    ]
+
+    for col, h in enumerate(headers, 1):
+        ws.cell(row=row, column=col, value=h).font = bold
+
+    row += 1
+
+    # ===== DATA =====
+    for r in sales_report:
+        ws.cell(row=row, column=1, value=r["date"].strftime("%d-%m-%Y"))
+        ws.cell(row=row, column=2, value=r["orders"])
+        ws.cell(row=row, column=3, value=r["sales"])
+        ws.cell(row=row, column=4, value=r["offer_discount"])
+        ws.cell(row=row, column=5, value=r["coupon_discount"])
+        ws.cell(row=row, column=6, value=r["net_revenue"])
+        row += 1
+
+    # Auto width (simple)
+    for col in ws.columns:
+        max_len = 0
+        col_letter = col[0].column_letter
+        for cell in col:
+            if cell.value:
+                max_len = max(max_len, len(str(cell.value)))
+        ws.column_dimensions[col_letter].width = max_len + 2
+
+    # ===== RESPONSE =====
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="sales_report.xlsx"'
+
+    wb.save(response)
+    return response
