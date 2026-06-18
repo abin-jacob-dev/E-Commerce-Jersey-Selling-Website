@@ -939,7 +939,7 @@ def select_payment(request):
     raw_subtotal = sum(item.subtotal for item in cart_items)
     offer_subtotal = sum(item.offer_subtotal for item in cart_items)
     offer_discount = raw_subtotal - offer_subtotal
-    
+
     offer = True if offer_discount > 0 else None
 
     # ---------------- COUPON ----------------
@@ -952,7 +952,9 @@ def select_payment(request):
         if coupon and offer_subtotal >= coupon.min_purchase_amount:
             if coupon.is_valid:
                 if coupon.discount_type == "percentage":
-                    coupon_discount = (offer_subtotal * coupon.discount_value) / Decimal("100")
+                    coupon_discount = (
+                        offer_subtotal * coupon.discount_value
+                    ) / Decimal("100")
                 else:
                     coupon_discount = coupon.discount_value
             else:
@@ -1014,16 +1016,21 @@ def select_payment(request):
                     subtotal=item.subtotal,
                     offer=item_offer,
                     offer_name=item_offer.name if item_offer else None,
-                    offer_discount_type=item_offer.discount_type if item_offer else None,
-                    offer_discount_value=item_offer.discount_value if item_offer else None,
+                    offer_discount_type=(
+                        item_offer.discount_type if item_offer else None
+                    ),
+                    offer_discount_value=(
+                        item_offer.discount_value if item_offer else None
+                    ),
                     offer_discount_amount=item.subtotal - item.offer_subtotal,
+                    final_paid_price=total,
                 )
 
             # COD
             if payment_method == "cod":
-                order.payment_status = "pending"
+                order.payment_status = "paid"
                 order.save()
-                
+
                 for item in cart_items:
                     variant = item.variant
                     if variant.stock < item.quantity:
@@ -1386,7 +1393,11 @@ def order_view(request, order_id):
                 )
                 order.save()
                 WalletService.credit_wallet(
-                    order.user, item.refund_amount, order, source="refund"
+                    order.user,
+                    item.subtotal,
+                    order,
+                    source="refund",
+                    # order.user, ((item.subtotal*item.quantity)-(item.offer_discount_value*item.quantity)), order, source="refund"
                 )
                 messages.success(
                     request,
@@ -1424,7 +1435,10 @@ def order_view(request, order_id):
 
                 order.save()
                 WalletService.credit_wallet(
-                    order.user, item.refund_amount, order, source="refund"
+                    order.user,
+                    item.subtotal,
+                    order,
+                    source="refund",
                 )
                 messages.success(
                     request,

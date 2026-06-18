@@ -216,9 +216,9 @@
 					</div>
 				{% endif %}
 
-				{% if order.offer %}
+				{% if order.get_offer_discount > 0 %}
 					<div class="flex justify-between text-sm">
-						<span class="text-gray-400">Offer ({{order.offer.name}})</span>
+						<span class="text-gray-400">Offer Discount</span>
 						<span class="font-black">₹{{ order.get_offer_discount }}</span>
 					</div>
 				{% endif %}

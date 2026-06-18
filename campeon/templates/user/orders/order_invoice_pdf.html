@@ -318,25 +318,25 @@
           <td class="totals-label">Subtotal</td>
           <td class="right">₹{{ order.subtotal }}</td>
         </tr>
-        {% comment %} {% if order.coupon %}
+        {% if order.get_coupon_discount > 0 %}
           <tr>
-            <td class="totals-label">Coupon ({{ order.coupon.code }})</td>
+            <td class="totals-label">Coupon ({{ order.coupon_name }})</td>
             <td class="right">-₹{{ order.get_coupon_discount }}</td>
           </tr>
         {% endif %}
-        {% if order.offer %}
+        {% if order.get_offer_discount > 0 %}
           <tr>
-            <td class="totals-label">OFFER ({{ order.offer.name }})</td>
+            <td class="totals-label">OFFER DISCOUNT</td>
             <td class="right">-₹{{ order.get_offer_discount }}</td>
           </tr>
-        {% endif %} {% endcomment %}
+        {% endif %}
         <tr>
           <td class="totals-label">Shipping</td>
           <td class="right">{{ order.shipping|default:'FREE' }}</td>
         </tr>
         <tr class="grand-total">
           <td>Total</td>
-          <td class="right">₹{{ order.subtotal }}</td>
+          <td class="right">₹{{ order.get_total_after_discount }}</td>
         </tr>
       </table>
 

@@ -183,10 +183,10 @@ class Offer(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-    product = models.OneToOneField(
+    product = models.ForeignKey(
         Product, null=True, blank=True, on_delete=models.CASCADE
     )
-    category = models.OneToOneField(
+    category = models.ForeignKey(
         Category, null=True, blank=True, on_delete=models.CASCADE
     )
 
@@ -413,23 +413,11 @@ class Order(models.Model):
 
     @property
     def get_coupon_discount(self):
-        if not self.coupon:
-            return 0
-        subtotal = self.get_subtotal
-        if self.coupon.discount_type == "percentage":
-            return subtotal * (self.coupon.discount_value / 100)
-        else:
-            return self.coupon.discount_value
+        return self.coupon_discount_value or 0
 
     @property
     def get_offer_discount(self):
-        if not self.offer:
-            return 0
-        subtotal = self.get_subtotal
-        if self.offer.discount_type == "percentage":
-            return subtotal * (self.offer.discount_value / 100)
-        else:
-            return self.offer.discount_value
+        return sum(item.offer_discount_amount for item in self.items.all())
 
     @property
     def get_total_after_discount(self):
@@ -485,7 +473,7 @@ class OrderItem(models.Model):
     offer_discount_type = models.CharField(max_length=20, null=True)  # percent/fixed
     offer_discount_value = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     offer_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
+    final_paid_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return f"{self.product_name} x {self.quantity}"

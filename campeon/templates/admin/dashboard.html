@@ -1,7 +1,7 @@
 {% extends 'admin/partials/base.html' %}
 {% load static %}
 {% block content %}
-  <main class="flex-1 p-12 overflow-y-auto">
+  {% comment %} <main class="flex-1 p-12 overflow-y-auto">
     <div class="flex justify-between items-start mb-12">
       <div>
         <h2 class="text-6xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest">Dashboard</h2>
@@ -72,5 +72,232 @@
         </div>
       </div>
     </div>
-  </main>
+  </main> {% endcomment %}
+  <main class="flex-1 p-12 overflow-y-auto">
+
+    <div class="flex justify-between items-center mb-10">
+
+        <div>
+            <h2 class="text-6xl font-black uppercase">
+                Dashboard
+            </h2>
+        </div>
+
+        <form method="get">
+
+            <select
+                name="filter"
+                onchange="this.form.submit()"
+                class="border px-4 py-2 rounded-lg"
+            >
+                <option value="monthly"
+                    {% if filter_type == 'monthly' %}
+                        selected
+                    {% endif %}
+                >
+                    Monthly
+                </option>
+
+                <option value="yearly"
+                    {% if filter_type == 'yearly' %}
+                        selected
+                    {% endif %}
+                >
+                    Yearly
+                </option>
+
+            </select>
+
+        </form>
+
+    </div>
+
+
+    <!-- STATS -->
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+
+        <div class="bg-white p-8 rounded-3xl shadow-sm">
+            <p class="text-sm font-bold uppercase mb-3">
+                Total Revenue
+            </p>
+
+            <h3 class="text-4xl font-black">
+                ₹{{ total_sales }}
+            </h3>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl shadow-sm">
+            <p class="text-sm font-bold uppercase mb-3">
+                Users
+            </p>
+
+            <h3 class="text-4xl font-black">
+                {{ total_users }}
+            </h3>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl shadow-sm">
+            <p class="text-sm font-bold uppercase mb-3">
+                Orders
+            </p>
+
+            <h3 class="text-4xl font-black">
+                {{ total_orders }}
+            </h3>
+        </div>
+
+        {% comment %} <div class="bg-white p-8 rounded-3xl shadow-sm">
+            <p class="text-sm font-bold uppercase mb-3">
+                Delivered Orders
+            </p>
+
+            <h3 class="text-4xl font-black">
+                {{ delivered_orders }}
+            </h3>
+        </div> {% endcomment %}
+
+    </div>
+
+
+    <!-- SALES CHART -->
+
+    <div class="bg-white p-8 rounded-3xl shadow-sm mb-12">
+
+        <h3 class="text-2xl font-black mb-6">
+            Sales Analytics
+        </h3>
+
+        <canvas id="salesChart"></canvas>
+
+    </div>
+
+
+    <!-- TOP SECTIONS -->
+
+    <div class="grid lg:grid-cols-2 gap-8">
+
+        <!-- PRODUCTS -->
+
+        <div class="bg-white p-8 rounded-3xl shadow-sm">
+
+            <h3 class="text-2xl font-black mb-6">
+                Top 10 Products
+            </h3>
+
+            <table class="w-full">
+
+                {% for product in top_products %}
+                <tr class="border-b">
+
+                    <td class="py-3">
+                        {{ product.variant__product__name }}
+                    </td>
+
+                    <td class="py-3 text-right font-bold">
+                        {{ product.total_sold }}
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+            </table>
+
+        </div>
+
+
+        <!-- CATEGORIES -->
+
+        <div class="bg-white p-8 rounded-3xl shadow-sm">
+
+            <h3 class="text-2xl font-black mb-6">
+                Top 10 Categories
+            </h3>
+
+            <table class="w-full">
+
+                {% for category in top_categories %}
+                <tr class="border-b">
+
+                    <td class="py-3">
+                        {{ category.variant__product__category__name }}
+                    </td>
+
+                    <td class="py-3 text-right font-bold">
+                        {{ category.total_sold }}
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+            </table>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{ sales_data|json_script:"sales-data" }}
+
+<script>
+
+const salesData = JSON.parse(
+    document.getElementById("sales-data").textContent
+);
+
+const labels = salesData.map(item => item.label);
+const totals = salesData.map(item => item.total);
+
+new Chart(
+    document.getElementById("salesChart"),
+    {
+        type: "bar",
+
+        data: {
+            labels: labels,
+
+            datasets: [{
+                label: "Revenue (₹)",
+                data: totals,
+                borderColor: "#006400",
+                backgroundColor: "rgba(0, 100, 0, 0.1)",
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: '{% if filter_type == "monthly" %}Months of the Year{% else %}Years{% endif %}',
+                        font: { weight: 'bold' }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Revenue Amount (₹)',
+                        font: { weight: 'bold' }
+                    }
+                }
+            }
+        }
+    }
+);
+
+</script>
 {% endblock %}

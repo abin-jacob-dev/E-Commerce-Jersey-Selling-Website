@@ -8,14 +8,14 @@
         <h2 class="text-6xl font-black uppercase tracking-tighter leading-none mb-4 tracking-tightest">User Management</h2>
         <p class="text-xs font-bold text-black-400 uppercase tracking-widest">Manage userprofiles, staff roles, and platform permissions.</p>
       </div>
-      <button class="bg-[#006400] text-white px-10 py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center gap-3">
+      {% comment %} <button class="bg-[#006400] text-white px-10 py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center gap-3">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>Add New User
-      </button>
+      </button> {% endcomment %}
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+    {% comment %} <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
       <div class="bg-[#e2ead8] p-8 rounded-[1.5rem] shadow-sm">
         <div class="flex items-center gap-3 mb-4">
           <svg class="w-5 h-5 text-lime-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,7 +55,7 @@
         </div>
         <div class="text-5xl font-black">12</div>
       </div>
-    </div>
+    </div> {% endcomment %}
     <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm">
       <form action="{% url 'admin_panel:user_management_search' %}" method="get">
         <div class="p-8 flex justify-between items-center border-b border-black-100">

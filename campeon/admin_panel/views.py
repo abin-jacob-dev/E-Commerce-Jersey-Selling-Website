@@ -7,13 +7,13 @@ from django.views.decorators.cache import never_cache
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now
 from userauths.views import superuser_required
-from products.models import Order
+from products.models import Order, OrderItem, Product, Category
 from django.db.models.functions import TruncDay, TruncMonth, TruncYear
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from weasyprint import HTML
 from openpyxl import Workbook
-from openpyxl.styles import Font
+from datetime import datetime
 
 
 # Create your views here.
@@ -87,18 +87,111 @@ def delete_user(request, id):
 @superuser_required
 def dashboard(request):
 
-    return render(request, "admin/dashboard.html")
+    filter_type = request.GET.get("filter", "monthly")
+
+    orders = Order.objects.filter(payment_status="paid")
+
+    if filter_type == "monthly":
+        orders = orders.filter(created_at__year=datetime.now().year)
+
+    elif filter_type == "yearly":
+        pass
+
+    order_items = OrderItem.objects.filter(order__in=orders).exclude(
+        status__in=[
+            "cancelled",
+            "returned",
+            "partially_cancelled",
+            "partially_returned",
+        ]
+    )
+
+    # SUMMARY
+
+    total_sales = orders.aggregate(total=Sum("total_amount"))["total"] or 0
+
+    total_orders = orders.count()
+
+    total_users = Account.objects.count()
+
+    delivered_orders = Order.objects.filter(order_status="delivered").count()
+
+    # TOP PRODUCTS
+
+    top_products = (
+        order_items.values("variant__product__name")
+        .annotate(total_sold=Sum("quantity"))
+        .order_by("-total_sold")[:10]
+    )
+
+    # TOP CATEGORIES
+
+    top_categories = (
+        order_items.values("variant__product__category__name")
+        .annotate(total_sold=Sum("quantity"))
+        .order_by("-total_sold")[:10]
+    )
+
+    # CHART
+
+    import calendar
+
+    now = datetime.now()
+    sales_data = []
+
+    if filter_type == "monthly":
+        # Loop through all 12 months for a complete timeline
+        for month in range(1, 13):
+            revenue = (
+                orders.filter(created_at__month=month).aggregate(
+                    total=Sum("total_amount")
+                )["total"]
+                or 0
+            )
+            sales_data.append(
+                {
+                    "label": calendar.month_abbr[month],  # 'Jan', 'Feb', etc.
+                    "total": float(revenue),
+                }
+            )
+
+    elif filter_type == "yearly":
+        # Show data for the past few years up to current year
+        current_year = now.year
+        for year in range(current_year - 4, current_year + 1):
+            revenue = (
+                orders.filter(created_at__year=year).aggregate(
+                    total=Sum("total_amount")
+                )["total"]
+                or 0
+            )
+            sales_data.append({"label": str(year), "total": float(revenue)})
+
+    context = {
+        "filter_type": filter_type,
+        "total_sales": total_sales,
+        "total_orders": total_orders,
+        "total_users": total_users,
+        "delivered_orders": delivered_orders,
+        "top_products": top_products,
+        "top_categories": top_categories,
+        "sales_data": sales_data,
+    }
+
+    return render(request, "admin/dashboard.html", context)
 
 
 def sales(request):
     period = request.GET.get("period", "daily")
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
-    
+
     orders = Order.objects.filter(payment_status="paid").prefetch_related("items")
-    
+
     if period == "custom" and start_date and end_date:
-        orders = orders.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
+        orders = orders.filter(
+            created_at__date__gte=start_date, created_at__date__lte=end_date
+        )
         group_by = TruncDay("created_at")
     elif period == "monthly":
         group_by = TruncMonth("created_at")
@@ -110,7 +203,11 @@ def sales(request):
     sales_date = (
         orders.annotate(period=group_by)
         .values("period")
-        .annotate(order_count=Count("id"), sales=Sum("subtotal"), net_revenue=Sum("total_amount"))
+        .annotate(
+            order_count=Count("id"),
+            sales=Sum("subtotal"),
+            net_revenue=Sum("total_amount"),
+        )
         .order_by("period")
     )
 
@@ -118,7 +215,9 @@ def sales(request):
     for row in sales_date:
         date = row["period"]
         if period == "monthly":
-            daily_orders = orders.filter(created_at__year=date.year, created_at__month=date.month)
+            daily_orders = orders.filter(
+                created_at__year=date.year, created_at__month=date.month
+            )
         elif period == "yearly":
             daily_orders = orders.filter(created_at__year=date.year)
         else:
@@ -150,14 +249,14 @@ def sales(request):
         "end_date": end_date,
         "total_orders": orders.count(),
         "total_sales": sum(order.subtotal for order in orders),
-        "total_offer_discount": sum( 
+        "total_offer_discount": sum(
             sum(item.offer_discount_amount for item in order.items.all())
             for order in orders
         ),
         "total_coupon_discount": sum(
             (order.coupon_discount_value or 0) for order in orders
         ),
-        "total_revenue": sum(order.total_amount for order in orders)
+        "total_revenue": sum(order.total_amount for order in orders),
     }
     return render(request, "admin/sales/sales.html", context)
 
@@ -171,8 +270,7 @@ def sales_report_pdf(request):
 
     if period == "custom" and start_date and end_date:
         orders = orders.filter(
-            created_at__date__gte=start_date,
-            created_at__date__lte=end_date
+            created_at__date__gte=start_date, created_at__date__lte=end_date
         )
         group_by = TruncDay("created_at")
     elif period == "monthly":
@@ -198,7 +296,9 @@ def sales_report_pdf(request):
         date = row["period"]
 
         if period == "monthly":
-            daily_orders = orders.filter(created_at__year=date.year, created_at__month=date.month)
+            daily_orders = orders.filter(
+                created_at__year=date.year, created_at__month=date.month
+            )
         elif period == "yearly":
             daily_orders = orders.filter(created_at__year=date.year)
         else:
@@ -213,14 +313,16 @@ def sales_report_pdf(request):
             (order.coupon_discount_value or 0) for order in daily_orders
         )
 
-        sales_report.append({
-            "date": date,
-            "orders": row["order_count"],
-            "sales": row["sales"] or 0,
-            "offer_discount": offer_discount,
-            "coupon_discount": coupon_discount,
-            "net_revenue": row["net_revenue"] or 0,
-        })
+        sales_report.append(
+            {
+                "date": date,
+                "orders": row["order_count"],
+                "sales": row["sales"] or 0,
+                "offer_discount": offer_discount,
+                "coupon_discount": coupon_discount,
+                "net_revenue": row["net_revenue"] or 0,
+            }
+        )
 
     context = {
         "sales_report": sales_report,
@@ -247,6 +349,7 @@ def sales_report_pdf(request):
 
     return response
 
+
 def sales_report_excel(request):
     period = request.GET.get("period", "daily")
     start_date = request.GET.get("start_date")
@@ -256,8 +359,7 @@ def sales_report_excel(request):
 
     if period == "custom" and start_date and end_date:
         orders = orders.filter(
-            created_at__date__gte=start_date,
-            created_at__date__lte=end_date
+            created_at__date__gte=start_date, created_at__date__lte=end_date
         )
         group_by = TruncDay("created_at")
 
@@ -287,8 +389,7 @@ def sales_report_excel(request):
 
         if period == "monthly":
             grouped_orders = orders.filter(
-                created_at__year=date.year,
-                created_at__month=date.month
+                created_at__year=date.year, created_at__month=date.month
             )
         elif period == "yearly":
             grouped_orders = orders.filter(created_at__year=date.year)
@@ -304,14 +405,16 @@ def sales_report_excel(request):
             (order.coupon_discount_value or 0) for order in grouped_orders
         )
 
-        sales_report.append({
-            "date": date,
-            "orders": row["order_count"],
-            "sales": row["sales"] or 0,
-            "offer_discount": offer_discount,
-            "coupon_discount": coupon_discount,
-            "net_revenue": row["net_revenue"] or 0,
-        })
+        sales_report.append(
+            {
+                "date": date,
+                "orders": row["order_count"],
+                "sales": row["sales"] or 0,
+                "offer_discount": offer_discount,
+                "coupon_discount": coupon_discount,
+                "net_revenue": row["net_revenue"] or 0,
+            }
+        )
 
     # SUMMARY (same as PDF)
     total_sales = sum(r["sales"] for r in sales_report)
@@ -324,16 +427,14 @@ def sales_report_excel(request):
     ws = wb.active
     ws.title = "Sales Report"
 
-    bold = Font(bold=True)
-
     row = 1
 
     # ===== TITLE =====
-    ws.cell(row=row, column=1, value="SALES REPORT").font = bold
+    ws.cell(row=row, column=1, value="SALES REPORT")
     row += 2
 
     # ===== SUMMARY =====
-    ws.cell(row=row, column=1, value="SUMMARY").font = bold
+    ws.cell(row=row, column=1, value="SUMMARY")
     row += 1
 
     summary_data = [
@@ -345,14 +446,14 @@ def sales_report_excel(request):
     ]
 
     for label, value in summary_data:
-        ws.cell(row=row, column=1, value=label).font = bold
+        ws.cell(row=row, column=1, value=label)
         ws.cell(row=row, column=2, value=value)
         row += 1
 
     row += 2
 
     # ===== BREAKDOWN HEADER =====
-    ws.cell(row=row, column=1, value="SALES BREAKDOWN").font = bold
+    ws.cell(row=row, column=1, value="SALES BREAKDOWN")
     row += 1
 
     headers = [
@@ -361,11 +462,11 @@ def sales_report_excel(request):
         "Sales",
         "Offer Discount",
         "Coupon Discount",
-        "Net Revenue"
+        "Net Revenue",
     ]
 
     for col, h in enumerate(headers, 1):
-        ws.cell(row=row, column=col, value=h).font = bold
+        ws.cell(row=row, column=col, value=h)
 
     row += 1
 
