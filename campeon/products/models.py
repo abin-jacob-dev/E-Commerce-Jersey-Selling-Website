@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.crypto import get_random_string
 
-# from cloudinary.models import CloudinaryField  # Removed CloudinaryField; using URLField for image URLs
+from cloudinary.models import CloudinaryField  # Removed CloudinaryField; using URLField for image URLs
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import Sum
 from userauths.models import Account
@@ -73,7 +73,7 @@ class Coupon(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
-    image = models.ImageField(upload_to="category/images")
+    image = CloudinaryField("category/images")
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)

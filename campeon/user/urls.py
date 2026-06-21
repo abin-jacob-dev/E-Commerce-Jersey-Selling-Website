@@ -18,5 +18,7 @@ urlpatterns = [
     path("edit-address/<id>", views.edit_address, name="edit_address"),
     path("delete-address/<id>", views.delete_address, name="delete_address"),
     path("wallet/", views.wallet, name="wallet"),
+    path("referral/", views.referral, name="referral"),
+    
     # path("wallet/create-order", views.create_order, name="create_order"),
 ]

@@ -9,3 +9,5 @@ media/
 static/
 venv/
 readme.md
+graphify-out
+/graphify-out

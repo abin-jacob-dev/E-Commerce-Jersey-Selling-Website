@@ -6,12 +6,13 @@ from django.contrib.auth.hashers import check_password
 from django.contrib import messages
 from .utility import OTP
 from django.http import HttpResponse
-from .forms import AddressesForm
+from .forms import AddressesForm,ReferralForm
 from user.models import Addresses
 import os
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
+from .referral import apply_referral_bonus
 
 from user.utility import validate_password
 from user.utility import validate_name
@@ -23,6 +24,7 @@ from django.conf import settings
 import razorpay
 from products.models import Wallet
 from payment.models import Payment
+from userauths.models import Account
 
 
 # Create your views here.
@@ -31,9 +33,11 @@ from payment.models import Payment
 def profile(request):
     try:
         address = Addresses.objects.get(user=request.user, is_default=True)
+        
+
     except:
         address = None
-    return render(request, "user/profile.html", {"address": address})
+    return render(request, "user/profile.html", {"address": address,"account": request.user})
 
 
 @user_login_required
@@ -251,3 +255,22 @@ def wallet(request):
     wallet = Wallet.objects.get(user=request.user)
     context = {"wallet": wallet}
     return render(request, "user/wallet/wallet.html", context)
+
+def referral(request):
+    if request.method == "POST":
+        
+        code=request.POST.get('referral_code','').strip()
+        try:
+            if not request.user.referred_by:
+                ref_user = Account.objects.get(referral_code=code)
+                if ref_user==request.user:
+                    return redirect('user:referral')
+                apply_referral_bonus(request.user, code)
+
+                messages.success(request, "Referral applied successfully!")
+                return redirect("user:referral")
+        except Account.DoesNotExist:
+            messages.error(request,'Invalid Referral code')
+            return redirect('user:referral')
+    
+    return render(request, "user/referral.html")

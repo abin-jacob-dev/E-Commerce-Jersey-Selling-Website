@@ -9,8 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
 from userauths.utility import OTP
-from products.models import Wallet,WalletTransaction
-
+from products.models import Wallet, WalletTransaction
 
 # verification email import
 from django.contrib.sites.shortcuts import get_current_site
@@ -20,7 +19,6 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 
-
 # Create your views here.
 # @never_cache
 # @login_required(login_url="userauths:signin")
@@ -28,23 +26,28 @@ from django.core.mail import EmailMessage
 #     print(request.user.is_authenticated, request.user.is_active)
 #     return render(request, "userauths/dashboard.html")
 
+
 def superuser_required(func):
-    def wrapper(request,*args,**kwargs):
+    def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_superuser:
-            return func(request,*args,**kwargs)
-        return redirect('userauths:signin')
+            return func(request, *args, **kwargs)
+        return redirect("userauths:signin")
+
     return wrapper
 
+
 def user_login_required(func):
-    def wrapper(request,*args,**kwargs):
+    def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_blocked:
             logout(request)
-            messages.error(request,'Your Account is blocked!')
-            return redirect('userauths:signin')
+            messages.error(request, "Your Account is blocked!")
+            return redirect("userauths:signin")
         if request.user.is_authenticated and not request.user.is_blocked:
-            return func(request,*args,**kwargs)
-        return redirect('userauths:signin')
+            return func(request, *args, **kwargs)
+        return redirect("userauths:signin")
+
     return wrapper
+
 
 def signup(request):
     if not request.session.get("is_email_verified"):
@@ -64,10 +67,9 @@ def signup(request):
             user = Account.objects.create_user(
                 full_name=full_name, email=email, password=password, username=username
             )
-            user.referral_code = referral_code
             user.is_active = True  # Active when sigin
             user.save()
-            
+
             del request.session["is_email_verified"]
             del request.session["verified_email"]
             messages.success(request, "Account Created successfully")
@@ -112,7 +114,9 @@ def activate_account(request):
                 messages.error(request, "Email already Registered")
                 del request.session["verified_email"]
                 return redirect("userauths:activate_account")
-            existing_otp = OTP.objects.filter(email=email).order_by("-created_at").first()
+            existing_otp = (
+                OTP.objects.filter(email=email).order_by("-created_at").first()
+            )
             if existing_otp and not existing_otp.is_expired():
                 messages.warning(request, "OTP already sent. Please wait.")
                 return redirect("userauths:activate_account")
@@ -140,7 +144,6 @@ def activate_account(request):
             if otp_obj.otp == entered_otp:
                 request.session["is_email_verified"] = True
 
-                
                 request.session.pop("otp_expiry", None)
 
                 otp_obj.delete()
@@ -151,7 +154,11 @@ def activate_account(request):
             messages.success(request, "Email Verified Successfully")
             return redirect("userauths:signup")
 
-    return render(request, "userauths/activate_account.html",{"otp_expiry": request.session.get("otp_expiry")})
+    return render(
+        request,
+        "userauths/activate_account.html",
+        {"otp_expiry": request.session.get("otp_expiry")},
+    )
 
 
 @never_cache
@@ -161,9 +168,9 @@ def signin(request):
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
-        
+
         user = authenticate(email=email, password=password)
-        
+
         if user is None:
             messages.error(request, "Invalid Credentials")
             print("user is none")
@@ -174,7 +181,7 @@ def signin(request):
             return redirect("userauths:signin")
 
         login(request, user)
-        
+
         messages.success(request, "You are now logged in.")
         # if user.is_staff or user.role == "admin":
         #     return redirect("userauths:dashboard")

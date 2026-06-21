@@ -18,3 +18,5 @@ class AddressesForm(forms.ModelForm):
             "is_default",
         ]
       
+class ReferralForm(forms.Form):
+    referral_code = forms.CharField(max_length=20)

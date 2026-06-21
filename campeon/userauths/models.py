@@ -5,6 +5,7 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+import random,string
 
 
 class MyAccountManager(BaseUserManager):
@@ -40,15 +41,25 @@ class Account(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=250)
     email = models.EmailField(max_length=250, unique=True)
     username = models.CharField(max_length=250, unique=True)
-    phone_number = models.CharField(max_length=50,null=True,blank=True)
-    profile_image = models.ImageField(upload_to = "profile_images/",null = True,blank=True)
-    referral_code = models.CharField( max_length=50,null = True,blank=True)
+    phone_number = models.CharField(max_length=50, null=True, blank=True)
+    profile_image = models.ImageField(
+        upload_to="profile_images/", null=True, blank=True
+    )
+    referral_code = models.CharField(max_length=50, null=True, blank=True)
+    referred_by = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="referrals",
+    )
+    referral_count = models.PositiveIntegerField(null=True,blank=True,default=0)
+    total_referral_amount = models.PositiveIntegerField(null=True,blank=True,default=0)
     is_blocked = models.BooleanField(default=False)
-    created_at = models.DateTimeField( auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # required
     date_joined = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(auto_now_add=True)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
@@ -58,7 +69,23 @@ class Account(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "full_name"]
 
+    @staticmethod
+    def create_referral_code():
+        chars = string.ascii_uppercase+string.digits
+        while True:
+
+            referral_code = "".join(random.choices(chars,k=8))
+            if not Account.objects.filter(referral_code = referral_code).exists():
+                return referral_code
+            
+    def save(self,*args, **kwargs):
+        if not self.referral_code:
+            self.referral_code = self.create_referral_code()
+        super().save(*args, **kwargs)
+
+    
+
     def __str__(self):
         return self.email
     
-    
+
