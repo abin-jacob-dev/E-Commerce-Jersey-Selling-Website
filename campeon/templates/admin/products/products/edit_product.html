@@ -157,10 +157,10 @@
                   <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Price (₹)</label>
                   <input type="number" name="price" value="{{ variant.price }}" step="0.01" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
                 </div>
-                <div>
+                {% comment %} <div>
                   <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Disc %</label>
                   <input type="number" name="discount" value="{{ variant.discount }}" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
-                </div>
+                </div> {% endcomment %}
                 <div>
                   <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Stock</label>
                   <input type="number" name="stock" value="{{ variant.stock }}" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />

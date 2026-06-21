@@ -73,7 +73,7 @@ class Coupon(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
-    image = CloudinaryField("category/images")
+    image = models.ImageField(upload_to="category/images")
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
@@ -474,7 +474,7 @@ class OrderItem(models.Model):
     offer_discount_value = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     offer_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     final_paid_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
+    
     def __str__(self):
         return f"{self.product_name} x {self.quantity}"
 

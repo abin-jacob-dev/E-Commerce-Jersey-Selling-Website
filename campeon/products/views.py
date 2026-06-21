@@ -1023,7 +1023,8 @@ def select_payment(request):
                         item_offer.discount_value if item_offer else None
                     ),
                     offer_discount_amount=item.subtotal - item.offer_subtotal,
-                    final_paid_price=total,
+                    final_paid_price=(item.subtotal / order.subtotal)
+                    * order.total_amount,
                 )
 
             # COD
@@ -1381,7 +1382,7 @@ def order_view(request, order_id):
                     order=order,
                 )
                 item.status = item_status
-                item.refund_amount = item.subtotal
+                item.refund_amount = item.final_paid_price
                 item.save()
 
                 all_cancelled = order.items.exclude(status="cancelled").exists()
@@ -1394,7 +1395,7 @@ def order_view(request, order_id):
                 order.save()
                 WalletService.credit_wallet(
                     order.user,
-                    item.subtotal,
+                    item.refund_amount,
                     order,
                     source="refund",
                     # order.user, ((item.subtotal*item.quantity)-(item.offer_discount_value*item.quantity)), order, source="refund"
@@ -1421,7 +1422,7 @@ def order_view(request, order_id):
                 )
 
                 item.status = "returned"
-                item.refund_amount = item.subtotal
+                item.refund_amount = item.final_paid_price
                 item.save()
 
                 all_returned = order.items.exclude(status="returned").exists()
@@ -1436,7 +1437,7 @@ def order_view(request, order_id):
                 order.save()
                 WalletService.credit_wallet(
                     order.user,
-                    item.subtotal,
+                    item.refund_amount,
                     order,
                     source="refund",
                 )

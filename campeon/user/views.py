@@ -250,7 +250,6 @@ def delete_address(request, id):
         return redirect("user:address")
     return render(request, "user/delete_address.html", {"address": address})
 
-
 def wallet(request):
     wallet = Wallet.objects.get(user=request.user)
     context = {"wallet": wallet}
@@ -258,7 +257,6 @@ def wallet(request):
 
 def referral(request):
     if request.method == "POST":
-        
         code=request.POST.get('referral_code','').strip()
         try:
             if not request.user.referred_by:
@@ -266,11 +264,9 @@ def referral(request):
                 if ref_user==request.user:
                     return redirect('user:referral')
                 apply_referral_bonus(request.user, code)
-
                 messages.success(request, "Referral applied successfully!")
                 return redirect("user:referral")
         except Account.DoesNotExist:
             messages.error(request,'Invalid Referral code')
-            return redirect('user:referral')
-    
+            return redirect('user:referral')   
     return render(request, "user/referral.html")

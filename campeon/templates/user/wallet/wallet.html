@@ -1,120 +1,116 @@
 {% extends 'user/partials/base.html' %}
 {% load static %}
 {% block content %}
-  <div class="flex">
-    <!-- Sidebar -->
+  <!-- Sidebar -->
 
-    <!-- Main Content -->
-    <main class="flex-1 bg-lime-light p-12">
-      <h2 class="text-4xl font-black uppercase mb-2 tracking-tightest">MY WALLET</h2>
-      <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-12">Manage your Wallet credits and transaction history.</p>
+  <!-- Main Content -->
+  <main class="flex-1 bg-lime-light p-12 min-w-0">
+    <h2 class="text-4xl font-black uppercase mb-2 tracking-tightest">MY WALLET</h2>
+    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-12">Manage your Wallet credits and transaction history.</p>
 
-      <div class="bg-white rounded-3xl p-10 shadow-sm flex flex-col gap-10">
-        <div class="flex justify-between items-start">
-          <h3 class="text-lg font-black uppercase tracking-widest tracking-tightest">TOP-UP WALLET</h3>
+    <div class="bg-white rounded-3xl p-10 shadow-sm flex flex-col gap-10">
+      <div class="flex justify-between items-start">
+        <h3 class="text-lg font-black uppercase tracking-widest tracking-tightest">TOP-UP WALLET</h3>
+      </div>
+
+      <div class="flex flex-col lg:flex-row gap-12">
+        <!-- Wallet Card -->
+        <div class="w-full lg:w-[450px] bg-black rounded-[2rem] p-10 text-white relative overflow-hidden">
+          <div class="absolute inset-0 opacity-10">
+            <div class="w-full h-full" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+          </div>
+
+          <div class="relative z-10">
+            <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Available Credits</span>
+            <div class="text-6xl font-black text-lime mt-4 mb-16">₹{{ wallet.current_balance }}</div>
+          </div>
         </div>
+        <div class="w-full lg:w-[450px] bg-gray-50 rounded-[2rem] p-10 text-white relative overflow-hidden"></div>
 
-        <div class="flex flex-col lg:flex-row gap-12">
-          <!-- Wallet Card -->
-          <div class="w-full lg:w-[450px] bg-black rounded-[2rem] p-10 text-white relative overflow-hidden">
-            <div class="absolute inset-0 opacity-10">
-              <div class="w-full h-full" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+        <!-- Top-up Form (UPDATED: only amount section) -->
+        {% comment %} <div class="flex-1 space-y-8">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest mb-4 text-gray-400">Enter Amount</label>
+
+            <div class="bg-white border border-gray-100 rounded-lg p-6 flex items-center shadow-sm">
+              <span class="text-2xl font-black mr-4">₹</span>
+
+              <input id="amountInput" type="number" value="500" class="w-full text-2xl font-black focus:outline-none focus:ring-2 focus:ring-lime/20" />
             </div>
 
-            <div class="relative z-10">
-              <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Available Credits</span>
-              <div class="text-6xl font-black text-lime mt-4 mb-16">₹{{wallet.current_balance}}</div>
+            <div class="grid grid-cols-4 gap-2 mt-4">
+              <button type="button" class="amount-btn bg-white border border-gray-200 text-black py-3 text-[10px] font-black hover:bg-black hover:text-white transition-colors" data-value="50">₹50</button>
+
+              <button type="button" class="amount-btn bg-white border border-gray-200 text-black py-3 text-[10px] font-black hover:bg-black hover:text-white transition-colors" data-value="100">₹100</button>
+
+              <button type="button" class="amount-btn bg-white border border-gray-200 text-black py-3 text-[10px] font-black hover:bg-black hover:text-white transition-colors" data-value="500">₹500</button>
+
+              <button type="button" class="amount-btn bg-white border border-gray-200 text-black py-3 text-[10px] font-black hover:bg-black hover:text-white transition-colors" data-value="1000">₹1000</button>
             </div>
           </div>
-          <div class="w-full lg:w-[450px] bg-gray-50 rounded-[2rem] p-10 text-white relative overflow-hidden">
-            
-          </div>
 
-          <!-- Top-up Form (UPDATED: only amount section) -->
-          {% comment %} <div class="flex-1 space-y-8">
-            <div>
-              <label class="block text-[10px] font-black uppercase tracking-widest mb-4 text-gray-400">Enter Amount</label>
+          <button id="payBtn" class="w-full bg-lime-dark text-white font-black uppercase py-5 rounded-lg shadow-xl hover:bg-black transition-all flex items-center justify-center gap-3">
+            Proceed to Pay<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </button>
+        </div> {% endcomment %}
+      </div>
+    </div>
 
-              <div class="bg-white border border-gray-100 rounded-lg p-6 flex items-center shadow-sm">
-                <span class="text-2xl font-black mr-4">₹</span>
-
-                <input id="amountInput" type="number" value="500" class="w-full text-2xl font-black focus:outline-none focus:ring-2 focus:ring-lime/20" />
-              </div>
-
-              <div class="grid grid-cols-4 gap-2 mt-4">
-                <button type="button" class="amount-btn bg-white border border-gray-200 text-black py-3 text-[10px] font-black hover:bg-black hover:text-white transition-colors" data-value="50">₹50</button>
-
-                <button type="button" class="amount-btn bg-white border border-gray-200 text-black py-3 text-[10px] font-black hover:bg-black hover:text-white transition-colors" data-value="100">₹100</button>
-
-                <button type="button" class="amount-btn bg-white border border-gray-200 text-black py-3 text-[10px] font-black hover:bg-black hover:text-white transition-colors" data-value="500">₹500</button>
-
-                <button type="button" class="amount-btn bg-white border border-gray-200 text-black py-3 text-[10px] font-black hover:bg-black hover:text-white transition-colors" data-value="1000">₹1000</button>
-              </div>
-            </div>
-
-            <button id="payBtn" class="w-full bg-lime-dark text-white font-black uppercase py-5 rounded-lg shadow-xl hover:bg-black transition-all flex items-center justify-center gap-3">
-              Proceed to Pay<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-              </svg>
-            </button>
-          </div> {% endcomment %}
+    <!-- Activity Stream -->
+    {% comment %} <div class="mt-20">
+      <div class="flex justify-between items-end mb-10">
+        <div>
+          <h3 class="text-3xl font-black uppercase tracking-tighter tracking-tightest">ACTIVITY STREAM</h3>
+          <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">Real-time ledger access</p>
         </div>
       </div>
 
-      <!-- Activity Stream -->
-      {% comment %} <div class="mt-20">
-        <div class="flex justify-between items-end mb-10">
-          <div>
-            <h3 class="text-3xl font-black uppercase tracking-tighter tracking-tightest">ACTIVITY STREAM</h3>
-            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">Real-time ledger access</p>
-          </div>
-        </div>
+      <div class="bg-white rounded-2xl overflow-hidden shadow-sm">
+        <table class="w-full text-left">
+          <thead class="bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100">
+            <tr>
+              <th class="px-8 py-6">Date / Time</th>
+              <th class="px-8 py-6">Transaction ID</th>
+              <th class="px-8 py-6">Description</th>
+              <th class="px-8 py-6 text-right">Amount</th>
+              <th class="px-8 py-6 text-center">Status</th>
+            </tr>
+          </thead>
 
-        <div class="bg-white rounded-2xl overflow-hidden shadow-sm">
-          <table class="w-full text-left">
-            <thead class="bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100">
-              <tr>
-                <th class="px-8 py-6">Date / Time</th>
-                <th class="px-8 py-6">Transaction ID</th>
-                <th class="px-8 py-6">Description</th>
-                <th class="px-8 py-6 text-right">Amount</th>
-                <th class="px-8 py-6 text-center">Status</th>
-              </tr>
-            </thead>
-
-            <tbody class="text-xs font-bold text-gray-600">
-              <!-- Row 1 -->
-              <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td class="px-8 py-6">
-                  <div class="font-black text-black">Oct 24, 2023</div>
-                  <div class="text-[9px] opacity-40">14:22 PM</div>
-                </td>
-                <td class="px-8 py-6 tracking-widest opacity-60">#TRX-82918442</td>
-                <td class="px-8 py-6">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-lime-bright rounded-md flex items-center justify-center text-black">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                      </svg>
-                    </div>
-                    <span class="font-black text-black">Top-up via Card</span>
+          <tbody class="text-xs font-bold text-gray-600">
+            <!-- Row 1 -->
+            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+              <td class="px-8 py-6">
+                <div class="font-black text-black">Oct 24, 2023</div>
+                <div class="text-[9px] opacity-40">14:22 PM</div>
+              </td>
+              <td class="px-8 py-6 tracking-widest opacity-60">#TRX-82918442</td>
+              <td class="px-8 py-6">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-lime-bright rounded-md flex items-center justify-center text-black">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
                   </div>
-                </td>
-                <td class="px-8 py-6 text-right text-lg font-black text-lime-dark">+₹500.00</td>
-                <td class="px-8 py-6 text-center">
-                  <span class="bg-lime-bright/20 text-lime-dark text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-full">Completed</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <span class="font-black text-black">Top-up via Card</span>
+                </div>
+              </td>
+              <td class="px-8 py-6 text-right text-lg font-black text-lime-dark">+₹500.00</td>
+              <td class="px-8 py-6 text-center">
+                <span class="bg-lime-bright/20 text-lime-dark text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-full">Completed</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-          <div class="p-8 text-center border-t border-gray-50">
-            <button class="border border-gray-200 px-8 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">Load Full History</button>
-          </div>
+        <div class="p-8 text-center border-t border-gray-50">
+          <button class="border border-gray-200 px-8 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">Load Full History</button>
         </div>
-      </div> {% endcomment %}
-    </main>
-  </div>
+      </div>
+    </div> {% endcomment %}
+  </main>
   <script>
     const input = document.getElementById('amountInput')
     const buttons = document.querySelectorAll('.amount-btn')

@@ -7,7 +7,6 @@ from django.contrib.auth.models import (
 )
 import random,string
 
-
 class MyAccountManager(BaseUserManager):
     def create_user(self, full_name, username, email, password):
         if not email:

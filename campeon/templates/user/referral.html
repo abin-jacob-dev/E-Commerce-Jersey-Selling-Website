@@ -6,7 +6,7 @@
 
     <!-- Header -->
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-6xl font-black uppercase tracking-tighter tracking-tightest">Referral Program</h2>
+      <h2 class="text-6xl font-black uppercase tracking-tighter tracking-tightest">Referral</h2>
     </div>
 
     <p class="text-xs font-bold text-lime-dark uppercase tracking-widest mb-12">Invite friends and earn wallet rewards instantly.</p>
@@ -31,7 +31,7 @@
 
       <div class="bg-[#e2ead8] p-8 rounded-sm">
         <span class="text-[13px] font-black uppercase tracking-widest text-lime-dark block mb-2">Referral Earnings</span>
-        <p class="text-3xl font-black">₹{{ user.total_referral_amount|default:0 }}</p>
+        <p class="text-3xl font-black">₹{{ user.total_referral_amount|floatformat:2 }}</p>
       </div>
     </div>
 
