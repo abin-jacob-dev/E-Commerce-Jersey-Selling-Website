@@ -35,7 +35,7 @@ def apply_referral_bonus(user, referral_code):
         WalletTransaction.objects.create(
             wallet=wallet,
             amount=referral_code_amount,
-            source="referral_bonus",
+            source="referral",
             transaction_type="credit",
         )
 

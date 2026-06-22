@@ -6,7 +6,7 @@ from django.contrib.auth.hashers import check_password
 from django.contrib import messages
 from .utility import OTP
 from django.http import HttpResponse
-from .forms import AddressesForm,ReferralForm
+from .forms import AddressesForm, ReferralForm
 from user.models import Addresses
 import os
 from django.shortcuts import get_object_or_404
@@ -22,7 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.conf import settings
 import razorpay
-from products.models import Wallet
+from products.models import Wallet, WalletTransaction
 from payment.models import Payment
 from userauths.models import Account
 
@@ -33,11 +33,12 @@ from userauths.models import Account
 def profile(request):
     try:
         address = Addresses.objects.get(user=request.user, is_default=True)
-        
 
     except:
         address = None
-    return render(request, "user/profile.html", {"address": address,"account": request.user})
+    return render(
+        request, "user/profile.html", {"address": address, "account": request.user}
+    )
 
 
 @user_login_required
@@ -250,23 +251,28 @@ def delete_address(request, id):
         return redirect("user:address")
     return render(request, "user/delete_address.html", {"address": address})
 
+
 def wallet(request):
     wallet = Wallet.objects.get(user=request.user)
-    context = {"wallet": wallet}
+    wallet_transactions = WalletTransaction.objects.filter(wallet=wallet).order_by(
+        "-created_at"
+    )
+    context = {"wallet": wallet, "wallet_transactions": wallet_transactions}
     return render(request, "user/wallet/wallet.html", context)
+
 
 def referral(request):
     if request.method == "POST":
-        code=request.POST.get('referral_code','').strip()
+        code = request.POST.get("referral_code", "").strip()
         try:
             if not request.user.referred_by:
                 ref_user = Account.objects.get(referral_code=code)
-                if ref_user==request.user:
-                    return redirect('user:referral')
+                if ref_user == request.user:
+                    return redirect("user:referral")
                 apply_referral_bonus(request.user, code)
                 messages.success(request, "Referral applied successfully!")
                 return redirect("user:referral")
         except Account.DoesNotExist:
-            messages.error(request,'Invalid Referral code')
-            return redirect('user:referral')   
+            messages.error(request, "Invalid Referral code")
+            return redirect("user:referral")
     return render(request, "user/referral.html")

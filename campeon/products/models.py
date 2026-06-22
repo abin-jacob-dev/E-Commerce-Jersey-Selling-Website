@@ -2,7 +2,9 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.crypto import get_random_string
 
-from cloudinary.models import CloudinaryField  # Removed CloudinaryField; using URLField for image URLs
+from cloudinary.models import (
+    CloudinaryField,
+)  # Removed CloudinaryField; using URLField for image URLs
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import Sum
 from userauths.models import Account
@@ -394,12 +396,17 @@ class Order(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    total_refund_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_refund_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0
+    )
 
     coupon_name = models.CharField(max_length=255, null=True)
 
     coupon_discount_type = models.CharField(max_length=20, null=True)  # percent/fixed
-    coupon_discount_value = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    coupon_discount_value = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True
+    )
+
     def save(self, *args, **kwargs):
 
         if not self.order_id:
@@ -439,7 +446,7 @@ class OrderItem(models.Model):
         ("shipped", "Shipped"),
         ("delivered", "Delivered"),
         ("cancelled", "Cancelled"),
-        ("partially_cancelled", "Partially Cancelled"),
+        # ("partially_cancelled", "Partially Cancelled"),
         ("returned", "Returned"),
         ("partially_returned", "Partially Returned"),
     ]
@@ -467,14 +474,18 @@ class OrderItem(models.Model):
     returned_reason = models.TextField(blank=True, null=True)
     returned_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     refund_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
+
     offer_name = models.CharField(max_length=255, null=True)
 
     offer_discount_type = models.CharField(max_length=20, null=True)  # percent/fixed
-    offer_discount_value = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    offer_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    offer_discount_value = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True
+    )
+    offer_discount_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0
+    )
     final_paid_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
+
     def __str__(self):
         return f"{self.product_name} x {self.quantity}"
 
@@ -489,7 +500,11 @@ class Wallet(models.Model):
 
 
 class WalletTransaction(models.Model):
-    SOURCE_CHOICES = [("order_payment", "ORDER PAYMENT"), ("refund", "REFUND")]
+    SOURCE_CHOICES = [
+        ("order_payment", "ORDER PAYMENT"),
+        ("refund", "REFUND"),
+        ("referral", "REFERRAL"),
+    ]
     TRANSACTION_TYPE = (
         ("credit", "CREDIT"),
         ("debit", "DEBIT"),

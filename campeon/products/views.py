@@ -1208,6 +1208,7 @@ def cancel_order_item(request, item_id):
 
 
 @user_login_required
+@transaction.atomic
 def cancel_order_item_request(request, item_id):
     item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
 
@@ -1230,7 +1231,7 @@ def cancel_order_item_request(request, item_id):
         item.variant.stock += item.quantity
         item.variant.save()
 
-    item.status = "partially_cancelled"
+    item.status = "cancelled"
     item.cancelled_at = timezone.now()
 
     reason = request.POST.get("reason", "")
@@ -1238,9 +1239,15 @@ def cancel_order_item_request(request, item_id):
         reason = request.POST.get("other_reason", "Other")
     item.cancel_reason = reason
     item.save()
-
     order = item.order
-    active_items = order.items.exclude(status="partially_cancelled")
+
+    if item.order.payment_status == "paid" :
+        
+        WalletService.credit_wallet(
+            user=order.user, amount=item.final_paid_price, order=order, source="refund"
+        )
+
+    active_items = order.items.exclude(status="cancelled")
     if not active_items.exists():
         order.order_status = "cancelled"
     else:
@@ -1370,45 +1377,45 @@ def order_view(request, order_id):
                     "products:order_view",
                     order_id=order.order_id,
                 )
-        elif "approve_cancel" in request.POST:
-            item_id = request.POST.get("item_id")
-            item_status = "cancelled"
+        # elif "approve_cancel" in request.POST:
+        #     item_id = request.POST.get("item_id")
+        #     item_status = "cancelled"
 
-            if item_id and item_status:
+        #     if item_id and item_status:
 
-                item = get_object_or_404(
-                    OrderItem,
-                    id=item_id,
-                    order=order,
-                )
-                item.status = item_status
-                item.refund_amount = item.final_paid_price
-                item.save()
+        #         item = get_object_or_404(
+        #             OrderItem,
+        #             id=item_id,
+        #             order=order,
+        #         )
+        #         item.status = item_status
+        #         item.refund_amount = item.final_paid_price
+        #         item.save()
 
-                all_cancelled = order.items.exclude(status="cancelled").exists()
+        #         all_cancelled = order.items.exclude(status="cancelled").exists()
 
-                if not all_cancelled:
-                    order.order_status = "cancelled"
-                order.total_refund_amount = sum(
-                    item.refund_amount for item in order.items.all()
-                )
-                order.save()
-                WalletService.credit_wallet(
-                    order.user,
-                    item.refund_amount,
-                    order,
-                    source="refund",
-                    # order.user, ((item.subtotal*item.quantity)-(item.offer_discount_value*item.quantity)), order, source="refund"
-                )
-                messages.success(
-                    request,
-                    f"Item status updated to {item.get_status_display()}",
-                )
+        #         if not all_cancelled:
+        #             order.order_status = "cancelled"
+        #         order.total_refund_amount = sum(
+        #             item.refund_amount for item in order.items.all()
+        #         )
+        #         order.save()
+        #         WalletService.credit_wallet(
+        #             order.user,
+        #             item.refund_amount,
+        #             order,
+        #             source="refund",
+        #             # order.user, ((item.subtotal*item.quantity)-(item.offer_discount_value*item.quantity)), order, source="refund"
+        #         )
+        #         messages.success(
+        #             request,
+        #             f"Item status updated to {item.get_status_display()}",
+        #         )
 
-                return redirect(
-                    "products:order_view",
-                    order_id=order.order_id,
-                )
+        #         return redirect(
+        #             "products:order_view",
+        #             order_id=order.order_id,
+        #         )
         elif "approve_return" in request.POST:
 
             item_id = request.POST.get("item_id")

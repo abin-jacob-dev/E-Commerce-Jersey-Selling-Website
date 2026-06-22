@@ -78,9 +78,9 @@
 												<option value="delivered" {% if item.status == 'delivered' %} selected {% endif %}>Delivered</option>
 												{% comment %}
 													<option value="cancelled" {% if item.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
-																																																																	                  <option value="partially_cancel" {% if item.status == 'partially_cancel' %}selected{% endif %}>Partially Cancelled</option>
-																																																																	                  <option value="returned" {% if item.status == 'returned' %}selected{% endif %}>Returned</option>
-																																																																	                  <option value="partially_return" {% if item.status == 'partially_return' %}selected{% endif %}>Partially Returned</option>
+																																																																																											                  <option value="partially_cancel" {% if item.status == 'partially_cancel' %}selected{% endif %}>Partially Cancelled</option>
+																																																																																											                  <option value="returned" {% if item.status == 'returned' %}selected{% endif %}>Returned</option>
+																																																																																											                  <option value="partially_return" {% if item.status == 'partially_return' %}selected{% endif %}>Partially Returned</option>
 												{% endcomment %}
 											</select>
 
@@ -93,57 +93,7 @@
 								</div>
 
 							</div>
-							{% if item.status == 'partially_cancelled' %}
 
-								<div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-
-									<div class="mb-3">
-										<p class="text-xs font-bold uppercase text-red-600">
-											Cancellation Request
-										</p>
-
-										<p class="text-sm text-gray-700 mt-1">
-											<strong>Reason:</strong>
-											{{ item.cancel_reason|default:"No reason provided" }}
-										</p>
-
-										{% if item.cancelled_at %}
-											<p class="text-xs text-gray-400 mt-1">
-												Requested on
-												{{ item.cancelled_at }}
-											</p>
-										{% endif %}
-									</div>
-
-									<div class="flex gap-2">
-
-										<form method="POST">
-											{% csrf_token %}
-											<input type="hidden" name="item_id" value="{{ item.id }}">
-											<button type="submit" name="approve_cancel" value="true" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-green-700">
-												Approve
-											</button>
-										</form>
-
-										{% comment %}
-											<form method="POST">
-																																																							            {% csrf_token %}
-																																																							            <input type="hidden" name="item_id" value="{{ item.id }}">
-																																																							            <button
-																																																							                type="submit"
-																																																							                name="reject_cancel"
-																																																							                value="true"
-																																																							                class="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-red-700">
-																																																							                Reject
-																																																							            </button>
-																																																							        </form>
-										{% endcomment %}
-
-									</div>
-
-								</div>
-
-							{% endif %}
 							{% if item.status == 'partially_returned' %}
 
 								<div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -178,16 +128,16 @@
 
 										{% comment %}
 											<form method="POST">
-																																																							            {% csrf_token %}
-																																																							            <input type="hidden" name="item_id" value="{{ item.id }}">
-																																																							            <button
-																																																							                type="submit"
-																																																							                name="reject_cancel"
-																																																							                value="true"
-																																																							                class="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-red-700">
-																																																							                Reject
-																																																							            </button>
-																																																							        </form>
+																																																																													            {% csrf_token %}
+																																																																													            <input type="hidden" name="item_id" value="{{ item.id }}">
+																																																																													            <button
+																																																																													                type="submit"
+																																																																													                name="reject_cancel"
+																																																																													                value="true"
+																																																																													                class="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-red-700">
+																																																																													                Reject
+																																																																													            </button>
+																																																																													        </form>
 										{% endcomment %}
 
 									</div>
@@ -269,9 +219,9 @@
 
 							{% comment %}
 								<option value="cancelled" {% if order.order_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
-																																							          <option value="partially_cancel" {% if order.order_status == 'partially_cancel' %}selected{% endif %}>Partially Cancelled</option>
-																																							          <option value="returned" {% if order.order_status == 'returned' %}selected{% endif %}>Returned</option>
-																																							          <option value="partially_return" {% if order.order_status == 'partially_return' %}selected{% endif %}>Partially Returned</option>
+																																																							          <option value="partially_cancel" {% if order.order_status == 'partially_cancel' %}selected{% endif %}>Partially Cancelled</option>
+																																																							          <option value="returned" {% if order.order_status == 'returned' %}selected{% endif %}>Returned</option>
+																																																							          <option value="partially_return" {% if order.order_status == 'partially_return' %}selected{% endif %}>Partially Returned</option>
 							{% endcomment %}
 						</select>
 

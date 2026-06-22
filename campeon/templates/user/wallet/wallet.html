@@ -59,57 +59,89 @@
     </div>
 
     <!-- Activity Stream -->
-    {% comment %} <div class="mt-20">
-      <div class="flex justify-between items-end mb-10">
-        <div>
-          <h3 class="text-3xl font-black uppercase tracking-tighter tracking-tightest">ACTIVITY STREAM</h3>
-          <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">Real-time ledger access</p>
-        </div>
-      </div>
+<div class="mt-20">
+  <div class="flex justify-between items-end mb-10">
+    <div>
+      <h3 class="text-3xl font-black uppercase tracking-tighter">ACTIVITY STREAM</h3>
+      <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">
+        Real-time wallet ledger
+      </p>
+    </div>
+  </div>
 
-      <div class="bg-white rounded-2xl overflow-hidden shadow-sm">
-        <table class="w-full text-left">
-          <thead class="bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100">
-            <tr>
-              <th class="px-8 py-6">Date / Time</th>
-              <th class="px-8 py-6">Transaction ID</th>
-              <th class="px-8 py-6">Description</th>
-              <th class="px-8 py-6 text-right">Amount</th>
-              <th class="px-8 py-6 text-center">Status</th>
-            </tr>
-          </thead>
+  <div class="bg-white rounded-2xl overflow-hidden shadow-sm">
+    <table class="w-full text-left">
 
-          <tbody class="text-xs font-bold text-gray-600">
-            <!-- Row 1 -->
-            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-              <td class="px-8 py-6">
-                <div class="font-black text-black">Oct 24, 2023</div>
-                <div class="text-[9px] opacity-40">14:22 PM</div>
-              </td>
-              <td class="px-8 py-6 tracking-widest opacity-60">#TRX-82918442</td>
-              <td class="px-8 py-6">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 bg-lime-bright rounded-md flex items-center justify-center text-black">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                  </div>
-                  <span class="font-black text-black">Top-up via Card</span>
-                </div>
-              </td>
-              <td class="px-8 py-6 text-right text-lg font-black text-lime-dark">+₹500.00</td>
-              <td class="px-8 py-6 text-center">
-                <span class="bg-lime-bright/20 text-lime-dark text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-full">Completed</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- HEADER -->
+      <thead class="bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100">
+        <tr>
+          <th class="px-8 py-6">Date</th>
+          <th class="px-8 py-6">Type</th>
+          <th class="px-8 py-6">Source</th>
+          <th class="px-8 py-6 text-right">Amount</th>
+        </tr>
+      </thead>
 
-        <div class="p-8 text-center border-t border-gray-50">
-          <button class="border border-gray-200 px-8 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">Load Full History</button>
-        </div>
-      </div>
-    </div> {% endcomment %}
+      <!-- BODY -->
+      <tbody class="text-xs font-bold text-gray-700">
+
+        {% for tx in wallet_transactions %}
+        <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition">
+
+          <!-- DATE -->
+          <td class="px-8 py-6">
+            <div class="font-black text-black">
+              {{ tx.created_at|date:"M d, Y" }}
+            </div>
+            {% comment %} <div class="text-[9px] opacity-40">
+              {{ tx.created_at|time:"H:i" }}
+            </div> {% endcomment %}
+          </td>
+
+          <!-- TYPE -->
+          <td class="px-8 py-6">
+            <span class="font-black text-black">
+              {{ tx.get_transaction_type_display }}
+            </span>
+          </td>
+
+          <!-- SOURCE (NEW COLUMN) -->
+          <td class="px-8 py-6">
+            <span class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full
+              
+            ">
+              {{ tx.get_source_display }}
+            </span>
+          </td>
+
+          <!-- AMOUNT -->
+          <td class="px-8 py-6 text-right text-lg font-black
+            {% if tx.transaction_type in 'credit refund referral' %}
+              text-green-600
+            {% else %}
+              text-red-500
+            {% endif %}
+          ">
+            {% if tx.transaction_type in 'credit refund referral' %}
+              +₹{{ tx.amount }}
+            {% else %}
+              -₹{{ tx.amount }}
+            {% endif %}
+          </td>
+
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center py-10 text-gray-400">
+            No transactions yet
+          </td>
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
+</div>
   </main>
   <script>
     const input = document.getElementById('amountInput')
