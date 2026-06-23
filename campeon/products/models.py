@@ -22,7 +22,7 @@ class Coupon(models.Model):
         ("fixed", "Fixed Amount"),
     ]
 
-    code = models.CharField(max_length=10, unique=True)
+    code = models.CharField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
     discount_type = models.CharField(
         max_length=20, choices=DISCOUNT_TYPE_CHOICES, default="percentage"
