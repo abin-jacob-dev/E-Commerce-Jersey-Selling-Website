@@ -56,7 +56,7 @@
 									<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block">VALUE</label>
 
 									<div class="flex items-center h-14 bg-[#eef6df] rounded px-4">
-										<input type="number" min="1" name="discount_value" value="{{coupon.discount_value}}" placeholder="20.00" class="w-full bg-transparent text-base font-bold text-gray-700 focus:outline-none"/>
+										<input type="text" min="1" name="discount_value" value="{{coupon.discount_value}}" placeholder="20.00" class="w-full bg-transparent text-base font-bold text-gray-700 focus:outline-none"/>
 										<span class="text-base font-bold text-gray-600"></span>
 									</div>
 								</div>
@@ -67,7 +67,7 @@
 								<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block">MINIMUM PURCHASE AMOUNT</label>
 
 								<div class="flex items-center h-14 bg-[#eef6df] rounded px-4">
-									<input type="number" min="0" name="min_purchase_amount" value="{{ coupon.min_purchase_amount |default:0 }}" placeholder="50.00" class="w-full bg-transparent text-base font-bold text-gray-700 focus:outline-none"/>
+									<input type="text" min="0" name="min_purchase_amount" value="{{ coupon.min_purchase_amount |default:0 }}" placeholder="50.00" class="w-full bg-transparent text-base font-bold text-gray-700 focus:outline-none"/>
 									<span class="text-base font-bold text-gray-600">INR</span>
 								</div>
 							</div>

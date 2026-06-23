@@ -8,9 +8,13 @@
         {% if messages %}
           {% for message in messages %}
             <div class="p-6 rounded-2xl mb-8 flex justify-between items-center shadow-sm border {% if message.tags == 'error' %}
+                
                 bg-red-50 border-red-100 text-red-600
+
               {% else %}
+                
                 bg-lime-50 border-lime-100 text-lime-600
+
               {% endif %}">
               <p class="text-[10px] font-black uppercase tracking-widest">{{ message }}</p>
               <button type="button" onclick="this.parentElement.remove()" class="text-xl font-light hover:rotate-90 transition-transform">&times;</button>
@@ -149,7 +153,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
                   <div>
                     <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Price (₹)</label>
-                    <input type="number" name="price" value="0" min="0" step="0.01" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
+                    <input type="text" name="price" value="0" min="0" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
                   </div>
                   {% comment %} <div>
                     <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Discount %</label>
@@ -222,241 +226,219 @@
     </div>
     {# end p-12 #}
   </main>
-<script>
-
-document.addEventListener('DOMContentLoaded', () => {
-
-  // =========================
-  // GLOBAL STATE
-  // =========================
-  let cropper = null
-  let currentInput = null
-  let isActive = true
-
-  const container = document.getElementById('variantsContainer')
-  const addBtn = document.getElementById('addVariantBtn')
-  const form = document.getElementById('productForm')
-
-  // =========================
-  // TOGGLE STATUS
-  // =========================
-  window.toggleStatus = function () {
-
-    const btn = document.getElementById('toggleBtn')
-    const circle = document.getElementById('toggleCircle')
-    const text = document.getElementById('statusText')
-    const hidden = document.getElementById('isActiveInput')
-
-    isActive = !isActive
-
-    btn.classList.toggle('bg-red-500', !isActive)
-    btn.classList.toggle('bg-lime-400', isActive)
-
-    circle.classList.toggle('left-1', !isActive)
-    circle.classList.toggle('right-1', isActive)
-
-    text.innerText = isActive ? 'Active' : 'Inactive'
-    hidden.value = isActive ? 'true' : 'false'
-  }
-
-  // =========================
-  // SIZE LOGIC (DEDUP)
-  // =========================
-  function updateSizes() {
-
-    const selects = document.querySelectorAll('.size-select')
-
-    const used = [...selects]
-      .map(s => s.value)
-      .filter(Boolean)
-
-    selects.forEach(select => {
-
-      const current = select.value
-
-      select.querySelectorAll('option').forEach(opt => {
-
-        if (!opt.value) return
-
-        opt.disabled = used.includes(opt.value) && opt.value !== current
-
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // =========================
+      // GLOBAL STATE
+      // =========================
+      let cropper = null
+      let currentInput = null
+      let isActive = true
+    
+      const container = document.getElementById('variantsContainer')
+      const addBtn = document.getElementById('addVariantBtn')
+      const form = document.getElementById('productForm')
+    
+      // =========================
+      // TOGGLE STATUS
+      // =========================
+      window.toggleStatus = function () {
+        const btn = document.getElementById('toggleBtn')
+        const circle = document.getElementById('toggleCircle')
+        const text = document.getElementById('statusText')
+        const hidden = document.getElementById('isActiveInput')
+    
+        isActive = !isActive
+    
+        btn.classList.toggle('bg-red-500', !isActive)
+        btn.classList.toggle('bg-lime-400', isActive)
+    
+        circle.classList.toggle('left-1', !isActive)
+        circle.classList.toggle('right-1', isActive)
+    
+        text.innerText = isActive ? 'Active' : 'Inactive'
+        hidden.value = isActive ? 'true' : 'false'
+      }
+    
+      // =========================
+      // SIZE LOGIC (DEDUP)
+      // =========================
+      function updateSizes() {
+        const selects = document.querySelectorAll('.size-select')
+    
+        const used = [...selects].map((s) => s.value).filter(Boolean)
+    
+        selects.forEach((select) => {
+          const current = select.value
+    
+          select.querySelectorAll('option').forEach((opt) => {
+            if (!opt.value) return
+    
+            opt.disabled = used.includes(opt.value) && opt.value !== current
+          })
+        })
+      }
+    
+      // =========================
+      // ADD VARIANT
+      // =========================
+      addBtn?.addEventListener('click', () => {
+        const first = document.querySelector('.variant-item')
+        const clone = first.cloneNode(true)
+    
+        clone.querySelector('input[name="variant_id"]')?.remove()
+    
+        clone.querySelectorAll('input').forEach((i) => {
+          if (i.type !== 'hidden') i.value = ''
+        })
+    
+        clone.querySelectorAll('select').forEach((s) => (s.selectedIndex = 0))
+    
+        clone.querySelectorAll('.preview-img').forEach((img) => img.remove())
+    
+        container.appendChild(clone)
+    
+        updateIndexes()
+        updateSizes()
       })
-
-    })
-  }
-
-  // =========================
-  // ADD VARIANT
-  // =========================
-  addBtn?.addEventListener('click', () => {
-
-    const first = document.querySelector('.variant-item')
-    const clone = first.cloneNode(true)
-
-    clone.querySelector('input[name="variant_id"]')?.remove()
-
-    clone.querySelectorAll('input').forEach(i => {
-      if (i.type !== 'hidden') i.value = ''
-    })
-
-    clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0)
-
-    clone.querySelectorAll('.preview-img').forEach(img => img.remove())
-
-    container.appendChild(clone)
-
-    updateIndexes()
-    updateSizes()
-  })
-
-  // =========================
-  // DELETE VARIANT
-  // =========================
-  document.addEventListener('click', e => {
-
-    if (!e.target.closest('.deleteVariantBtn')) return
-
-    if (document.querySelectorAll('.variant-item').length === 1) {
-      return showError('At least one variant is required')
-    }
-
-    e.target.closest('.variant-item').remove()
-
-    updateIndexes()
-    updateSizes()
-  })
-
-  // =========================
-  // SIZE CHANGE
-  // =========================
-  document.addEventListener('change', e => {
-
-    if (e.target.classList.contains('size-select')) {
-      updateSizes()
-    }
-
-    // =========================
-    // IMAGE PICK → CROPPER
-    // =========================
-    if (e.target.classList.contains('variantImages')) {
-
-      const file = e.target.files[0]
-      if (!file || file.name === 'cropped.jpg') return
-
-      currentInput = e.target
-
-      const reader = new FileReader()
-      reader.onload = ev => {
-
-        const img = document.getElementById('cropImage')
-        img.src = ev.target.result
-
-        const modal = document.getElementById('cropModal')
-        modal.classList.remove('hidden')
-        modal.classList.add('flex')
-
+    
+      // =========================
+      // DELETE VARIANT
+      // =========================
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.deleteVariantBtn')) return
+    
+        if (document.querySelectorAll('.variant-item').length === 1) {
+          return showError('At least one variant is required')
+        }
+    
+        e.target.closest('.variant-item').remove()
+    
+        updateIndexes()
+        updateSizes()
+      })
+    
+      // =========================
+      // SIZE CHANGE
+      // =========================
+      document.addEventListener('change', (e) => {
+        if (e.target.classList.contains('size-select')) {
+          updateSizes()
+        }
+    
+        // =========================
+        // IMAGE PICK → CROPPER
+        // =========================
+        if (e.target.classList.contains('variantImages')) {
+          const file = e.target.files[0]
+          if (!file || file.name === 'cropped.jpg') return
+    
+          currentInput = e.target
+    
+          const reader = new FileReader()
+          reader.onload = (ev) => {
+            const img = document.getElementById('cropImage')
+            img.src = ev.target.result
+    
+            const modal = document.getElementById('cropModal')
+            modal.classList.remove('hidden')
+            modal.classList.add('flex')
+    
+            cropper?.destroy()
+            cropper = new Cropper(img, { aspectRatio: 1, viewMode: 1 })
+          }
+    
+          reader.readAsDataURL(file)
+        }
+      })
+    
+      // =========================
+      // INDEX UPDATER
+      // =========================
+      function updateIndexes() {
+        document.querySelectorAll('.variant-item').forEach((item, i) => {
+          item.querySelectorAll('.variantImages').forEach((input) => {
+            input.name = `images_${i}[]`
+          })
+        })
+      }
+    
+      // =========================
+      // CROP APPLY
+      // =========================
+      window.applyCrop = function () {
+        if (!cropper) return showError('Cropper not ready')
+    
+        cropper.getCroppedCanvas({ width: 800, height: 800 }).toBlob((blob) => {
+          const file = new File([blob], 'cropped.jpg', { type: 'image/jpeg' })
+    
+          const dt = new DataTransfer()
+          dt.items.add(file)
+          currentInput.files = dt.files
+    
+          const img = document.createElement('img')
+          img.src = URL.createObjectURL(blob)
+          img.className = 'preview-img absolute inset-0 w-full h-full object-cover rounded-2xl'
+    
+          currentInput
+            .closest('.image-slot')
+            .querySelectorAll('.preview-img')
+            .forEach((i) => i.remove())
+    
+          currentInput.closest('.image-slot').appendChild(img)
+    
+          cropper.destroy()
+          cropper = null
+    
+          closeCrop()
+        })
+      }
+    
+      window.closeCrop = function () {
+        document.getElementById('cropModal').classList.add('hidden')
         cropper?.destroy()
-        cropper = new Cropper(img, { aspectRatio: 1, viewMode: 1 })
+        cropper = null
       }
-
-      reader.readAsDataURL(file)
-    }
-  })
-
-  // =========================
-  // INDEX UPDATER
-  // =========================
-  function updateIndexes() {
-
-    document.querySelectorAll('.variant-item').forEach((item, i) => {
-
-      item.querySelectorAll('.variantImages').forEach(input => {
-        input.name = `images_${i}[]`
+    
+      // =========================
+      // ERROR UI
+      // =========================
+      function showError(msg) {
+        const el = document.getElementById('messagesContainer')
+    
+        el?.insertAdjacentHTML(
+          'afterbegin',
+          `
+          <div class="p-4 bg-red-50 text-red-600 rounded-xl mb-4 text-[10px] font-black uppercase">
+            ${msg}
+          </div>
+        `
+        )
+      }
+    
+      // =========================
+      // SUBMIT VALIDATION
+      // =========================
+      form?.addEventListener('submit', (e) => {
+        let ok = true
+    
+        document.querySelectorAll('.variant-item').forEach((item, i) => {
+          const files = item.querySelectorAll('input[type="file"]')
+    
+          let count = 0
+          files.forEach((f) => (count += f.files.length))
+    
+          if (count < 3) {
+            showError(`Variant ${i + 1} needs 3 images`)
+            ok = false
+          }
+        })
+    
+        if (!ok) e.preventDefault()
       })
-
+    
+      // INIT
+      updateSizes()
     })
-  }
-
-  // =========================
-  // CROP APPLY
-  // =========================
-  window.applyCrop = function () {
-
-    if (!cropper) return showError('Cropper not ready')
-
-    cropper.getCroppedCanvas({ width: 800, height: 800 }).toBlob(blob => {
-
-      const file = new File([blob], 'cropped.jpg', { type: 'image/jpeg' })
-
-      const dt = new DataTransfer()
-      dt.items.add(file)
-      currentInput.files = dt.files
-
-      const img = document.createElement('img')
-      img.src = URL.createObjectURL(blob)
-      img.className = 'preview-img absolute inset-0 w-full h-full object-cover rounded-2xl'
-
-      currentInput.closest('.image-slot')
-        .querySelectorAll('.preview-img')
-        .forEach(i => i.remove())
-
-      currentInput.closest('.image-slot').appendChild(img)
-
-      cropper.destroy()
-      cropper = null
-
-      closeCrop()
-    })
-  }
-
-  window.closeCrop = function () {
-    document.getElementById('cropModal').classList.add('hidden')
-    cropper?.destroy()
-    cropper = null
-  }
-
-  // =========================
-  // ERROR UI
-  // =========================
-  function showError(msg) {
-
-    const el = document.getElementById('messagesContainer')
-
-    el?.insertAdjacentHTML('afterbegin', `
-      <div class="p-4 bg-red-50 text-red-600 rounded-xl mb-4 text-[10px] font-black uppercase">
-        ${msg}
-      </div>
-    `)
-  }
-
-  // =========================
-  // SUBMIT VALIDATION
-  // =========================
-  form?.addEventListener('submit', e => {
-
-    let ok = true
-
-    document.querySelectorAll('.variant-item').forEach((item, i) => {
-
-      const files = item.querySelectorAll('input[type="file"]')
-
-      let count = 0
-      files.forEach(f => count += f.files.length)
-
-      if (count < 3) {
-        showError(`Variant ${i + 1} needs 3 images`)
-        ok = false
-      }
-
-    })
-
-    if (!ok) e.preventDefault()
-  })
-
-  // INIT
-  updateSizes()
-
-})
-
-</script>
+  </script>
 {% endblock %}

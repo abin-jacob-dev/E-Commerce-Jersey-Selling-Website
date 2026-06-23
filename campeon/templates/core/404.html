@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 - Page Not Found</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'lime-light': '#f7fee7',
+              'lime-bright': '#84cc16'
+            },
+            fontFamily: {
+              montserrat: ['Montserrat', 'sans-serif']
+            }
+          }
+        }
+      }
+    </script>
+
+    <style>
+      .bg-gradient-circle {
+        background: radial-gradient(circle at 10% 10%, rgba(132, 204, 22, 0.15), transparent 50%);
+      }
+    </style>
+  </head>
+
+  <body class="bg-lime-light min-h-screen flex flex-col font-montserrat antialiased overflow-x-hidden bg-gradient-circle">
+    <main class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+      <!-- 404 BLOCK -->
+      <div class="flex flex-col items-center justify-center leading-none">
+        <!-- BIG NUMBER -->
+        <h1 class="font-black text-black flex items-center justify-center text-[6rem] sm:text-[10rem] md:text-[14rem] lg:text-[18rem]">4<span class="text-lime-bright">0</span>4</h1>
+
+        <!-- TITLE -->
+        <h2 class="font-black uppercase text-center text-xl sm:text-3xl md:text-5xl lg:text-6xl -mt-4 sm:-mt-6 md:-mt-10">PAGE NOT FOUND</h2>
+      </div>
+
+      <!-- BUTTON (moved OUTSIDE for better spacing) -->
+      <a href="{% url 'core:home' %}" class="mt-10 bg-lime-bright text-black font-black uppercase px-8 md:px-16 py-4 md:py-6 rounded shadow-2xl hover:bg-black hover:text-white transition-all transform hover:-translate-y-2 tracking-[0.2em] md:tracking-[0.3em] text-sm md:text-lg flex items-center gap-3">RETURN TO HOME</a>
+    </main>
+  </body>
+</html>

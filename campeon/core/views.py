@@ -32,3 +32,6 @@ def contact(request):
 
 def about(request):
     return render(request, "core/about.html")
+
+def page_not_found(request):
+    return render(request, "core/404.html")

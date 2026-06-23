@@ -194,7 +194,6 @@ def products_list(request):
 
 @superuser_required
 def add_product(request):
-
     if request.method == "POST":
         try:
             with transaction.atomic():
@@ -979,125 +978,136 @@ def select_payment(request):
         if not payment_method:
             messages.error(request, "Select payment method")
             return redirect("products:select_payment")
+        try:
+            with transaction.atomic():
 
-        with transaction.atomic():
-
-            order = Order.objects.create(
-                user=request.user,
-                full_name=address.full_name,
-                phone_number=address.phone_number,
-                address_line_1=address.address_line_1,
-                address_line_2=address.address_line_2,
-                city=address.city,
-                place=address.place,
-                state=address.state,
-                postal_code=address.postal_code,
-                payment_method=payment_method,
-                subtotal=raw_subtotal,
-                coupon=coupon,
-                coupon_name=coupon.code if coupon else None,
-                coupon_discount_type=coupon.discount_type if coupon else None,
-                coupon_discount_value=coupon_discount,
-                shipping=shipping,
-                total_amount=total,
-                payment_status="pending",
-            )
-
-            # save items
-            for item in cart_items:
-                item_offer = get_best_offer(item.variant.product)
-                OrderItem.objects.create(
-                    order=order,
-                    variant=item.variant,
-                    product_name=item.variant.product.name,
-                    size=item.variant.size,
-                    price=item.variant.price,
-                    quantity=item.quantity,
-                    subtotal=item.subtotal,
-                    offer=item_offer,
-                    offer_name=item_offer.name if item_offer else None,
-                    offer_discount_type=(
-                        item_offer.discount_type if item_offer else None
-                    ),
-                    offer_discount_value=(
-                        item_offer.discount_value if item_offer else None
-                    ),
-                    offer_discount_amount=item.subtotal - item.offer_subtotal,
-                    final_paid_price=(item.subtotal / order.subtotal)
-                    * order.total_amount,
+                order = Order.objects.create(
+                    user=request.user,
+                    full_name=address.full_name,
+                    phone_number=address.phone_number,
+                    address_line_1=address.address_line_1,
+                    address_line_2=address.address_line_2,
+                    city=address.city,
+                    place=address.place,
+                    state=address.state,
+                    postal_code=address.postal_code,
+                    payment_method=payment_method,
+                    subtotal=raw_subtotal,
+                    coupon=coupon,
+                    coupon_name=coupon.code if coupon else None,
+                    coupon_discount_type=coupon.discount_type if coupon else None,
+                    coupon_discount_value=coupon_discount,
+                    shipping=shipping,
+                    total_amount=total,
+                    payment_status="pending",
                 )
 
-            # COD
-            if payment_method == "cod":
-                order.payment_status = "paid"
-                order.save()
-
+                # save items
                 for item in cart_items:
-                    variant = item.variant
-                    if variant.stock < item.quantity:
-                        messages.error(request, "Stock unavailable")
-                        return redirect("products:cart")
-                    variant.stock -= item.quantity
-                    variant.save()
+                    item_offer = get_best_offer(item.variant.product)
+                    OrderItem.objects.create(
+                        order=order,
+                        variant=item.variant,
+                        product_name=item.variant.product.name,
+                        size=item.variant.size,
+                        price=item.variant.price,
+                        quantity=item.quantity,
+                        subtotal=item.subtotal,
+                        offer=item_offer,
+                        offer_name=item_offer.name if item_offer else None,
+                        offer_discount_type=(
+                            item_offer.discount_type if item_offer else None
+                        ),
+                        offer_discount_value=(
+                            item_offer.discount_value if item_offer else None
+                        ),
+                        offer_discount_amount=item.subtotal - item.offer_subtotal,
+                        final_paid_price=(item.subtotal / order.subtotal)
+                        * order.total_amount,
+                    )
 
-                cart.items.all().delete()
-                request.session.pop("coupon_id", None)
-                return redirect("products:payment_successful", order_id=order.order_id)
-            # WALLET
-            if payment_method == "wallet":
-                wallet = Wallet.objects.select_for_update().get(user=request.user)
-                try:
-                    WalletService.debit_wallet(request.user, order.total_amount, order)
+                # COD
+                if payment_method == "cod":
+                    order.payment_status = "paid"
+                    order.save()
 
-                    cart.items.all().delete()
-                    for item in order.items.all():
+                    for item in cart_items:
                         variant = item.variant
-
                         if variant.stock < item.quantity:
                             messages.error(request, "Stock unavailable")
                             return redirect("products:cart")
-
                         variant.stock -= item.quantity
                         variant.save()
-                    order.payment_status = "paid"
-                    order.save()
-                    messages.success(request, "Payment Successful")
+
+                    cart.items.all().delete()
+                    request.session.pop("coupon_id", None)
                     return redirect(
                         "products:payment_successful", order_id=order.order_id
                     )
-                except ValueError as e:
-                    messages.error(request, str(e))
+                # WALLET
+                if payment_method == "wallet":
+                    wallet = Wallet.objects.select_for_update().get(user=request.user)
+                    try:
+                        WalletService.debit_wallet(
+                            request.user, order.total_amount, order
+                        )
 
-            # RAZORPAY
-            if payment_method == "razorpay":
-                razorpay_order = client.order.create(
-                    {
-                        "amount": int(total * 100),
-                        "currency": "INR",
-                        "payment_capture": 1,
-                    }
-                )
-                print(razorpay_order)
-                Payment.objects.create(
-                    order=order,
-                    amount=int(total * 100),
-                    status="created",
-                    razorpay_order_id=razorpay_order["id"],
-                )
+                        cart.items.all().delete()
+                        for item in order.items.all():
+                            variant = item.variant
 
-                request.session["order_id"] = order.order_id
-                request.session["razorpay_order_id"] = razorpay_order["id"]
+                            if variant.stock < item.quantity:
+                                messages.error(request, "Stock unavailable")
+                                return redirect("products:cart")
 
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "razorpay_order_id": razorpay_order["id"],
-                        "amount": int(total * 100),
-                        "key": settings.RAZORPAY_KEY_ID,
-                        "order_id": order.order_id,
-                    }
-                )
+                            variant.stock -= item.quantity
+                            variant.save()
+                        order.payment_status = "paid"
+                        order.save()
+                        messages.success(request, "Payment Successful")
+                        return redirect(
+                            "products:payment_successful", order_id=order.order_id
+                        )
+                    except ValueError as e:
+                        messages.error(request, str(e))
 
+                # RAZORPAY
+                if payment_method == "razorpay":
+
+                    razorpay_order = client.order.create(
+                        {
+                            "amount": int(total * 100),
+                            "currency": "INR",
+                            "payment_capture": 1,
+                        }
+                    )
+                    print(razorpay_order)
+                    Payment.objects.create(
+                        order=order,
+                        amount=int(total * 100),
+                        status="created",
+                        razorpay_order_id=razorpay_order["id"],
+                    )
+
+                    request.session["order_id"] = order.order_id
+                    request.session["razorpay_order_id"] = razorpay_order["id"]
+
+                    return JsonResponse(
+                        {
+                            "success": True,
+                            "razorpay_order_id": razorpay_order["id"],
+                            "amount": int(total * 100),
+                            "key": settings.RAZORPAY_KEY_ID,
+                            "order_id": order.order_id,
+                        }
+                    )
+        except Exception as e:
+            print("Order Creation Failed : ", e)
+            messages.error(
+                request,
+                "Something went wrong while placing your order. Please try again.",
+            )
+            return redirect("products:select_payment")
     context = {
         "cart_items": cart_items,
         "subtotal": raw_subtotal,
@@ -1107,7 +1117,6 @@ def select_payment(request):
         "coupon": coupon,
         "offer": offer,
     }
-
     return render(request, "products/select_payment.html", context)
 
 
@@ -1241,8 +1250,8 @@ def cancel_order_item_request(request, item_id):
     item.save()
     order = item.order
 
-    if item.order.payment_status == "paid" :
-        
+    if item.order.payment_status == "paid":
+
         WalletService.credit_wallet(
             user=order.user, amount=item.final_paid_price, order=order, source="refund"
         )
