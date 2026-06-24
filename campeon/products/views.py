@@ -53,7 +53,7 @@ def categories(request):
     if search_query:
         categories_list = categories_list.filter(name__icontains=search_query)
 
-    paginator = Paginator(categories_list, 6)  # Show 5 categories per page.
+    paginator = Paginator(categories_list, 3)  # Show 5 categories per page.
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -195,6 +195,9 @@ def products_list(request):
 @superuser_required
 def add_product(request):
     if request.method == "POST":
+        if not request.POST.get("name", "").strip():
+            messages.error(request, "Please enter the Name of the product")
+            return redirect("products:add_product")
         try:
             with transaction.atomic():
 
@@ -210,31 +213,30 @@ def add_product(request):
 
                 sizes = request.POST.getlist("size")
 
-                # skus = request.POST.getlist("sku")
                 prices = request.POST.getlist("price")
-                discounts = request.POST.getlist("discount")
+                # discounts = request.POST.getlist("discount")
                 stocks = request.POST.getlist("stock")
                 variant_status = request.POST.getlist("variant_is_active")
 
+                seen_sizes = set()
+                for size in sizes:
+                    if size in seen_sizes:
+                        messages.error(request, f"Duplicate size:{size}")
+                        return redirect("products:add_product")
+                    seen_sizes.add(size)
                 for i in range(len(sizes)):
 
-                    discount = discounts[i] if i < len(discounts) else 0
+                    # discount = discounts[i] if i < len(discounts) else 0
                     stock = stocks[i] if i < len(stocks) else 0
                     variant_active = (
                         variant_status[i] == "true" if i < len(variant_status) else True
                     )
-                    seen_sizes = set()
-                    for size in sizes:
-                        if size in seen_sizes:
-                            messages.error(request, f"Duplicate size:{size}")
-                            return redirect("products:add_product")
 
                     variant = Variant.objects.create(
                         product=product,
                         size=sizes[i],
-                        # sku=skus[i],
                         price=prices[i],
-                        discount=discount,
+                        # discount=discount,
                         stock=stock,
                         is_active=variant_active,
                     )
@@ -270,6 +272,9 @@ def edit_product(request, slug):
     product = get_object_or_404(Product, slug=slug)
 
     if request.method == "POST":
+        if not request.POST.get("name", "").strip():
+            messages.error(request, "Please enter the Name of the product")
+            return redirect("products:edit_product", slug=product.slug)
         try:
             with transaction.atomic():
                 # Update main product
@@ -284,9 +289,8 @@ def edit_product(request, slug):
                 variant_ids = request.POST.getlist("variant_id")
                 sizes = request.POST.getlist("size")
 
-                # skus = request.POST.getlist("sku")
                 prices = request.POST.getlist("price")
-                discounts = request.POST.getlist("discount")
+                # discounts = request.POST.getlist("discount")
                 stocks = request.POST.getlist("stock")
                 variant_statuses = request.POST.getlist("variant_is_active")
 
@@ -296,21 +300,22 @@ def edit_product(request, slug):
                     VariantImage.objects.filter(id__in=delete_image_ids).delete()
 
                 processed_variant_ids = []
+                seen_sizes = set()
+
+                for size in sizes:
+                    if size in seen_sizes:
+                        messages.error(request, f"Duplicate size:{size}")
+                        return redirect("products:edit_product", slug=product.slug)
+                    seen_sizes.add(size)
 
                 for i in range(len(sizes)):
 
                     variant_id = variant_ids[i] if i < len(variant_ids) else None
-                    seen_sizes = set()
-                    for size in sizes:
-                        if size in seen_sizes:
-                            messages.error(request, f"Duplicate size:{size}")
-                            return redirect("prdouct:edit_product")
 
                     variant_data = {
                         "size": sizes[i],
-                        # "sku": skus[i],
                         "price": prices[i],
-                        "discount": discounts[i] if i < len(discounts) else 0,
+                        # "discount": discounts[i] if i < len(discounts) else 0,
                         "stock": stocks[i] if i < len(stocks) else 0,
                         "is_active": (
                             variant_statuses[i] == "true"
@@ -321,7 +326,9 @@ def edit_product(request, slug):
 
                     if variant_id:
                         # Update existing
-                        variant = Variant.objects.get(id=variant_id, product=product)
+                        variant = Variant.objects.filter(
+                            id=variant_id, product=product
+                        ).first()
                         for attr, value in variant_data.items():
                             setattr(variant, attr, value)
                         variant.save()
@@ -335,8 +342,12 @@ def edit_product(request, slug):
 
                     # Handle new image uploads for this variant
                     new_images = request.FILES.getlist(f"images_{i}[]")
-                    for img in new_images:
+                    for img in new_images[:3]:
                         VariantImage.objects.create(variant=variant, image=img)
+
+                    # Validate that the variant has exactly 3 images
+                    if variant.images.count() != 3:
+                        raise ValueError(f"Variant with size '{variant.size}' must have exactly 3 images. Please ensure all 3 image slots are filled.")
 
                 # Delete variants not present in the form
                 Variant.objects.filter(product=product).exclude(
@@ -360,6 +371,7 @@ def edit_product(request, slug):
             "product": product,
             "categories": categories,
             "variants": variants,
+            "slot_numbers": range(3),
         },
     )
 

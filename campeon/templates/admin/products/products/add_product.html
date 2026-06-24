@@ -34,7 +34,7 @@
           </div>
           <div class="flex flex-wrap items-center gap-6">
             <div class="flex gap-4">
-              <button type="button" class="bg-white border border-gray-100 text-black px-8 py-3 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-gray-50 transition-all shadow-sm">Cancel</button>
+              <a href="{% url "products:products_list" %}" type="button" class="bg-white border border-gray-100 text-black px-8 py-3 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-gray-50 transition-all shadow-sm">Cancel</a>
               <button type="submit" class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-4 group">
                 <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -99,115 +99,118 @@
 
         <!-- ─── Product Variants ───────────────────────────────────── -->
         <section class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-50">
-          <div class="flex justify-between items-center mb-12">
-            <h3 class="text-2xl font-black uppercase tracking-tightest">Product Variants</h3>
-            <button type="button" id="addVariantBtn" class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-3 group">
-              <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-90 transition-transform">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-              </div>Add Variant
-            </button>
+  <div class="flex justify-between items-center mb-12">
+    <h3 class="text-2xl font-black uppercase tracking-tightest">Product Variants</h3>
+    <button type="button" id="addVariantBtn" class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-3 group">
+      <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-90 transition-transform">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+      </div>
+      Add Variant
+    </button>
+  </div>
+
+  <div id="variantsContainer">
+
+    <!-- ── Single Variant Block ─────────────────────────── -->
+    <div class="variant-item bg-gray-50/30 p-10 rounded-[2.5rem] border border-gray-100 relative mb-10">
+
+      <button type="button" class="deleteVariantBtn absolute top-8 right-8 text-gray-200 hover:text-red-500 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+      </button>
+
+      <div class="space-y-10">
+
+        <!-- Row 1: Size | Stock -->
+        <div class="grid grid-cols-2 gap-10">
+
+          <!-- Size -->
+          <div>
+            <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Size</label>
+            <div class="relative">
+              <select name="size" class="size-select w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
+                <option value="S">Small</option>
+                <option value="M">Medium</option>
+                <option value="L">Large</option>
+                <option value="XL">Extra Large</option>
+                <option value="XXL">Double Extra Large</option>
+              </select>
+              <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
           </div>
 
-          <div id="variantsContainer">
-            <!-- ── Single Variant Block ─────────────────────────── -->
-            <div class="variant-item bg-gray-50/30 p-10 rounded-[2.5rem] border border-gray-100 relative mb-10">
-              <button type="button" class="deleteVariantBtn absolute top-8 right-8 text-gray-200 hover:text-red-500 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-              </button>
+          <!-- Stock -->
+          <div>
+            <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Stock</label>
+            <input type="number" name="stock" value="0" min="0"
+              class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
+          </div>
 
-              <div class="space-y-10">
-                <!-- Row 1: Size / Color / SKU -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                  <!-- Size -->
-                  <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Size</label>
-                    <div class="relative">
-                      <select name="size" class="size-select w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
-                        {# Values match SIZE_CHOICES in Variant model #}
-                        <option value="S">S</option>
-                        <option value="M">M</option>
-                        <option value="L">L</option>
-                        <option value="XL">XL</option>
-                        <option value="XXL">XXL</option>
-                      </select>
-                      <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </div>
-                  </div>
+        </div>
 
-                  <!-- Color — populated from DB via `colors` context, not hardcoded -->
+        <!-- Row 2: Price | Variant Status -->
+        <div class="grid grid-cols-2 gap-10">
 
-                  <!-- SKU -->
-                  {% comment %} <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">SKU</label>
-                    <input type="text" name="sku" placeholder="e.g. APX-001-BLK-S" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 transition-all" />
-                  </div> {% endcomment %}
-                </div>
+          <!-- Price -->
+          <div>
+            <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Price (₹)</label>
+            <input type="text" name="price" value="0" min="0"
+              class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
+          </div>
 
-                <!-- Row 2: Price / Discount / Stock / Variant Status -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
-                  <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Price (₹)</label>
-                    <input type="text" name="price" value="0" min="0" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
-                  </div>
-                  {% comment %} <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Discount %</label>
-                    <input type="number" name="discount" value="0" min="0" max="100" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
-                  </div> {% endcomment %}
-                  <div>
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Stock</label>
-                    <input type="number" name="stock" value="0" min="0" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10" />
-                  </div>
-                  <div>
-                    {# variant_is_active matches request.POST.getlist("variant_is_active") in view #}
-                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Variant Active</label>
-                    <div class="relative">
-                      <select name="variant_is_active" class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
-                        <option value="true">Active</option>
-                        <option value="false">Inactive</option>
-                      </select>
-                      <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+          <!-- Variant Status -->
+          <div>
+            <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Variant Status</label>
+            <div class="relative">
+              <select name="variant_is_active"
+                class="w-full bg-white border border-gray-100 rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+              <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
 
-                <!-- Row 3: Images (max 3 per variant) -->
-                <div>
-                  <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-6">
-                    Variant Images
-                    <span class="text-[7px] lowercase font-medium ml-2 text-gray-300">Min 3 required</span>
-                  </label>
+        </div>
 
-                  {# Three individual upload slots so each goes through the crop flow #}
-                  <div class="flex flex-wrap gap-6 items-center variantImageSlots">
-                    {% for slot_num in slot_numbers %}
-                      <div class="image-slot relative w-24 h-24">
-                        {# Clicking the outer box triggers the hidden file input inside it #}
-                        <div onclick="this.querySelector('input').click()" class="w-24 h-24 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex items-center justify-center cursor-pointer hover:border-lime-400 hover:bg-lime-50 transition-all group/asset">
-                          <svg class="w-6 h-6 text-gray-200 group-hover/asset:text-lime-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                          </svg>
-                          {# No `multiple` — one file per slot goes through the cropper #}
-                          <input type="file" name="images_0[]" class="variantImages hidden" accept="image/*" />
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
+        <!-- Row 3: Images -->
+        <div>
+          <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-6">
+            Variant Images
+            <span class="text-[7px] lowercase font-medium ml-2 text-gray-300">Min 3 required</span>
+          </label>
+
+          <div class="flex flex-wrap gap-6 items-center variantImageSlots">
+            {% for slot_num in slot_numbers %}
+              <div class="image-slot relative w-24 h-24">
+                <div onclick="this.querySelector('input').click()"
+                  class="w-24 h-24 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex items-center justify-center cursor-pointer hover:border-lime-400 hover:bg-lime-50 transition-all group/asset">
+
+                  <svg class="w-6 h-6 text-gray-200 group-hover/asset:text-lime-400 transition-colors"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                  </svg>
+
+                  <input type="file" name="images_0[]" class="variantImages hidden" accept="image/*" />
                 </div>
               </div>
-              {# end space-y-10 #}
-            </div>
-            {# end variant-item #}
+            {% endfor %}
           </div>
-          {# end variantsContainer #}
-        </section>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
       </form>
       {# end productForm #}
 
