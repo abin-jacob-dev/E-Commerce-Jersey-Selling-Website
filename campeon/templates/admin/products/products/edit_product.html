@@ -200,12 +200,12 @@
         <div class="image-slot relative w-32 h-32">
             {% if variant.images.all.0 %}
                 <!-- If the image already exists, show it here. Clicking it will open the file picker to replace it. -->
-                <img src="{{ variant.images.all.0.image.url }}" class="w-32 h-32 object-cover rounded-2xl border cursor-pointer" onclick="this.parentElement.querySelector('input').click()">
+                <img src="{{ variant.images.all.0.image.url }}" class="w-32 h-32 object-cover rounded-2xl border cursor-pointer" onclick="this.parentElement.querySelector('input[type=file]').click()">
                 <!-- We remember the old image's ID so we can delete it from the database if the user uploads a new one -->
                 <input type="hidden" class="existing-image-id" value="{{ variant.images.all.0.id }}">
             {% else %}
                 <!-- If there's no image yet, show a dashed "Add Image" box. Clicking it opens the file picker. -->
-                <div class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all" onclick="this.parentElement.querySelector('input').click()">
+                <div class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all" onclick="this.parentElement.querySelector('input[type=file]').click()">
                     <svg class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add Image</span>
                 </div>
@@ -217,10 +217,10 @@
         <!-- === SLOT 1 (Second Image) === -->
         <div class="image-slot relative w-32 h-32">
             {% if variant.images.all.1 %}
-                <img src="{{ variant.images.all.1.image.url }}" class="w-32 h-32 object-cover rounded-2xl border cursor-pointer" onclick="this.parentElement.querySelector('input').click()">
+                <img src="{{ variant.images.all.1.image.url }}" class="w-32 h-32 object-cover rounded-2xl border cursor-pointer" onclick="this.parentElement.querySelector('input[type=file]').click()">
                 <input type="hidden" class="existing-image-id" value="{{ variant.images.all.1.id }}">
             {% else %}
-                <div class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all" onclick="this.parentElement.querySelector('input').click()">
+                <div class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all" onclick="this.parentElement.querySelector('input[type=file]').click()">
                     <svg class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add Image</span>
                 </div>
@@ -231,10 +231,10 @@
         <!-- === SLOT 2 (Third Image) === -->
         <div class="image-slot relative w-32 h-32">
             {% if variant.images.all.2 %}
-                <img src="{{ variant.images.all.2.image.url }}" class="w-32 h-32 object-cover rounded-2xl border cursor-pointer" onclick="this.parentElement.querySelector('input').click()">
+                <img src="{{ variant.images.all.2.image.url }}" class="w-32 h-32 object-cover rounded-2xl border cursor-pointer" onclick="this.parentElement.querySelector('input[type=file]').click()">
                 <input type="hidden" class="existing-image-id" value="{{ variant.images.all.2.id }}">
             {% else %}
-                <div class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all" onclick="this.parentElement.querySelector('input').click()">
+                <div class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all" onclick="this.parentElement.querySelector('input[type=file]').click()">
                     <svg class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add Image</span>
                 </div>
@@ -384,7 +384,7 @@ if (e.target.closest('#addVariantBtn')) {
             const emptyBox = document.createElement('div');
             emptyBox.className = "w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all";
             // Make the new box trigger the file input
-            emptyBox.onclick = function() { this.parentElement.querySelector('input').click(); };
+            emptyBox.onclick = function() { this.parentElement.querySelector('input[type=file]').click(); };
             emptyBox.innerHTML = `
                 <svg class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add Image</span>
