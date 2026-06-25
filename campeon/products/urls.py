@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+
 # from .offer_service import variant_price
 
 app_name = "products"

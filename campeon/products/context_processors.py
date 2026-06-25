@@ -46,6 +46,9 @@ def cart_summary(request):
                     coupon_discount = (subtotal * applied_coupon.discount_value) / Decimal('100')
                 else:
                     coupon_discount = applied_coupon.discount_value
+            else:
+                request.session.pop("coupon_id", None)
+                
         except Coupon.DoesNotExist:
             request.session.pop("coupon_id", None)
 

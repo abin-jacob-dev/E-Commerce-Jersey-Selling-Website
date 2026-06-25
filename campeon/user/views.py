@@ -41,6 +41,7 @@ def profile(request):
     )
 
 
+@never_cache
 @user_login_required
 def edit_profile(request):
     if request.method == "POST":
@@ -62,7 +63,7 @@ def edit_profile(request):
         return redirect("user:profile")
     return render(request, "user/edit_profile.html")
 
-
+@never_cache
 @user_login_required
 def remove_photo(request):
     user = request.user
@@ -76,7 +77,7 @@ def remove_photo(request):
 
     return redirect("user:edit_profile")
 
-
+@never_cache
 @user_login_required
 def change_email(request):
     user = request.user
@@ -139,7 +140,7 @@ def change_email(request):
         {"otp_expiry": request.session.get("otp_expiry")},
     )
 
-
+@never_cache
 @user_login_required
 def set_default_address(request, address_id):
     address = get_object_or_404(Addresses, id=address_id, user=request.user)
@@ -148,7 +149,7 @@ def set_default_address(request, address_id):
     address.save()
     return redirect("user:address")
 
-
+@never_cache
 @user_login_required
 def change_password(request):
     if request.method == "POST":
@@ -176,7 +177,7 @@ def change_password(request):
                 return redirect("user:change_password")
     return render(request, "user/change_password.html")
 
-
+@never_cache
 @user_login_required
 def address(request):
     user_id = request.user.id
@@ -184,7 +185,7 @@ def address(request):
     address_list = Addresses.objects.filter(user=request.user.id)
     return render(request, "user/address.html", {"address_list": address_list})
 
-
+@never_cache
 @user_login_required
 def add_address(request):
     next_url = request.GET.get("next") or reverse("user:address")
@@ -220,7 +221,7 @@ def add_address(request):
         request, "user/add_address.html", {"form": form, "next_url": next_url}
     )
 
-
+@never_cache
 @user_login_required
 def edit_address(request, id):
     address = Addresses.objects.get(id=id)
@@ -237,7 +238,7 @@ def edit_address(request, id):
         form = AddressesForm(instance=address)
     return render(request, "user/edit_address.html", {"form": form, "address": address})
 
-
+@never_cache
 @user_login_required
 def delete_address(request, id):
     address = Addresses.objects.get(id=id)
@@ -251,7 +252,8 @@ def delete_address(request, id):
         return redirect("user:address")
     return render(request, "user/delete_address.html", {"address": address})
 
-
+@never_cache
+@user_login_required
 def wallet(request):
     wallet = Wallet.objects.get(user=request.user)
     wallet_transactions = WalletTransaction.objects.filter(wallet=wallet).order_by(
@@ -260,7 +262,8 @@ def wallet(request):
     context = {"wallet": wallet, "wallet_transactions": wallet_transactions}
     return render(request, "user/wallet/wallet.html", context)
 
-
+@never_cache
+@user_login_required
 def referral(request):
     if request.method == "POST":
         code = request.POST.get("referral_code", "").strip()
@@ -268,6 +271,7 @@ def referral(request):
             if not request.user.referred_by:
                 ref_user = Account.objects.get(referral_code=code)
                 if ref_user == request.user:
+                    messages.error(request, "You can not refer for yourself")
                     return redirect("user:referral")
                 apply_referral_bonus(request.user, code)
                 messages.success(request, "Referral applied successfully!")

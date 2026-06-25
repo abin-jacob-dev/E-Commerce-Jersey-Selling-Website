@@ -68,8 +68,7 @@ class Coupon(models.Model):
         if self.discount_type == "percentage" and self.discount_value > 100:
             raise ValidationError("Percentage discount cannot be greater than 100%")
 
-    class Meta:
-        ordering = ["-created_at"]
+    
 
 
 class Category(models.Model):

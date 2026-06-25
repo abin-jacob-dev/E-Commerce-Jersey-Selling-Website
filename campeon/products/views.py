@@ -39,12 +39,12 @@ from django.conf import settings
 import razorpay
 from .service import WalletService
 from .offer_service import get_best_offer, get_discount_price
-
+from django.views.decorators.cache import never_cache
 # Create your views here.
 
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-
+@never_cache
 @superuser_required
 def categories(request):
     categories_list = Category.objects.filter(is_deleted=False).order_by("-created_at")
@@ -73,7 +73,7 @@ def categories(request):
         },
     )
 
-
+@never_cache
 @superuser_required
 def add_new_category(request):
     form = CategoryForm()
@@ -100,7 +100,7 @@ def add_new_category(request):
         request, "admin/products/categories/add_new_category.html", {"form": form}
     )
 
-
+@never_cache
 @superuser_required
 def edit_category(request, slug):
     category = get_object_or_404(Category, slug=slug)
@@ -131,7 +131,7 @@ def edit_category(request, slug):
         {"form": form, "category": category},
     )
 
-
+@never_cache
 @superuser_required
 def delete_category(request, slug):
     category = Category.objects.get(slug=slug)
@@ -657,6 +657,8 @@ def calculate_cart_summary(cart, request=None):
                     )
                 elif applied_coupon.discount_type == "fixed":
                     coupon_discount = applied_coupon.discount_value
+            else:
+                coupon_discount=0
         except Coupon.DoesNotExist:
             pass
     final_total = max(subtotal - coupon_discount, 0)
@@ -1160,7 +1162,7 @@ def payment_failed(request, order_id):
 @user_login_required
 def orders(request):
 
-    orders_list = Order.objects.filter(user=request.user).order_by("-created_at")
+    orders_list = Order.objects.filter(user=request.user,payment_status='paid').order_by("-created_at")
     search_query = request.GET.get("search")
     if search_query:
         orders_list = orders_list.filter(order_id__icontains=search_query)
@@ -1236,7 +1238,7 @@ def cancel_order_item_request(request, item_id):
     if request.method != "POST":
         return redirect("products:order_details", order_id=item.order.order_id)
 
-    if item.status in ["shipped", "delivered"]:
+    if item.status in ["delivered"]: #shipped
         messages.error(request, "Cannot cancel now")
         return redirect("products:order_details", order_id=item.order.order_id)
 
@@ -1276,12 +1278,6 @@ def cancel_order_item_request(request, item_id):
     order.save()
     messages.success(request, "Item cancelled successfully")
     return redirect("products:order_details", order_id=order.order_id)
-
-
-# def view_invoice(request, order_id):
-#     order = get_object_or_404(Order, order_id=order_id, user=request.user)
-#     context = {"order": order}
-#     return render(request, "user/orders/order_invoice.html", context)
 
 
 def download_invoice(request, order_id):
@@ -1385,7 +1381,7 @@ def order_view(request, order_id):
                 item.save()
 
                 statuses = set(order.items.values_list("status", flat=True))
-                if statuses == 1:
+                if len(statuses) == 1:
                     order.order_status = statuses.pop()
                     order.save()
 
@@ -1482,7 +1478,7 @@ def order_view(request, order_id):
     context = {"order": order}
     return render(request, "admin/orders/order_view.html", context)
 
-
+@superuser_required
 def coupons(request):
     coupons = Coupon.objects.order_by("-created_at")
     context = {
@@ -1490,7 +1486,7 @@ def coupons(request):
     }
     return render(request, "admin/coupons/coupons.html", context)
 
-
+@superuser_required
 def add_coupon(request):
     if request.method == "POST":
         coupon = Coupon(
@@ -1512,7 +1508,7 @@ def add_coupon(request):
             return redirect("products:add_coupon")
     return render(request, "admin/coupons/add_coupon.html")
 
-
+@superuser_required
 def edit_coupon(request, id):
     coupon = get_object_or_404(
         Coupon,
@@ -1541,7 +1537,7 @@ def edit_coupon(request, id):
 
     return render(request, "admin/coupons/edit_coupon.html", {"coupon": coupon})
 
-
+@superuser_required
 def delete_coupon(request, id):
     coupon = get_object_or_404(Coupon, id=id)
     if request.method == "POST":
@@ -1579,13 +1575,13 @@ def remove_coupon(request):
     messages.success(request, "Coupon removed")
     return redirect("products:cart")
 
-
+@superuser_required
 def offers(request):
     offers = Offer.objects.all()
 
     return render(request, "admin/offers/offers.html", {"offers": offers})
 
-
+@superuser_required
 def add_offer(request):
     if request.method == "POST":
         product = None
@@ -1642,7 +1638,7 @@ def add_offer(request):
     }
     return render(request, "admin/offers/add_offer.html", context)
 
-
+@superuser_required
 def edit_offer(request, id):
     offer = get_object_or_404(Offer, id=id)
 
@@ -1706,7 +1702,7 @@ def edit_offer(request, id):
 
     return render(request, "admin/offers/edit_offer.html", context)
 
-
+@superuser_required
 def delete_offer(request, id):
     offer = get_object_or_404(Offer, id=id)
     if request.method == "POST":

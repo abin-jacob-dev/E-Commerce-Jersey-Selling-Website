@@ -66,10 +66,10 @@
         </div>
 
         <!-- Referral Code Field -->
-        <div>
+        {% comment %} <div>
           <label for="{{ form.referral_code.id_for_label }}" class="block text-[13px] font-black uppercase tracking-widest mb-2 text-gray-500">Referral Code (Optional)</label>
           <input type="text" placeholder="striker@campeon.com" class="w-full input-field rounded-lg px-6 py-4 text-sm font-medium focus:outline-none placeholder:text-gray-300 focus:ring-2 focus:ring-lime/20" name="{{ form.referral_code.name }}" id="{{ form.referral_code.id_for_label }}" value="{{ form.referral_code.value|default:'' }}" />
-        </div>
+        </div> {% endcomment %}
 
         <button type="submit" class="w-full bg-lime-bright text-black font-black uppercase py-5 rounded-lg shadow-lg hover:bg-black hover:text-white transition-all transform hover:-translate-y-1 tracking-[0.2em] text-sm flex items-center justify-center gap-3">
           Create Account<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
