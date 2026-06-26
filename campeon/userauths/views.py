@@ -26,6 +26,7 @@ from django.core.mail import EmailMessage
 #     print(request.user.is_authenticated, request.user.is_active)
 #     return render(request, "userauths/dashboard.html")
 
+
 def superuser_required(func):
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_superuser:

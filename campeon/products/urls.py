@@ -107,11 +107,7 @@ urlpatterns = [
         views.cancel_order_item_request,
         name="cancel_order_item_request",
     ),
-    # path(
-    #     "view-invoice/<str:order_id>",
-    #     views.view_invoice,
-    #     name="view_invoice",
-    # ),
+
     path(
         "download-invoice/<str:order_id>/",
         views.download_invoice,
@@ -182,10 +178,6 @@ urlpatterns = [
         views.delete_offer,
         name="delete_offer",
     ),
-    # path(
-    #     "variant-price/",
-    #     views.variant_price,
-    #     name="variant_price",
-    # ),
+
     # ---------------------------Wallet-------------------------------------------------
 ]

@@ -93,6 +93,7 @@ def dashboard(request):
 
     if filter_type == "monthly":
         orders = orders.filter(created_at__year=datetime.now().year)
+        
 
     elif filter_type == "yearly":
         pass
