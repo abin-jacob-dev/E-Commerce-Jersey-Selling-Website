@@ -1,0 +1,16 @@
+Pending
+1. Remove unwanted files and folders from the repository.
+2. Remove unnecessary items from the README.
+3. Use better branch naming conventions.
+4. Code test failed - OTP timer change.
+5. Add an option to redirect admins to the dashboard.
+6. Ensure the project matches the Figma design.
+7. Ensure sufficient data is available on the website for demonstration purposes.
+8. Add proper field validations to all forms.
+9. Show the selected profile image before saving the profile.
+10. Use appropriate font sizes based on content priority (e.g., file validation messages on the profile page).
+11. Cancel functionality is not working on the profile edit page.
+12. The website displays a referral bonus of 50, but only 10 is credited. Use configuration values instead of hardcoded values across the application.
+13. The wishlist button on the product listing page is not working.
+14. Ratings and reviews functionality is incomplete.
+15. Similar products are not displayed on the product details page...

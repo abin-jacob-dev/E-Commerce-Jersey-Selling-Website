@@ -116,6 +116,218 @@ The platform features complete user authentication (email-based with social logi
 
 ---
 
+## 🗺️ Route Reference
+
+### Core (Shop) — Prefix: `/`
+
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/` | `core:home` | Home page |
+| `GET` | `/shop/` | `core:shop` | Shop catalog for browsing sports jerseys |
+| `GET` | `/contact/` | `core:contact` | Contact page |
+| `GET` | `/about/` | `core:about` | About page |
+| `GET` | `/page-not-found/` | `core:page_not_found` | Custom 404 page |
+
+### User Authentication — Prefix: `/auth/`
+
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET/POST` | `/auth/` | `userauths:signin` | User sign in |
+| `GET/POST` | `/auth/signin/` | `userauths:signin` | User sign in |
+| `GET/POST` | `/auth/signup/` | `userauths:signup` | User registration |
+| `GET` | `/auth/signout/` | `userauths:signout` | User sign out |
+| `GET/POST` | `/auth/forgot-password/` | `userauths:forgot_password` | Initiate password reset |
+| `GET` | `/auth/activate/<uidb64>/<token>/` | `userauths:activate` | Account activation link |
+| `GET` | `/auth/activate-account` | `userauths:activate_account` | Account activation page |
+| `GET` | `/auth/reset-password-validate/<uidb64>/<token>/` | `userauths:reset_password_validate` | Validate reset token |
+| `GET/POST` | `/auth/reset-password/` | `userauths:reset_password` | Complete password reset |
+| `GET/POST` | `/auth/signin-admin/` | `userauths:signin_admin` | Admin sign in (separate panel) |
+| `GET` | `/auth/signout-admin/` | `userauths:signout_admin` | Admin sign out |
+
+### Social Authentication — Prefix: `/accounts/`
+
+All standard django-allauth routes for Google OAuth and other social providers.
+
+### User Profile — Prefix: `/user/`
+
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/user/` | `user:profile` | User profile dashboard |
+| `GET` | `/user/profile/` | `user:profile` | User profile dashboard |
+| `GET/POST` | `/user/edit-profile/` | `user:edit_profile` | Edit personal details |
+| `POST` | `/user/remove-photo/` | `user:remove_photo` | Remove profile photo |
+| `GET/POST` | `/user/change_email/` | `user:change_email` | Change email address |
+| `GET/POST` | `/user/change-password/` | `user:change_password` | Change password |
+| `GET` | `/user/address/` | `user:address` | Address book management |
+| `POST` | `/user/set-default-address/<address_id>/` | `user:set_default_address` | Set default shipping address |
+| `GET/POST` | `/user/add-address/` | `user:add_address` | Add new address |
+| `GET/POST` | `/user/edit-address/<id>` | `user:edit_address` | Edit an address |
+| `POST` | `/user/delete-address/<id>` | `user:delete_address` | Delete an address |
+| `GET` | `/user/wallet/` | `user:wallet` | View wallet & transactions |
+| `GET` | `/user/referral/` | `user:referral` | Referral program dashboard |
+
+### Admin Panel — Prefix: `/admin-panel/`
+
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/admin-panel/` | `admin_panel:dashboard` | Dashboard overview |
+| `GET` | `/admin-panel/dashboard/` | `admin_panel:dashboard` | Dashboard overview |
+| `GET` | `/admin-panel/users/` | `admin_panel:users` | User management |
+| `GET` | `/admin-panel/user-management-search/` | `admin_panel:user_management_search` | Search/sort users |
+| `POST` | `/admin-panel/block-user/<id>/` | `admin_panel:block_user` | Block/unblock user |
+| `POST` | `/admin-panel/delete-user/<id>/` | `admin_panel:delete_user` | Delete user |
+| `GET` | `/admin-panel/sales/` | `admin_panel:sales` | Sales report view |
+| `GET` | `/admin-panel/sales-report-pdf/` | `admin_panel:sales_report_pdf` | Download PDF report |
+| `GET` | `/admin-panel/sales-report-excel/` | `admin_panel:sales_report_excel` | Download Excel report |
+
+### Products & Shopping — Prefix: `/products/`
+
+#### Catalog & Products
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/products/all-products` | `products:all_products` | All products listing |
+| `GET` | `/products/product-detail/<slug>/` | `products:product_detail` | Product detail page |
+
+#### Cart
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/products/cart/` | `products:cart` | View shopping cart |
+| `POST` | `/products/add-to-cart/` | `products:add_to_cart` | Add item to cart |
+| `POST` | `/products/update-cart-quantity/` | `products:update_cart_quantity` | Update item quantity |
+| `POST` | `/products/remove-from-cart/<item_id>/` | `products:remove_from_cart` | Remove item from cart |
+
+#### Wishlist
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/products/wishlist/` | `products:wishlist` | View wishlist |
+| `POST` | `/products/add-to-wishlist/<slug>` | `products:add_to_wishlist` | Add product to wishlist |
+| `POST` | `/products/remove-from-wishlist/<int:id>/` | `products:remove_from_wishlist` | Remove from wishlist |
+| `POST` | `/products/clear-wishlist/` | `products:clear_wishlist` | Clear entire wishlist |
+| `POST` | `/products/wishlist-to-cart/` | `products:wishlist_to_cart` | Move all to cart |
+| `POST` | `/products/wishlist-item-to-cart/<int:variant_id>/` | `products:wishlist_item_to_cart` | Move one item to cart |
+
+#### Checkout & Payment
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET/POST` | `/products/checkout/` | `products:checkout` | Checkout process |
+| `POST` | `/products/verify-payment/` | `products:verify_payment` | Verify Razorpay payment |
+| `GET/POST` | `/products/select-payment/` | `products:select_payment` | Choose payment method |
+| `GET` | `/products/payment-successful/<order_id>` | `products:payment_successful` | Payment success page |
+| `GET` | `/products/payment-failed/<order_id>` | `products:payment_failed` | Payment failure page |
+
+#### Orders (User & Admin)
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/products/orders` | `products:orders` | User's order history |
+| `GET` | `/products/order-details/<order_id>` | `products:order_details` | Order detail view |
+| `POST` | `/products/cancel-order-item/<int:item_id>/` | `products:cancel_order_item` | Cancel order item |
+| `POST` | `/products/cancel-order-item-request/<int:item_id>/` | `products:cancel_order_item_request` | Request cancellation |
+| `POST` | `/products/return-order-item/<int:item_id>/` | `products:return_order_item` | Return order item |
+| `POST` | `/products/return-order-item-request/<int:item_id>/` | `products:return_order_item_request` | Request return |
+| `GET` | `/products/download-invoice/<order_id>/` | `products:download_invoice` | Download order invoice PDF |
+| `GET` | `/products/all-orders` | `products:all_orders` | Admin: All orders |
+| `GET` | `/products/order-view/<order_id>` | `products:order_view` | Admin: Order detail view |
+
+#### Admin: Categories
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/products/categories/` | `products:categories` | List all categories |
+| `GET/POST` | `/products/add-new-category/` | `products:add_new_category` | Add new category |
+| `GET/POST` | `/products/edit-category/<slug:slug>` | `products:edit_category` | Edit category |
+| `POST` | `/products/delete-category/<slug:slug>` | `products:delete_category` | Soft-delete category |
+
+#### Admin: Products
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/products/products-list/` | `products:products_list` | List all products |
+| `GET/POST` | `/products/add-product/` | `products:add_product` | Add new product |
+| `GET/POST` | `/products/edit-product/<slug:slug>` | `products:edit_product` | Edit product |
+| `POST` | `/products/delete-product/<slug:slug>` | `products:delete_product` | Soft-delete product |
+
+#### Admin: Coupons
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/products/coupons/` | `products:coupons` | List all coupons |
+| `GET/POST` | `/products/add-coupon/` | `products:add_coupon` | Add new coupon |
+| `GET/POST` | `/products/edit-coupon/<int:id>` | `products:edit_coupon` | Edit coupon |
+| `POST` | `/products/delete-coupon/<int:id>` | `products:delete_coupon` | Delete coupon |
+| `POST` | `/products/apply-coupon/` | `products:apply_coupon` | User: Apply coupon at checkout |
+| `POST` | `/products/remove-coupon/` | `products:remove_coupon` | User: Remove applied coupon |
+
+#### Admin: Offers
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/products/offers` | `products:offers` | List all offers |
+| `GET/POST` | `/products/add-offer/` | `products:add_offer` | Add new offer |
+| `GET/POST` | `/products/edit-offer/<int:id>/` | `products:edit_offer` | Edit offer |
+| `POST` | `/products/delete-offer/<int:id>/` | `products:delete_offer` | Delete offer |
+
+### Payment — Prefix: `/payment/`
+
+| Method | Path | Name | Description |
+|:-------|:-----|:-----|:------------|
+| `GET` | `/payment/` | `payment:payment_page` | Payment page |
+| `POST` | `/payment/verify/` | `payment:verify_payment` | Verify payment callback |
+
+### Django Admin
+| Path | Description |
+|:-----|:------------|
+| `/admin/` | Django's built-in admin interface |
+
+---
+
+## 🗄️ Database Models
+
+### `Account` (userauths)
+Custom user model with email-based authentication. Fields include: `full_name`, `email` (unique, login ID), `username`, `phone_number`, `profile_image`, `referral_code` (auto-generated), `referred_by` (self-referential FK), `referral_count`, `total_referral_amount`, `is_blocked`, `is_active`, `is_admin`, `is_staff`, `is_superuser`.
+
+### `Addresses` (user)
+User shipping addresses with fields: `user`, `full_name`, `phone_number`, `address_line_1`, `address_line_2`, `city`, `place`, `state`, `postal_code`, `address_label` (Home/Work/Other), `is_default`.
+
+### `Category` (products)
+Product categories with fields: `name`, `slug` (auto-generated), `image`, `description`, `is_active`, `is_deleted` (soft delete).
+
+### `Product` (products)
+Core product model with fields: `name`, `slug` (auto-generated), `category` (FK), `description`, `highlights`, `is_active`, `is_deleted` (soft delete).
+
+### `Variant` (products)
+Size-specific product variants with fields: `product` (FK), `size` (S/M/L/XL/XXL), `sku` (auto-generated), `price`, `discount` (0-100%), `stock`, `is_active`. Enforces unique product+size constraint.
+
+### `VariantImage` (products)
+Multiple images per variant with fields: `variant` (FK), `image` (uploaded to Cloudinary or local storage).
+
+### `Offer` (products)
+Promotional offers with fields: `name`, `discount_type` (percentage/fixed), `discount_value`, `start_date`, `end_date`, `is_active`, `product` (FK, nullable), `category` (FK, nullable). Must belong to either a product or a category.
+
+### `Coupon` (products)
+Discount coupons with fields: `code` (unique), `is_active`, `discount_type` (percentage/fixed), `discount_value`, `min_purchase_amount`, `start_date`, `end_date`.
+
+### `Cart` (products)
+One-to-one user cart with auto-calculated `total_price` property.
+
+### `CartItem` (products)
+Cart line items with fields: `cart` (FK), `variant` (FK), `quantity` (1-5). Computes `subtotal`, `offer_price`, and `offer_subtotal` dynamically.
+
+### `Wishlist` (products)
+Saved items with fields: `user` (FK), `variant` (FK). Unique user+variant constraint.
+
+### `Order` (products)
+Complete order record with fields: `user`, `coupon` (FK), `offer` (FK), address snapshot (full_name, phone, address_line_1/2, city, place, state, postal_code), `order_id` (auto-generated, e.g. `ORD-XXXXXXXX`), `payment_status` (pending/paid/failed), `payment_method` (cod/wallet/razorpay), `order_status` (pending/processing/shipped/delivered/cancelled/returned/partial), `subtotal`, `shipping`, `total_amount`, `total_refund_amount`, coupon snapshot fields.
+
+### `OrderItem` (products)
+Individual line items within an order with fields: `order` (FK), `offer` (FK), `variant` (FK), snapshot fields (`product_name`, `size`, `price`, `quantity`, `subtotal`), `status` (pending/processing/shipped/delivered/cancelled/returned), `cancel_reason`, `cancelled_at`, `returned_reason`, `returned_at`, `refund_amount`, offer snapshot fields, `final_paid_price`.
+
+### `Wallet` (products)
+User wallet with fields: `user` (OneToOne), `current_balance`, `updated_at`.
+
+### `WalletTransaction` (products)
+Wallet activity log with fields: `wallet` (FK), `order` (FK, nullable), `amount`, `source` (order_payment/refund/referral), `transaction_type` (credit/debit), `created_at`.
+
+### `Payment` (payment)
+Razorpay payment records with fields: `order` (OneToOne), `razorpay_order_id`, `razorpay_payment_id`, `razorpay_signature`, `amount`, `status` (created/pending/paid/failed), `created_at`.
+
+---
+
 ## 🔐 Environment Variables
 
 Create a `.env` file in the project root with the following variables:
@@ -195,7 +407,7 @@ venv\Scripts\activate
 pip install -r campeon/requirements.txt
 ```
 
-> **Note:** The project has requirements file (`requirements.txt`). The main `requirements.txt` file at `campeon/requirements.txt` contains the complete and most up-to-date list of dependencies and will install everything needed.
+> **Note:** The project has multiple requirements files (`requirements.txt`, `requirements1.txt`, `requirements2.txt`, `requirements3.txt`). The main `requirements.txt` file at `campeon/requirements.txt` contains the complete and most up-to-date list of dependencies and will install everything needed.
 
 ### Step 4: Configure Environment Variables
 
@@ -251,7 +463,7 @@ The application will be available at **http://127.0.0.1:8000/**.
 6. **Media Files** – Cloudinary handles media storage, so no local media server needed
 7. **Web Server** – Use Gunicorn or uWSGI as the WSGI server behind Nginx
 8. **HTTPS** – Enable HTTPS with SSL/TLS certificates (Let's Encrypt)
-<!-- 
+
 ### Example Production Setup (Nginx + Gunicorn)
 
 ```bash
@@ -282,7 +494,7 @@ server {
 }
 ```
 
---- -->
+---
 
 ## 🧪 Usage
 
@@ -351,7 +563,7 @@ Using **WeasyPrint** for PDF invoices and **OpenPyXL** for Excel reports gave in
 Creating a custom admin panel alongside Django's built-in admin provided experience in building **admin-specific authentication** (separate sign-in), role-based access control (superuser_required decorator), and data visualization within Django templates.
 
 ---
-<!-- 
+
 ## 🗺️ Roadmap
 
 - [ ] **Additional Payment Gateways** – Integrate Stripe, PayPal, and additional regional payment providers
@@ -365,7 +577,7 @@ Creating a custom admin panel alongside Django's built-in admin provided experie
 - [ ] **Inventory Alerts** – Low-stock notifications for admin
 - [ ] **Bulk Import/Export** – CSV/Excel import for products and variants
 
---- -->
+---
 
 ## 👥 Authors
 

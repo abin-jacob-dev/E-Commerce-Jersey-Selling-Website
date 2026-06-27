@@ -486,15 +486,6 @@ def product_detail(request, slug):
         messages.warning(request, "Product not found or unavailable.")
         return redirect("products:all_products")
 
-    # Check if product has any active variants with stock
-    # has_stock = any(
-    #     variant.stock > 0 and variant.is_active for variant in product.variants.all()
-    # )
-    # if not has_stock:
-    #     messages.warning(request, "This product is currently out of stock.")
-    #     return redirect("products:all_products")
-
-    # Find default variant (lowest price with stock)
     active_variants = [v for v in product.variants.all() if v.stock > 0 and v.is_active]
     if not active_variants:
         messages.warning(request, "This product is out of stock")
@@ -1146,10 +1137,6 @@ def payment_successful(request, order_id):
         "order_items": order.items.all(),
         "payment_method": request.session.get("payment_method"),
     }
-    # if request.session.get("payment_success_order") != order_id:
-    #     return redirect("products:orders")
-
-    # del request.session["payment_success_order"]
     return render(request, "products/payment_successful.html", context)
 
 
@@ -1394,45 +1381,6 @@ def order_view(request, order_id):
                     "products:order_view",
                     order_id=order.order_id,
                 )
-        # elif "approve_cancel" in request.POST:
-        #     item_id = request.POST.get("item_id")
-        #     item_status = "cancelled"
-
-        #     if item_id and item_status:
-
-        #         item = get_object_or_404(
-        #             OrderItem,
-        #             id=item_id,
-        #             order=order,
-        #         )
-        #         item.status = item_status
-        #         item.refund_amount = item.final_paid_price
-        #         item.save()
-
-        #         all_cancelled = order.items.exclude(status="cancelled").exists()
-
-        #         if not all_cancelled:
-        #             order.order_status = "cancelled"
-        #         order.total_refund_amount = sum(
-        #             item.refund_amount for item in order.items.all()
-        #         )
-        #         order.save()
-        #         WalletService.credit_wallet(
-        #             order.user,
-        #             item.refund_amount,
-        #             order,
-        #             source="refund",
-        #             # order.user, ((item.subtotal*item.quantity)-(item.offer_discount_value*item.quantity)), order, source="refund"
-        #         )
-        #         messages.success(
-        #             request,
-        #             f"Item status updated to {item.get_status_display()}",
-        #         )
-
-        #         return redirect(
-        #             "products:order_view",
-        #             order_id=order.order_id,
-        #         )
         elif "approve_return" in request.POST:
 
             item_id = request.POST.get("item_id")

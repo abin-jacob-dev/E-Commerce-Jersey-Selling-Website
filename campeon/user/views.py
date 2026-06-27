@@ -181,7 +181,6 @@ def change_password(request):
 @user_login_required
 def address(request):
     user_id = request.user.id
-    # user_account = Account.objects.get(id = user_id)
     address_list = Addresses.objects.filter(user=request.user.id)
     return render(request, "user/address.html", {"address_list": address_list})
 
@@ -203,18 +202,6 @@ def add_address(request):
 
             address.save()
             return redirect(next_url)
-        # full_name = request.POST.get("full_name", "")
-        # phone_number = request.POST.get("phone_number", "")
-        # address_line_1 = request.POST.get("address_line_1", "")
-        # address_line_2 = request.POST.get("address_line_2", "")
-        # state = request.POST.get("state", "")
-        # city = request.POST.get("city", "")
-        # postal_code = request.POST.get("postal_code", "")
-        # address_label = request.POST.get("address_label", "")
-        # is_default = request.POST.get("is_default", "")
-        # is_default = True if is_default == "on" else False
-        # print(full_name, address_line_1, is_default)
-        # print(request.user.id)
     else:
         form = AddressesForm()
     return render(

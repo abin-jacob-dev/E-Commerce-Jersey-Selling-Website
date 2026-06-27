@@ -55,17 +55,3 @@ def get_discount_price(variant):
     return max(Decimal("0"), price - offer.discount_value)
 
 
-# def variant_price(request):
-#     variant_id = request.GET.get("variant_id")
-#     variant = get_object_or_404(Variant, id=variant_id, is_active=True)
-#     discount_price = get_discount_price(variant)
-#     offer = get_best_offer(variant.product)
-#     return JsonResponse(
-#         {
-#             "price": str(variant.price),
-#             "discount_price": discount_price,
-#             "saved_amount": str(variant_price - discount_price),
-#             "has_offer": bool(offer),
-#             "offer_name": offer.name if offer else "",
-#         }
-#     )

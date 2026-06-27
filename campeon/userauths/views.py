@@ -19,12 +19,6 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 
-# Create your views here.
-# @never_cache
-# @login_required(login_url="userauths:signin")
-# def dashboard(request):
-#     print(request.user.is_authenticated, request.user.is_active)
-#     return render(request, "userauths/dashboard.html")
 
 
 def superuser_required(func):
@@ -74,29 +68,6 @@ def signup(request):
             del request.session["verified_email"]
             messages.success(request, "Account Created successfully")
             return redirect("userauths:signin")
-
-            # User Activation
-            # current_site = get_current_site(request)
-            # mail_subject = "Please Activate your account"
-            # message = render_to_string(
-            #     "userauths/account_verificaton_email.html",
-            #     {
-            #         "user": user,
-            #         "domain": current_site,
-            #         "uid": urlsafe_base64_encode(
-            #             force_bytes(user.pk)
-            #         ),  # encoding the pk
-            #         "token": default_token_generator.make_token(user),
-            #     },
-            # )
-            # to_email = email
-            # send_email = EmailMessage(mail_subject, message, to=[to_email])
-            # send_email.send()
-
-            # # messages.success(request,'Thank you for registering with us . We have send the Verification email to your email address.Please Verify it.')
-            # return redirect(
-            #     f"{reverse('userauths:signin')}?command=verification&email={email}"
-            # )
     else:
         form = UserSignupForm()
 
@@ -183,9 +154,7 @@ def signin(request):
         login(request, user)
 
         messages.success(request, "You are now logged in.")
-        # if user.is_staff or user.role == "admin":
-        #     return redirect("userauths:dashboard")
-
+ 
         return redirect("user:profile")  # dashboard
     return render(request, "userauths/signin.html")
 
