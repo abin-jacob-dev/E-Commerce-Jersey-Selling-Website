@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 from .models import Account
 import re
 
@@ -11,7 +10,7 @@ class UserSignupForm(forms.ModelForm):
 
     class Meta:
         model = Account
-        fields = ["email", "full_name", "referral_code"]
+        fields = ["email", "full_name"]
 
     def clean(self):
         cleaned_data = super().clean()
@@ -19,11 +18,16 @@ class UserSignupForm(forms.ModelForm):
         confirm_password = cleaned_data.get("confirm_password")
         if password != confirm_password:
             raise forms.ValidationError("Passwords doesn't match")
+        return cleaned_data
 
     def clean_full_name(self):
-        full_name = self.cleaned_data.get("full_name")
-        if re.search(r"\d", full_name):
-            raise forms.ValidationError("Name should not contain numbers")
+        full_name = self.cleaned_data.get("full_name").strip()
+        if not re.fullmatch(r"^[A-Za-z ]+$", full_name):
+            raise forms.ValidationError(
+                "Full name should contain only letters and spaces."
+            )
+        if len(full_name) < 3:
+            raise forms.ValidationError("Minimum length of name is 3")
         return full_name
 
     def clean_password(self):

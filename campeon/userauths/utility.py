@@ -18,7 +18,7 @@ class OTP(models.Model):
 
     def generate_otp(self):
         self.otp = "".join(random.choices(string.digits, k=6))
-        self.expires_at = timezone.now() + timedelta(minutes=5)
+        self.expires_at = timezone.now() + timedelta(minutes=2)
         self.save()
 
     def send_otp_email(self, email):
@@ -34,7 +34,7 @@ class OTP(models.Model):
 
         👉 {self.otp}
 
-        This OTP is valid for 5 minutes. Please do not share this code with anyone.
+        This OTP is valid for 2 minutes. Please do not share this code with anyone.
 
         If you did not attempt to create an account, you can safely ignore this email.
 

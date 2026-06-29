@@ -8,7 +8,7 @@ from django.contrib.auth.models import (
 import random,string
 
 class MyAccountManager(BaseUserManager):
-    def create_user(self, full_name, username, email, password):
+    def create_user(self, full_name, username, email, password=None):
         if not email:
             raise ValueError("User must have an Email Address")
         if not username:
@@ -40,11 +40,11 @@ class Account(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=250)
     email = models.EmailField(max_length=250, unique=True)
     username = models.CharField(max_length=250, unique=True)
-    phone_number = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
     profile_image = models.ImageField(
         upload_to="profile_images/", null=True, blank=True
     )
-    referral_code = models.CharField(max_length=50, null=True, blank=True)
+    referral_code = models.CharField(max_length=8, null=True, blank=True,unique=True)
     referred_by = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
@@ -52,8 +52,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
         blank=True,
         related_name="referrals",
     )
-    referral_count = models.PositiveIntegerField(null=True,blank=True,default=0)
-    total_referral_amount = models.PositiveIntegerField(null=True,blank=True,default=0)
+    referral_count = models.PositiveIntegerField(default=0)
+    total_referral_amount = models.PositiveIntegerField(default=0)
     is_blocked = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
