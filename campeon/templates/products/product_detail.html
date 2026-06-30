@@ -12,7 +12,8 @@
     "price": {{ v.price }},
     "discount_price": {{ v.discount_price }},
     "saved": {{ v.saved }},
-    "stock": {{ v.stock }}
+    "stock": {{ v.stock }},
+    "in_wishlist": {{ v.in_wishlist|yesno:"true,false" }}
   }{% if not forloop.last %},{% endif %}
 {% endfor %}
 ]
@@ -66,7 +67,7 @@
           <div>
             <div class="flex justify-between items-end mb-4">
               <h3 class="text-[10px] font-black uppercase tracking-widest tracking-tightest mt-5">Select Size</h3>
-              <a href="#" class="text-[9px] font-black uppercase tracking-widest text-[#00a300] hover:underline">Size Guide</a>
+              {% comment %} <a href="#" class="text-[9px] font-black uppercase tracking-widest text-[#00a300] hover:underline">Size Guide</a> {% endcomment %}
             </div>
             <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
               <button onclick="selectSize('S', this)" data-size="S" class="size-btn border py-3 text-xs font-black uppercase">S</button>
@@ -93,30 +94,30 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
               </svg>ADD TO CART
             </button>
-            <button name="action" value="wishlist" type="submit" name="add_to_wishlist" class="p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            <button id="wishlistBtn" type="submit" name="action" value="wishlist" class="p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition">
+              <svg id="wishlistIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="wishlistPath" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </button>
           </form>
 
           <div class="pt-8 border-t border-gray-100 flex items-center gap-4">
-            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+            {% comment %} <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
               <svg class="w-5 h-5 text-lime-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
-            </div>
-            <div>
+            </div> {% endcomment %}
+            {% comment %} <div>
               <h4 class="text-[9px] font-black uppercase tracking-widest tracking-tightest">RETURNS</h4>
               <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">30-day no-hassle return policy</p>
-            </div>
+            </div> {% endcomment %}
           </div>
         </div>
       </div>
     </div>
 
     <!-- Tech Section -->
-    <div class="mb-32">
+    <div class="mb-5">
       <h3 class="text-4xl font-black uppercase tracking-tighter mb-12 tracking-tightest">PRODUCT DETAILS</h3>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {% if product.description %}
@@ -140,6 +141,38 @@
         {% endif %}
       </div>
     </div>
+
+    <section class="py-5">
+      <div class="container mx-auto text-center">
+        <h3 class="text-3xl font-black uppercase mb-12 tracking-tightest">Similar Products.</h3>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12">
+          {% for product in similar_products %}
+            <a href="{% url 'products:product_detail' product.slug %}" class="block">
+              <div class="text-left group cursor-pointer">
+                <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
+                  {% if product.get_primary_image %}
+                    <img src="{{ product.get_primary_image }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
+                  {% else %}
+                    <img src="https://via.placeholder.com/400x533?text=No+Image" alt="No image" class="w-full h-full object-cover" />
+                  {% endif %}
+                </div>
+
+                <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">{{ product.name }}</h5>
+
+                <div class="flex space-x-2 text-xs">
+                  {% with variant=product.variants.first %}
+                    {% if variant %}
+                      <span class="text-lime font-bold">₹{{ variant.price }}</span>
+                    {% endif %}
+                  {% endwith %}
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
 
     <!-- Reviews Section -->
     {% comment %} <div>
@@ -258,6 +291,21 @@
   </main>
 
   <script>
+    function updateWishlistIcon() {
+    const icon = document.getElementById("wishlistIcon");
+
+    if (!selectedVariant) return;
+
+    if (selectedVariant.in_wishlist) {
+        // Filled heart with border
+        icon.setAttribute("fill", "currentColor");
+        icon.setAttribute("stroke", "currentColor");
+    } else {
+        // Outline heart
+        icon.setAttribute("fill", "none");
+        icon.setAttribute("stroke", "currentColor");
+    }
+}
     const variants = JSON.parse(document.getElementById('variantData').textContent)
     let selectedSize = null
     let selectedVariant = null
@@ -287,38 +335,39 @@
     }
     
     function selectSize(size, el) {
-  selectedSize = size
+    selectedSize = size;
 
-  document.querySelectorAll('.size-btn')
-    .forEach(btn => btn.classList.remove('bg-lime-dark', 'text-white'))
+    document.querySelectorAll('.size-btn')
+        .forEach(btn => btn.classList.remove('bg-lime-dark', 'text-white'));
 
-  el.classList.add('bg-lime-dark', 'text-white')
+    el.classList.add('bg-lime-dark', 'text-white');
 
-  selectedVariant = variants.find(v => v.size == selectedSize)
+    selectedVariant = variants.find(v => v.size == selectedSize);
 
-  if (!selectedVariant) return
+    if (!selectedVariant) return;
 
-  document.getElementById('currentPrice').innerText =
-    `₹${selectedVariant.discount_price}`
+    document.getElementById('currentPrice').innerText =
+        `₹${selectedVariant.discount_price}`;
 
-  document.getElementById('originalPrice').innerText =
-    `₹${selectedVariant.price}`
+    document.getElementById('originalPrice').innerText =
+        `₹${selectedVariant.price}`;
 
-  document.getElementById('savedAmount').innerText =
-    `You save ₹${selectedVariant.saved}`
+    document.getElementById('savedAmount').innerText =
+        `You save ₹${selectedVariant.saved}`;
 
-  // stock text
-  const stockText =
-    selectedVariant.stock > 5
-      ? 'In stock'
-      : selectedVariant.stock > 0
-        ? `Only ${selectedVariant.stock} left`
-        : 'Out of stock'
+    const stockText =
+        selectedVariant.stock > 5
+            ? 'In stock'
+            : selectedVariant.stock > 0
+                ? `Only ${selectedVariant.stock} left`
+                : 'Out of stock';
 
-  document.getElementById('stockStatus').innerText = stockText
+    document.getElementById('stockStatus').innerText = stockText;
 
-  updateGallery()
-  updateAddToCartState()
+    updateWishlistIcon();   // <-- ADD THIS
+
+    updateGallery();
+    updateAddToCartState();
 }
     function updateAddToCartState() {
       const btn = document.querySelector('#addToCartForm button[type="submit"]')

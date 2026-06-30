@@ -40,9 +40,11 @@ import razorpay
 from .service import WalletService
 from .offer_service import get_best_offer, get_discount_price
 from django.views.decorators.cache import never_cache
+
 # Create your views here.
 
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
 
 @never_cache
 @superuser_required
@@ -73,6 +75,7 @@ def categories(request):
         },
     )
 
+
 @never_cache
 @superuser_required
 def add_new_category(request):
@@ -99,6 +102,7 @@ def add_new_category(request):
     return render(
         request, "admin/products/categories/add_new_category.html", {"form": form}
     )
+
 
 @never_cache
 @superuser_required
@@ -130,6 +134,7 @@ def edit_category(request, slug):
         "admin/products/categories/edit_category.html",
         {"form": form, "category": category},
     )
+
 
 @never_cache
 @superuser_required
@@ -347,7 +352,9 @@ def edit_product(request, slug):
 
                     # Validate that the variant has exactly 3 images
                     if variant.images.count() != 3:
-                        raise ValueError(f"Variant with size '{variant.size}' must have exactly 3 images. Please ensure all 3 image slots are filled.")
+                        raise ValueError(
+                            f"Variant with size '{variant.size}' must have exactly 3 images. Please ensure all 3 image slots are filled."
+                        )
 
                 # Delete variants not present in the form
                 Variant.objects.filter(product=product).exclude(
@@ -493,6 +500,13 @@ def product_detail(request, slug):
     default_variant = min(active_variants, key=lambda v: v.price)
     offer = get_best_offer(product)
     discount_price = get_discount_price(default_variant)
+    similar_products = Product.objects.filter(category=product.category)
+    print(similar_products)
+    wishlist_variant_ids = set(
+        Wishlist.objects.filter(
+            user=request.user, variant__product=product
+        ).values_list("variant_id", flat=True)
+    )
     variant_data = []
     for v in product.variants.all():
         discounted = get_discount_price(v)
@@ -504,6 +518,7 @@ def product_detail(request, slug):
                 "discount_price": discounted,
                 "saved": v.price - discounted,
                 "stock": v.stock,
+                "in_wishlist": v.id in wishlist_variant_ids
             }
         )
     saved_amount = default_variant.price - discount_price
@@ -514,6 +529,7 @@ def product_detail(request, slug):
         "discount_price": discount_price,
         "saved_amount": saved_amount,
         "variant_data": variant_data,
+        "similar_products": similar_products,
     }
     return render(request, "products/product_detail.html", context)
 
@@ -649,7 +665,7 @@ def calculate_cart_summary(cart, request=None):
                 elif applied_coupon.discount_type == "fixed":
                     coupon_discount = applied_coupon.discount_value
             else:
-                coupon_discount=0
+                coupon_discount = 0
         except Coupon.DoesNotExist:
             pass
     final_total = max(subtotal - coupon_discount, 0)
@@ -1149,7 +1165,9 @@ def payment_failed(request, order_id):
 @user_login_required
 def orders(request):
 
-    orders_list = Order.objects.filter(user=request.user,payment_status='paid').order_by("-created_at")
+    orders_list = Order.objects.filter(
+        user=request.user, payment_status="paid"
+    ).order_by("-created_at")
     search_query = request.GET.get("search")
     if search_query:
         orders_list = orders_list.filter(order_id__icontains=search_query)
@@ -1225,7 +1243,7 @@ def cancel_order_item_request(request, item_id):
     if request.method != "POST":
         return redirect("products:order_details", order_id=item.order.order_id)
 
-    if item.status in ["delivered"]: #shipped
+    if item.status in ["delivered"]:  # shipped
         messages.error(request, "Cannot cancel now")
         return redirect("products:order_details", order_id=item.order.order_id)
 
@@ -1426,6 +1444,7 @@ def order_view(request, order_id):
     context = {"order": order}
     return render(request, "admin/orders/order_view.html", context)
 
+
 @superuser_required
 def coupons(request):
     coupons = Coupon.objects.order_by("-created_at")
@@ -1433,6 +1452,7 @@ def coupons(request):
         "coupons": coupons,
     }
     return render(request, "admin/coupons/coupons.html", context)
+
 
 @superuser_required
 def add_coupon(request):
@@ -1455,6 +1475,7 @@ def add_coupon(request):
             messages.error(request, "".join(e.messages))
             return redirect("products:add_coupon")
     return render(request, "admin/coupons/add_coupon.html")
+
 
 @superuser_required
 def edit_coupon(request, id):
@@ -1484,6 +1505,7 @@ def edit_coupon(request, id):
             return redirect("products:edit_coupon", coupon.id)
 
     return render(request, "admin/coupons/edit_coupon.html", {"coupon": coupon})
+
 
 @superuser_required
 def delete_coupon(request, id):
@@ -1523,11 +1545,13 @@ def remove_coupon(request):
     messages.success(request, "Coupon removed")
     return redirect("products:cart")
 
+
 @superuser_required
 def offers(request):
     offers = Offer.objects.all()
 
     return render(request, "admin/offers/offers.html", {"offers": offers})
+
 
 @superuser_required
 def add_offer(request):
@@ -1585,6 +1609,7 @@ def add_offer(request):
         "categories": Category.objects.filter(is_active=True, is_deleted=False),
     }
     return render(request, "admin/offers/add_offer.html", context)
+
 
 @superuser_required
 def edit_offer(request, id):
@@ -1649,6 +1674,7 @@ def edit_offer(request, id):
     }
 
     return render(request, "admin/offers/edit_offer.html", context)
+
 
 @superuser_required
 def delete_offer(request, id):

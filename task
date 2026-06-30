@@ -13,4 +13,13 @@ Pending
 12. The website displays a referral bonus of 50, but only 10 is credited. Use configuration values instead of hardcoded values across the application.
 13. The wishlist button on the product listing page is not working.
 14. Ratings and reviews functionality is incomplete.
-15. Similar products are not displayed on the product details page...
+15. Similar products are not displayed on the product details page.
+16. Remove all hardcoded and dummy text from the website.
+17. Different product amounts are displayed on the home page, product details page, and wishlist. Ensure consistency.
+18. Show an indication of whether a product is already in the wishlist.
+19. Retain entered data when validation errors occur during coupon creation.
+20. Add address validations.
+21. Show the order total on the order success page.
+22. Display complete order summary details on the order details page.
+
+23. Add order information to wallet transaction history.

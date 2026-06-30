@@ -62,9 +62,9 @@
 
     {% endblock %}
     <!-- Footer -->
-    <footer class="bg-[#f9fafb] pt-20 pb-10">
+    <footer class="bg-[#f9fafb] pt-5 pb-10">
       <div class="max-w-screen-2xl mx-auto px-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+        {% comment %} <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
           <div>
             <h5 class="font-black uppercase mb-6 tracking-tight">Help Customers</h5>
             <ul class="text-xs space-y-4 text-gray-600">
@@ -116,18 +116,18 @@
               </a>
             </div>
           </div>
-        </div>
+        </div> {% endcomment %}
 
-        <div class="border-t border-gray-200 pt-10 flex flex-col md:flex-row justify-between items-center text-[13px] text-gray-500 uppercase tracking-widest">
+        <div class="border-t border-gray-200 pt-3 flex flex-col md:flex-row justify-between items-center text-[13px] text-gray-500 uppercase tracking-widest">
           <p>© 2026 Campeon</p>
-          <div class="flex space-x-4 mt-4 md:mt-0">
+          {% comment %} <div class="flex space-x-4 mt-4 md:mt-0">
             <svg class="w-8 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M2 4h20v16H2V4zm2 2v12h16V6H4zm3 3h2v2H7V9zm4 0h6v2h-6V9zm0 4h6v2h-6v-2z" />
             </svg>
             <svg class="w-8 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M2 4h20v16H2V4zm2 2v12h16V6H4zm3 3h2v2H7V9zm4 0h6v2h-6V9zm0 4h6v2h-6v-2z" />
             </svg>
-          </div>
+          </div> {% endcomment %}
         </div>
       </div>
     </footer>

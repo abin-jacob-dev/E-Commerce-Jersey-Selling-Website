@@ -6,7 +6,7 @@ from django.contrib.auth.hashers import check_password
 from django.contrib import messages
 from .utility import OTP
 from django.http import HttpResponse
-from .forms import AddressesForm, ReferralForm
+from .forms import AddressesForm, EditProfileForm
 from user.models import Addresses
 import os
 from django.shortcuts import get_object_or_404
@@ -44,24 +44,18 @@ def profile(request):
 @never_cache
 @user_login_required
 def edit_profile(request):
+    user = request.user
     if request.method == "POST":
-        full_name = request.POST.get("full_name", "")
-        phone_number = request.POST.get("phone_number", "")
-        error = validate_name(full_name)
-        if error:
-            messages.error(request, error)
-            return redirect("user:edit_profile")
-        user = Account.objects.get(id=request.user.id)
-        if "photo" in request.FILES:
-            if user.profile_image:
-                if os.path.isfile(user.profile_image.path):
-                    os.remove(user.profile_image.path)
-            user.profile_image = request.FILES["photo"]
-        user.full_name = full_name
-        user.phone_number = phone_number
-        user.save()
-        return redirect("user:profile")
-    return render(request, "user/edit_profile.html")
+        form = EditProfileForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile saved successfully.")
+            return redirect("user:profile")
+        messages.error(request, "Please Correct the errors below")
+    else:
+        form = EditProfileForm(instance=user)
+    return render(request, "user/edit_profile.html", {"form": form})
+
 
 @never_cache
 @user_login_required
@@ -69,13 +63,14 @@ def remove_photo(request):
     user = request.user
 
     if user.profile_image:
-        if os.path.isfile(user.profile_image.path):
-            os.remove(user.profile_image.path)
+        if os.path.isfile(user.profile_image.url):
+            os.remove(user.profile_image.url)
 
         user.profile_image = None
         user.save()
 
     return redirect("user:edit_profile")
+
 
 @never_cache
 @user_login_required
@@ -140,6 +135,7 @@ def change_email(request):
         {"otp_expiry": request.session.get("otp_expiry")},
     )
 
+
 @never_cache
 @user_login_required
 def set_default_address(request, address_id):
@@ -148,6 +144,7 @@ def set_default_address(request, address_id):
     address.is_default = True
     address.save()
     return redirect("user:address")
+
 
 @never_cache
 @user_login_required
@@ -177,12 +174,14 @@ def change_password(request):
                 return redirect("user:change_password")
     return render(request, "user/change_password.html")
 
+
 @never_cache
 @user_login_required
 def address(request):
     user_id = request.user.id
     address_list = Addresses.objects.filter(user=request.user.id)
     return render(request, "user/address.html", {"address_list": address_list})
+
 
 @never_cache
 @user_login_required
@@ -208,6 +207,7 @@ def add_address(request):
         request, "user/add_address.html", {"form": form, "next_url": next_url}
     )
 
+
 @never_cache
 @user_login_required
 def edit_address(request, id):
@@ -225,6 +225,7 @@ def edit_address(request, id):
         form = AddressesForm(instance=address)
     return render(request, "user/edit_address.html", {"form": form, "address": address})
 
+
 @never_cache
 @user_login_required
 def delete_address(request, id):
@@ -239,6 +240,7 @@ def delete_address(request, id):
         return redirect("user:address")
     return render(request, "user/delete_address.html", {"address": address})
 
+
 @never_cache
 @user_login_required
 def wallet(request):
@@ -248,6 +250,7 @@ def wallet(request):
     )
     context = {"wallet": wallet, "wallet_transactions": wallet_transactions}
     return render(request, "user/wallet/wallet.html", context)
+
 
 @never_cache
 @user_login_required

@@ -5,7 +5,9 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
-import random,string
+from cloudinary.models import CloudinaryField
+import random, string
+
 
 class MyAccountManager(BaseUserManager):
     def create_user(self, full_name, username, email, password=None):
@@ -41,10 +43,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=250, unique=True)
     username = models.CharField(max_length=250, unique=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
-    profile_image = models.ImageField(
-        upload_to="profile_images/", null=True, blank=True
+    profile_image = CloudinaryField(
+        "profile_photo", folder="profile_photos", null=True, blank=True
     )
-    referral_code = models.CharField(max_length=8, null=True, blank=True,unique=True)
+    referral_code = models.CharField(max_length=8, null=True, blank=True, unique=True)
     referred_by = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
@@ -70,21 +72,17 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     @staticmethod
     def create_referral_code():
-        chars = string.ascii_uppercase+string.digits
+        chars = string.ascii_uppercase + string.digits
         while True:
 
-            referral_code = "".join(random.choices(chars,k=8))
-            if not Account.objects.filter(referral_code = referral_code).exists():
+            referral_code = "".join(random.choices(chars, k=8))
+            if not Account.objects.filter(referral_code=referral_code).exists():
                 return referral_code
-            
-    def save(self,*args, **kwargs):
+
+    def save(self, *args, **kwargs):
         if not self.referral_code:
             self.referral_code = self.create_referral_code()
         super().save(*args, **kwargs)
 
-    
-
     def __str__(self):
         return self.email
-    
-

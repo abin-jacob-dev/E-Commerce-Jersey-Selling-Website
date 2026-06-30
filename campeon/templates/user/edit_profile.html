@@ -1,67 +1,114 @@
 {% extends 'user/partials/base.html' %}
 {% load static %}
+
 {% block content %}
   <main class="flex-1 bg-lime-light p-12">
     <div class="flex justify-between items-center mb-12">
-      <h2 class="text-6xl font-black uppercase tracking-tighter leading-none tracking-tightest">EDIT PROFILE</h2>
+      <h2 class="text-6xl font-black uppercase tracking-tighter tracking-tightest">EDIT PROFILE</h2>
+
       <a href="{% url 'user:profile' %}" class="text-[13px] font-black uppercase tracking-widest hover:underline transition-all">Back to Profile</a>
     </div>
 
     <form action="{% url 'user:edit_profile' %}" method="POST" enctype="multipart/form-data" class="max-w-4xl space-y-12">
       {% csrf_token %}
-      <!-- Form Fields -->
+
       {% include 'partials/alert.html' %}
+
       <!-- Avatar Upload -->
       <div class="flex items-center gap-10">
-        <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl relative group">
-          <!-- Profile Image -->
+        <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-xl relative group">
           <img src="{% if user.profile_image %}
               {{ user.profile_image.url }}
             {% else %}
               {% static 'assets/user/user_profile.jpg' %}
             {% endif %}"
             class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
-          <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-            <span class="text-white text-[12px] font-black uppercase tracking-widest">Change Photo</span>
+
+          <button type="button" onclick="document.getElementById('photoInput').click()" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"><span class="text-white text-[12px] font-black uppercase tracking-widest">Change Photo</span></button>
+
+          <input id="photoInput" name="profile_image" type="file" accept="image/*" class="hidden" onchange="previewImage(event)" />
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-lg font-black tracking-wide">{{ user.email }}</h4>
+
+            <a href="{% url 'user:change_email' %}" class="text-green-900 text-[12px] font-black uppercase tracking-widest ml-4 hover:text-green-700 transition-colors">Change Email</a>
           </div>
 
-          <!-- File Input (Hidden) -->
-          <input name="photo" type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewImage(event)" />
-        </div>
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-black uppercase tracking-widest tracking-tightest">{{ user.email }}</h4>
-            <a href="{% url 'user:change_email' %}" class="text-green-900 text-[12px] font-black uppercase tracking-widest no-underline ml-4 hover:text-green-700 transition-colors">Change Email</a>
-          </div>
-          <p class="text-[12px] font-bold text-black-300 uppercase tracking-widest leading-loose">
-            Square format recommended.<br />JPG or PNG, max 2MB.
+          <p class="text-sm font-semibold text-gray-600 tracking-wide leading-relaxed">
+            Square format recommended.<br />
           </p>
-          <a href="{% url "user:remove_photo" %}" class="text-[12px] font-black uppercase text-red-600 hover:text-red-800 mt-2">Remove Photo</a>
+
+          <a href="{% url 'user:remove_photo' %}" class="inline-block mt-3 text-[12px] font-black uppercase text-red-600 hover:text-red-800">Remove Photo</a>
         </div>
       </div>
+
+      <!-- Form -->
       <div class="bg-white p-12 rounded-sm shadow-sm">
         <div class="grid grid-cols-2 gap-10">
+          <!-- Full Name -->
           <div class="col-span-2 md:col-span-1">
-            <label class="block text-[12px] font-black uppercase tracking-widest text-black-400 mb-3">Full Name</label>
-            <input name="full_name" type="text" value="{{ user.full_name }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
+            <label class="block text-sm font-black uppercase tracking-widest text-black mb-3">Full Name</label>
+
+            <input name="full_name" type="text" value="{{ user.full_name }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-base font-semibold tracking-wide focus:outline-none focus:ring-2 focus:ring-lime/20" />
+
+            {% if form.full_name.errors %}
+              <ul class="mt-2 text-xs text-red-600 font-semibold space-y-1">
+                {% for error in form.full_name.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
           </div>
 
-          {% comment %} <div class="col-span-2 md:col-span-1 relative">
-            <label class="block text-[12px] font-black uppercase tracking-widest text-black-400 mb-3">Email Address</label>
-            <input name="email" type="email" value="{{ user.email }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20 pr-14" />
-          </div> {% endcomment %}
-
+          <!-- Phone -->
           <div class="col-span-2 md:col-span-1">
-            <label class="block text-[12px] font-black uppercase tracking-widest text-black-400 mb-3">Phone Number</label>
-            <input min="10" name="phone_number" type="number" value="{{ user.phone_number }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-xs font-black  tracking-widest focus:outline-none focus:ring-2 focus:ring-lime/20" />
+            <label class="block text-sm font-black uppercase tracking-widest text-black mb-3">Phone Number</label>
+
+            <input minlength="10" maxlength="15" name="phone_number" type="number" value="{{ user.phone_number }}" class="w-full bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 text-base font-semibold tracking-wide focus:outline-none focus:ring-2 focus:ring-lime/20" />
+
+            {% if form.phone_number.errors %}
+              <ul class="mt-2 text-xs text-red-600 font-semibold space-y-1">
+                {% for error in form.phone_number.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
           </div>
         </div>
 
+        <!-- Buttons -->
         <div class="flex items-center gap-4 pt-12 border-t border-gray-50 mt-12">
-          <button type="submit" class="bg-lime-dark text-white px-12 py-5 text-[13px] font-black uppercase tracking-[0.2em] rounded-sm shadow-xl hover:bg-black transition-all">Save Changes</button>
-          <button type="button" class="bg-white border border-gray-200 text-black px-12 py-5 text-[13px] font-black uppercase tracking-[0.2em] rounded-sm shadow-sm hover:bg-gray-50 transition-all">Cancel</button>
+          <button type="submit" class="bg-lime-dark text-white px-12 py-5 text-sm font-black uppercase tracking-[0.2em] rounded-sm shadow-xl hover:bg-black transition-all">Save Changes</button>
+
+          <a href="{% url 'user:profile' %}" class="bg-white border border-gray-200 text-black px-12 py-5 text-sm font-black uppercase tracking-[0.2em] rounded-sm shadow-sm hover:bg-gray-50 transition-all">Cancel</a>
         </div>
       </div>
     </form>
   </main>
+
+  <script>
+    function previewImage(event) {
+      const input = event.target
+      const file = input.files && input.files[0]
+    
+      if (!file) return
+    
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file')
+        input.value = ''
+        return
+      }
+    
+      const reader = new FileReader()
+    
+      reader.onload = function (e) {
+        const img = input.closest('.group').querySelector('img')
+        img.src = e.target.result
+      }
+    
+      reader.readAsDataURL(file)
+    }
+  </script>
 {% endblock %}

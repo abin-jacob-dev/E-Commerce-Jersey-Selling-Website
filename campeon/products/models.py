@@ -68,8 +68,6 @@ class Coupon(models.Model):
         if self.discount_type == "percentage" and self.discount_value > 100:
             raise ValidationError("Percentage discount cannot be greater than 100%")
 
-    
-
 
 class Category(models.Model):
     name = models.CharField(max_length=250, unique=True)
@@ -508,7 +506,9 @@ class WalletTransaction(models.Model):
         ("credit", "CREDIT"),
         ("debit", "DEBIT"),
     )
-    order = models.ForeignKey("Order", on_delete=models.SET_NULL, null=True, blank=True)
+    order = models.ForeignKey(
+        "Order", on_delete=models.SET_NULL, null=True, blank=True, related_name="order"
+    )
     wallet = models.ForeignKey(
         Wallet, on_delete=models.CASCADE, related_name="wallet_transactions"
     )

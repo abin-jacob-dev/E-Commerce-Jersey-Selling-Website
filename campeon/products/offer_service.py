@@ -41,7 +41,7 @@ def get_best_offer(product):
     else:
         return category_offer
 
-
+#product detail page offer calculation
 def get_discount_price(variant):
     price = variant.price
     product = variant.product
