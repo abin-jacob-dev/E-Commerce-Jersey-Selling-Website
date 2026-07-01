@@ -161,7 +161,17 @@
       </h4>
     </div>
 
-    <span class="text-xl font-black">₹{{ product.min_price }}</span>
+    {% comment %} <span class="text-xl font-black">₹{{ variant.offer_price }}</span> {% endcomment %}
+    {% with variant=product.cheapest_variant %}
+    {% if variant %}
+        {% if variant.offer_price < variant.price %}
+            <span class="text-green-600">₹{{ variant.offer_price }}</span>
+            <span class="line-through text-gray-400">₹{{ variant.price }}</span>
+        {% else %}
+            <span>₹{{ variant.price }}</span>
+        {% endif %}
+    {% endif %}
+{% endwith %}
   </div>
 </div>
           {% endfor %}

@@ -72,9 +72,14 @@
               <h5 class="font-bold uppercase text-xs mb-1 tracking-tightest">{{ product.name }}</h5>
 
               <div class="flex space-x-2 text-xs">
-                {% with variant=product.variants.first %}
+                {% with variant=product.cheapest_variant %}
                   {% if variant %}
-                    <span class="text-lime font-bold">₹{{ variant.price }}</span>
+                    {% if variant.offer_price < variant.price %}
+                      <span class="text-green-600">₹{{ variant.offer_price }}</span>
+                      <span class="line-through text-gray-400">₹{{ variant.price }}</span>
+                    {% else %}
+                      <span>₹{{ variant.price }}</span>
+                    {% endif %}
                   {% endif %}
                 {% endwith %}
               </div>

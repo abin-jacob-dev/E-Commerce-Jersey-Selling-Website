@@ -133,6 +133,12 @@ class Product(models.Model):
         return None
 
     @property
+    def cheapest_variant(self):
+        return (
+            self.variants.filter(is_active=True, stock__gt=0).order_by("price").first()
+        )
+
+    @property
     def total_stock(self):
         return self.variants.aggregate(total=Sum("stock"))["total"] or 0
 
@@ -251,6 +257,12 @@ class Variant(models.Model):
         indexes = [
             models.Index(fields=["product", "is_active"]),
         ]
+
+    @property
+    def offer_price(self):
+        from products.offer_service import get_discount_price
+
+        return get_discount_price(self)
 
     def __str__(self):
         return f"{self.product.name} - {self.size}"

@@ -19,27 +19,89 @@ class AddressesForm(forms.ModelForm):
             "is_default",
         ]
 
+    def clean_full_name(self):
+        full_name = self.cleaned_data.get("full_name")
+        if not full_name:
+            raise forms.ValidationError("Full name is required.")
+        if len(full_name) < 3:
+            raise forms.ValidationError("Full name must be at least 3 characters.")
+        if not full_name.replace(" ", "").isalpha():
+            raise forms.ValidationError("Full name must contain only letters.")
+        return full_name.strip()
+
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get("phone_number")
+        if not phone_number:
+            raise forms.ValidationError("Phone number is required.")
+        phone_number = phone_number.strip()
+        if not phone_number.isdigit():
+            raise forms.ValidationError("Phone number must contain only digits.")
+        if len(phone_number) < 10 or len(phone_number) > 15:
+            raise forms.ValidationError("Phone number must be 10–15 digits.")
+        return phone_number
+
+    def clean_address_line_1(self):
+        address_line_1 = self.cleaned_data.get("address_line_1")
+        if not address_line_1:
+            raise forms.ValidationError("Address Line 1 is required.")
+        address_line_1 = address_line_1.strip()
+        if len(address_line_1) < 5:
+            raise forms.ValidationError("Address is too short")
+        if len(address_line_1) > 100:
+            raise forms.ValidationError("Address is too long.")
+        return address_line_1
+
+    def clean_city(self):
+        city = self.cleaned_data.get("city")
+        if not city:
+            raise forms.ValidationError("City is required.")
+        city = city.strip()
+        if not city.replace(" ", "").isalpha():
+            raise forms.ValidationError("City must contain only letters.")
+        return city.title()
+
+    def clean_state(self):
+        state = self.cleaned_data.get("state")
+        if not state:
+            raise forms.ValidationError("State is required.")
+        state = state.strip()
+        if not state.replace(" ", "").isalpha():
+            raise forms.ValidationError("State must contain only letters.")
+        return state.title()
+
+    def clean_postal_code(self):
+        postal_code = self.cleaned_data.get("postal_code")
+        if not postal_code:
+            raise forms.ValidationError("Postal code is required.")
+        postal_code = postal_code.strip()
+        if not postal_code.isdigit():
+            raise forms.ValidationError("Postal code must contain only digits.")
+        return postal_code
+
 
 class EditProfileForm(forms.ModelForm):
     class Meta:
         model = Account
-        fields = ['profile_image','full_name','phone_number']
+        fields = ["profile_image", "full_name", "phone_number"]
+
     def clean_full_name(self):
-        full_name= self.cleaned_data.get('full_name')
+        full_name = self.cleaned_data.get("full_name")
         if not full_name:
-            raise forms.ValidationError('Full name is required.')
-        if len(full_name)<3:
-            raise forms.ValidationError('Full name must be at least 3 characters.')
-        if not full_name.replace(' ','').isalpha():
-            raise forms.ValidationError('Full name must contain only letters.')
+            raise forms.ValidationError("Full name is required.")
+        if len(full_name) < 3:
+            raise forms.ValidationError("Full name must be at least 3 characters.")
+        if not full_name.replace(" ", "").isalpha():
+            raise forms.ValidationError("Full name must contain only letters.")
         return full_name.strip()
+
     def clean_phone_number(self):
-        phone_number = self.cleaned_data.get('phone_number')
+        phone_number = self.cleaned_data.get("phone_number")
         if not phone_number.isdigit():
-            raise forms.ValidationError('Phone number must contain only digits.')
-        if len(phone_number)<10 or len(phone_number)>15:
-            raise forms.ValidationError('Phone number must be 10–15 digits.')
+            raise forms.ValidationError("Phone number must contain only digits.")
+        if len(phone_number) < 10 or len(phone_number) > 15:
+            raise forms.ValidationError("Phone number must be 10–15 digits.")
         return phone_number
+
 
 class ReferralForm(forms.Form):
     referral_code = forms.CharField(max_length=20)

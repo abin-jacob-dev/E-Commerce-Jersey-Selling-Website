@@ -398,13 +398,16 @@ def delete_product(request, slug):
 
 
 def all_products(request):
-    products = Product.objects.filter(
-        is_deleted=False,
-        is_active=True,
-        variants__is_active=True,
-        variants__stock__gt=0,
-    ).annotate(min_price=Min("variants__price"))
-
+    products = (
+        Product.objects.filter(
+            is_deleted=False,
+            is_active=True,
+            variants__is_active=True,
+            variants__stock__gt=0,
+        )
+        .annotate(min_price=Min("variants__price"))
+        .prefetch_related("variants__images")
+    )
     search_query = request.GET.get("search_query")
     if search_query:
         products = products.filter(
@@ -463,7 +466,7 @@ def all_products(request):
         del query_params["page"]
 
     category = Category.objects.filter(is_deleted=False, is_active=True)
-    products = products.prefetch_related("variants__images")
+    # products = products.prefetch_related("variants__images")
     context = {
         "products": page_obj,
         "category": category,
@@ -502,11 +505,14 @@ def product_detail(request, slug):
     discount_price = get_discount_price(default_variant)
     similar_products = Product.objects.filter(category=product.category)
     print(similar_products)
-    wishlist_variant_ids = set(
-        Wishlist.objects.filter(
-            user=request.user, variant__product=product
-        ).values_list("variant_id", flat=True)
-    )
+    if request.user.is_authenticated:
+        wishlist_variant_ids = set(
+            Wishlist.objects.filter(
+                user=request.user, variant__product=product
+            ).values_list("variant_id", flat=True)
+        )
+    else:
+        wishlist_variant_ids = set()
     variant_data = []
     for v in product.variants.all():
         discounted = get_discount_price(v)
@@ -518,7 +524,7 @@ def product_detail(request, slug):
                 "discount_price": discounted,
                 "saved": v.price - discounted,
                 "stock": v.stock,
-                "in_wishlist": v.id in wishlist_variant_ids
+                "in_wishlist": v.id in wishlist_variant_ids,
             }
         )
     saved_amount = default_variant.price - discount_price

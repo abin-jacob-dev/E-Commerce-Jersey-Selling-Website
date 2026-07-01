@@ -47,9 +47,9 @@
               </div>
 
               <!-- PRICE (RIGHT SIDE PERFECT ALIGN) -->
-              <div class="flex items-center justify-end px-6 lg:px-8 border-t lg:border-t-0 lg:border-l border-gray-100 min-w-[140px]">
+              {% comment %} <div class="flex items-center justify-end px-6 lg:px-8 border-t lg:border-t-0 lg:border-l border-gray-100 min-w-[140px]">
                 <span class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ item.variant.price }}</span>
-              </div>
+              </div> {% endcomment %}
 
               <!-- REMOVE -->
               <button class="remove-wishlist-btn absolute top-4 right-4 text-gray-400 hover:text-red-500" data-url="{% url 'products:remove_from_wishlist' item.id %}">✕</button>
