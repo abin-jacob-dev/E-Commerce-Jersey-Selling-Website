@@ -329,7 +329,7 @@ The sales report page (`/admin-panel/sales/`) supports:
 - **Excel Export** – Downloadable `.xlsx` file with `OpenPyXL`, containing summary and breakdown sheets
 
 ---
-
+<!-- 
 ## 💡 Lessons Learned
 
 ### Authentication Override
@@ -350,7 +350,7 @@ Using **WeasyPrint** for PDF invoices and **OpenPyXL** for Excel reports gave in
 ### Admin Panel Design
 Creating a custom admin panel alongside Django's built-in admin provided experience in building **admin-specific authentication** (separate sign-in), role-based access control (superuser_required decorator), and data visualization within Django templates.
 
----
+--- -->
 <!-- 
 ## 🗺️ Roadmap
 
@@ -372,7 +372,7 @@ Creating a custom admin panel alongside Django's built-in admin provided experie
 - **[@abin-jacob-dev](https://www.github.com/abin-jacob-dev)** – Full-stack developer and project maintainer
 
 ---
-
+<!-- 
 ## 🙏 Acknowledgements
 
 - [Django Documentation](https://docs.djangoproject.com/) – The excellent Django framework and its comprehensive documentation
@@ -391,7 +391,7 @@ Creating a custom admin panel alongside Django's built-in admin provided experie
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more details.
 
----
+--- -->
 
 ## ⚙️ Project Structure
 

@@ -1562,7 +1562,6 @@ def remove_coupon(request):
 @superuser_required
 def offers(request):
     offers = Offer.objects.all()
-
     return render(request, "admin/offers/offers.html", {"offers": offers})
 
 
