@@ -59,14 +59,7 @@ class Coupon(models.Model):
             return False
         return True
 
-    def clean(self):
-        if self.start_date and self.end_date:
-            if self.start_date >= self.end_date:
-                raise ValidationError("End date must be after start date")
-        if self.discount_value <= 0:
-            raise ValidationError("Discount Value must be greater than zero")
-        if self.discount_type == "percentage" and self.discount_value > 100:
-            raise ValidationError("Percentage discount cannot be greater than 100%")
+
 
 
 class Category(models.Model):

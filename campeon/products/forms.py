@@ -1,5 +1,5 @@
 from django import forms
-from products.models import Category, Product, Coupon
+from products.models import Category, Product, Coupon, Review
 
 
 class CategoryForm(forms.ModelForm):
@@ -28,3 +28,26 @@ class CouponForm(forms.ModelForm):
             "start_date",
             "end_date",
         ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("start_date")
+        end_date = cleaned_data.get("end_date")
+        discount_value = cleaned_data.get("discount_value")
+        discount_type = cleaned_data.get("discount_type")
+
+        if start_date and end_date:
+            if start_date >= end_date:
+                self.add_error("end_date", "End date must be after start date")
+        if discount_value is not None:
+            if discount_value <= 0:
+                self.add_error("discount_value", "Discount Value must be greater than zero")
+            if discount_type == "percentage" and discount_value > 100:
+                self.add_error("discount_value", "Percentage discount cannot be greater than 100%")
+        return cleaned_data
+
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ["rating", "comment"]

@@ -118,7 +118,7 @@
 							<div class="space-y-4">
 								<div>
 									<label class="text-[10px] font-bold text-gray-500 mb-2 block">Start Date</label>
-									<input type="date" name="start_date" placeholder="mm/dd/yyyy" value="{{ form.start_date.value|date:'Y-m-d'|default:coupon.start_date|date:'Y-m-d' }}" class="w-full h-12 bg-white px-4 text-sm font-bold rounded focus:outline-none {% if form.start_date.errors %}border-red-500 border-2{% endif %}"/>
+									<input type="date" name="start_date" placeholder="mm/dd/yyyy" value="{{ form.start_date.value|date:'Y-m-d'|default:form.start_date.value }}" class="w-full h-12 bg-white px-4 text-sm font-bold rounded focus:outline-none {% if form.start_date.errors %}border-red-500 border-2{% endif %}"/>
 									{% if form.start_date.errors %}
 										<p class="text-xs text-red-500 mt-1">{{ form.start_date.errors.0 }}</p>
 									{% endif %}
@@ -126,7 +126,7 @@
 
 								<div>
 									<label class="text-[10px] font-bold text-gray-500 mb-2 block">End Date</label>
-									<input type="date" name="end_date" placeholder="mm/dd/yyyy" value="{{ form.end_date.value|date:'Y-m-d'|default:coupon.end_date|date:'Y-m-d' }}" class="w-full h-12 bg-white px-4 text-sm font-bold rounded focus:outline-none {% if form.end_date.errors %}border-red-500 border-2{% endif %}"/>
+									<input type="date" name="end_date" placeholder="mm/dd/yyyy" value="{{ form.end_date.value|date:'Y-m-d'|default:form.end_date.value }}" class="w-full h-12 bg-white px-4 text-sm font-bold rounded focus:outline-none {% if form.end_date.errors %}border-red-500 border-2{% endif %}"/>
 									{% if form.end_date.errors %}
 										<p class="text-xs text-red-500 mt-1">{{ form.end_date.errors.0 }}</p>
 									{% endif %}

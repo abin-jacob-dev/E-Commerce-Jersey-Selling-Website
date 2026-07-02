@@ -4,7 +4,7 @@ from django.db import transaction
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from products.forms import CategoryForm, ProductForm, CouponForm
+from products.forms import CategoryForm, ProductForm, CouponForm, ReviewForm
 from products.models import (
     Category,
     Product,
@@ -18,7 +18,7 @@ from products.models import (
     Coupon,
     Offer,
     Wallet,
-    Review
+    Review,
 )
 from payment.models import Payment
 from user.models import Addresses
@@ -531,17 +531,17 @@ def product_detail(request, slug):
     saved_amount = default_variant.price - discount_price
 
     from .models import Review
-    reviews = Review.objects.filter(product=product).select_related('user')
+
+    reviews = Review.objects.filter(product=product).select_related("user")
     user_review = None
     has_purchased = False
-    
+
     if request.user.is_authenticated:
         user_review = reviews.filter(user=request.user).first()
         from .models import OrderItem
+
         has_purchased = OrderItem.objects.filter(
-            order__user=request.user, 
-            variant__product=product,
-            status='delivered'
+            order__user=request.user, variant__product=product, status="delivered"
         ).exists()
 
     context = {
@@ -1515,7 +1515,9 @@ def edit_coupon(request, id):
             messages.success(request, "Coupon Updated Successfully")
             return redirect("products:coupons")
 
-    return render(request, "admin/coupons/edit_coupon.html", {"coupon": coupon, "form": form})
+    return render(
+        request, "admin/coupons/edit_coupon.html", {"coupon": coupon, "form": form}
+    )
 
 
 @superuser_required
@@ -1697,55 +1699,52 @@ def delete_offer(request, id):
     return render(request, "admin/offers/delete_offer.html", {"offer": offer})
 
 
-
 @user_login_required
 def add_review(request, slug):
     product = get_object_or_404(Product, slug=slug, is_deleted=False)
-    
+
     has_purchased = OrderItem.objects.filter(
-        order__user=request.user, 
-        variant__product=product,
-        status='delivered'
+        order__user=request.user, variant__product=product, status="delivered"
     ).exists()
-    
+
     if not has_purchased:
-        messages.error(request, "You can only review products you have purchased and received.")
+        messages.error(
+            request, "You can only review products you have purchased and received."
+        )
         return redirect("products:product_detail", slug=slug)
-        
+
     if request.method == "POST":
-        rating = request.POST.get('rating')
-        comment = request.POST.get('comment', '')
-        
-        if rating and rating.isdigit() and 1 <= int(rating) <= 5:
-            Review.objects.create(
-                user=request.user,
-                product=product,
-                rating=int(rating),
-                comment=comment
-            )
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.product = product
+            review.save()
             messages.success(request, "Review added successfully.")
         else:
-            messages.error(request, "Failed to add review. Please provide a valid rating between 1 and 5.")
-            
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Failed to add review. {error}")
+
     return redirect("products:product_detail", slug=slug)
+
 
 @user_login_required
 def edit_review(request, review_id):
     review = get_object_or_404(Review, id=review_id, user=request.user)
-    
+
     if request.method == "POST":
-        rating = request.POST.get('rating')
-        comment = request.POST.get('comment', '')
-        
-        if rating and rating.isdigit() and 1 <= int(rating) <= 5:
-            review.rating = int(rating)
-            review.comment = comment
-            review.save()
+        form = ReviewForm(request.POST, instance=review)
+        if form.is_valid():
+            form.save()
             messages.success(request, "Review updated successfully.")
         else:
-            messages.error(request, "Failed to update review. Please provide a valid rating between 1 and 5.")
-            
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Failed to update review. {error}")
+
     return redirect("products:product_detail", slug=review.product.slug)
+
 
 @user_login_required
 def delete_review(request, review_id):
