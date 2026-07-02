@@ -1,5 +1,5 @@
 from django import forms
-from products.models import Category, Product
+from products.models import Category, Product, Coupon
 
 
 class CategoryForm(forms.ModelForm):
@@ -16,3 +16,15 @@ class ProductForm(forms.ModelForm):
         fields = ["name", "category", "description", "highlights", "is_active"]
 
 
+class CouponForm(forms.ModelForm):
+    class Meta:
+        model = Coupon
+        fields = [
+            "code",
+            "is_active",
+            "discount_type",
+            "discount_value",
+            "min_purchase_amount",
+            "start_date",
+            "end_date",
+        ]

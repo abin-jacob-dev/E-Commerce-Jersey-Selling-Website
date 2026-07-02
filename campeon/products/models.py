@@ -528,3 +528,18 @@ class WalletTransaction(models.Model):
     source = models.CharField(choices=SOURCE_CHOICES, max_length=50)
     transaction_type = models.CharField(choices=TRANSACTION_TYPE, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="reviews")
+    rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comment = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("product", "user")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Review by {self.user.username} for {self.product.name}"

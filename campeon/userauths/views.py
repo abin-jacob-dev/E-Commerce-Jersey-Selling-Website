@@ -26,8 +26,9 @@ def superuser_required(func):
         if request.user.is_authenticated and request.user.is_superuser:
             return func(request, *args, **kwargs)
         return redirect("userauths:signin")
-
     return wrapper
+
+
 
 
 def user_login_required(func):
@@ -36,10 +37,11 @@ def user_login_required(func):
             logout(request)
             messages.error(request, "Your Account is blocked!")
             return redirect("userauths:signin")
-        if request.user.is_authenticated and not request.user.is_blocked:
+        if request.user.is_authenticated and request.user.is_superuser:
+            return redirect('admin_panel:dashboard')
+        if request.user.is_authenticated and not request.user.is_blocked :
             return func(request, *args, **kwargs)
         return redirect("userauths:signin")
-
     return wrapper
 
 
@@ -154,7 +156,8 @@ def signin(request):
         login(request, user)
 
         messages.success(request, "You are now logged in.")
- 
+        if user.is_superuser:
+            return redirect('admin_panel:dashboard')
         return redirect("user:profile")  # dashboard
     return render(request, "userauths/signin.html")
 

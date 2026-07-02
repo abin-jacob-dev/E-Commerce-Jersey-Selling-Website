@@ -35,8 +35,10 @@
 							</div>
 
 							<!-- CODE NAME -->
-							<input
-							type="text" name="code" value="{{coupon.code}}" placeholder="CHAMPIONS_2024" class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold text-gray-700 rounded focus:outline-none mb-8"/>
+							<input type="text" name="code" value="{{ form.code.value|default:coupon.code }}" placeholder="CHAMPIONS_2024" class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold text-gray-700 rounded focus:outline-none {% if form.code.errors %}border-red-500 border-2{% else %}mb-8{% endif %}"/>
+							{% if form.code.errors %}
+								<p class="text-xs text-red-500 mt-1 mb-8">{{ form.code.errors.0 }}</p>
+							{% endif %}
 
 							<!-- GRID -->
 							<div
@@ -45,20 +47,26 @@
 								<div>
 									<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block">DISCOUNT TYPE</label>
 
-									<select name="discount_type" class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold text-gray-700 rounded focus:outline-none">
-										<option {% if coupon.discount_type == 'percentage' %} selected {% endif %} value="percentage">Percentage (%)</option>
-										<option {% if coupon.discount_type == 'fixed' %} selected {% endif %} value="fixed">Fixed Amount (₹)</option>
+									<select name="discount_type" class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold text-gray-700 rounded focus:outline-none {% if form.discount_type.errors %}border-red-500 border-2{% endif %}">
+										<option {% if form.discount_type.value|default:coupon.discount_type == 'percentage' %} selected {% endif %} value="percentage">Percentage (%)</option>
+										<option {% if form.discount_type.value|default:coupon.discount_type == 'fixed' %} selected {% endif %} value="fixed">Fixed Amount (₹)</option>
 									</select>
+									{% if form.discount_type.errors %}
+										<p class="text-xs text-red-500 mt-1">{{ form.discount_type.errors.0 }}</p>
+									{% endif %}
 								</div>
 
 								<!-- VALUE -->
 								<div>
 									<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block">VALUE</label>
 
-									<div class="flex items-center h-14 bg-[#eef6df] rounded px-4">
-										<input type="number" min="1" name="discount_value" value="{{coupon.discount_value}}" placeholder="20.00" class="w-full bg-transparent text-base font-bold text-gray-700 focus:outline-none"/>
+									<div class="flex items-center h-14 bg-[#eef6df] rounded px-4 {% if form.discount_value.errors %}border-red-500 border-2{% endif %}">
+										<input type="number" min="1" name="discount_value" value="{{ form.discount_value.value|default:coupon.discount_value }}" placeholder="20.00" class="w-full bg-transparent text-base font-bold text-gray-700 focus:outline-none"/>
 										<span class="text-base font-bold text-gray-600"></span>
 									</div>
+									{% if form.discount_value.errors %}
+										<p class="text-xs text-red-500 mt-1">{{ form.discount_value.errors.0 }}</p>
+									{% endif %}
 								</div>
 							</div>
 
@@ -66,10 +74,13 @@
 							<div>
 								<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block">MINIMUM PURCHASE AMOUNT</label>
 
-								<div class="flex items-center h-14 bg-[#eef6df] rounded px-4">
-									<input type="number" min="0" name="min_purchase_amount" value="{{ coupon.min_purchase_amount |default:0 }}" placeholder="50.00" class="w-full bg-transparent text-base font-bold text-gray-700 focus:outline-none"/>
+								<div class="flex items-center h-14 bg-[#eef6df] rounded px-4 {% if form.min_purchase_amount.errors %}border-red-500 border-2{% endif %}">
+									<input type="number" min="0" name="min_purchase_amount" value="{{ form.min_purchase_amount.value|default:coupon.min_purchase_amount|default:0 }}" placeholder="50.00" class="w-full bg-transparent text-base font-bold text-gray-700 focus:outline-none"/>
 									<span class="text-base font-bold text-gray-600">INR</span>
 								</div>
+								{% if form.min_purchase_amount.errors %}
+									<p class="text-xs text-red-500 mt-1">{{ form.min_purchase_amount.errors.0 }}</p>
+								{% endif %}
 							</div>
 						</div>
 
@@ -107,12 +118,18 @@
 							<div class="space-y-4">
 								<div>
 									<label class="text-[10px] font-bold text-gray-500 mb-2 block">Start Date</label>
-									<input type="date" name="start_date" placeholder="mm/dd/yyyy" value="{{coupon.start_date|date:'Y-m-d'}}" class="w-full h-12 bg-white px-4 text-sm font-bold rounded focus:outline-none"/>
+									<input type="date" name="start_date" placeholder="mm/dd/yyyy" value="{{ form.start_date.value|date:'Y-m-d'|default:coupon.start_date|date:'Y-m-d' }}" class="w-full h-12 bg-white px-4 text-sm font-bold rounded focus:outline-none {% if form.start_date.errors %}border-red-500 border-2{% endif %}"/>
+									{% if form.start_date.errors %}
+										<p class="text-xs text-red-500 mt-1">{{ form.start_date.errors.0 }}</p>
+									{% endif %}
 								</div>
 
 								<div>
 									<label class="text-[10px] font-bold text-gray-500 mb-2 block">End Date</label>
-									<input type="date" name="end_date" placeholder="mm/dd/yyyy" value="{{coupon.end_date|date:'Y-m-d'}}" class="w-full h-12 bg-white px-4 text-sm font-bold rounded focus:outline-none"/>
+									<input type="date" name="end_date" placeholder="mm/dd/yyyy" value="{{ form.end_date.value|date:'Y-m-d'|default:coupon.end_date|date:'Y-m-d' }}" class="w-full h-12 bg-white px-4 text-sm font-bold rounded focus:outline-none {% if form.end_date.errors %}border-red-500 border-2{% endif %}"/>
+									{% if form.end_date.errors %}
+										<p class="text-xs text-red-500 mt-1">{{ form.end_date.errors.0 }}</p>
+									{% endif %}
 								</div>
 							</div>
 						</div>

@@ -4,7 +4,7 @@ from django.db import transaction
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from products.forms import CategoryForm, ProductForm
+from products.forms import CategoryForm, ProductForm, CouponForm
 from products.models import (
     Category,
     Product,
@@ -18,6 +18,7 @@ from products.models import (
     Coupon,
     Offer,
     Wallet,
+    Review
 )
 from payment.models import Payment
 from user.models import Addresses
@@ -528,6 +529,21 @@ def product_detail(request, slug):
             }
         )
     saved_amount = default_variant.price - discount_price
+
+    from .models import Review
+    reviews = Review.objects.filter(product=product).select_related('user')
+    user_review = None
+    has_purchased = False
+    
+    if request.user.is_authenticated:
+        user_review = reviews.filter(user=request.user).first()
+        from .models import OrderItem
+        has_purchased = OrderItem.objects.filter(
+            order__user=request.user, 
+            variant__product=product,
+            status='delivered'
+        ).exists()
+
     context = {
         "product": product,
         "default_variant": default_variant,
@@ -536,6 +552,9 @@ def product_detail(request, slug):
         "saved_amount": saved_amount,
         "variant_data": variant_data,
         "similar_products": similar_products,
+        "reviews": reviews,
+        "user_review": user_review,
+        "has_purchased": has_purchased,
     }
     return render(request, "products/product_detail.html", context)
 
@@ -1462,25 +1481,19 @@ def coupons(request):
 
 @superuser_required
 def add_coupon(request):
+    form = CouponForm()
     if request.method == "POST":
-        coupon = Coupon(
-            code=request.POST.get("code").upper(),
-            is_active=request.POST.get("is_active") == "on",
-            discount_type=request.POST.get("discount_type"),
-            discount_value=Decimal(request.POST.get("discount_value", 0.00)),
-            min_purchase_amount=Decimal(request.POST.get("min_purchase_amount", 0.00)),
-            start_date=request.POST.get("start_date"),
-            end_date=request.POST.get("end_date"),
-        )
-        try:
-            coupon.full_clean()
-            coupon.save()
+        data = request.POST.copy()
+        if data.get("code"):
+            data["code"] = data.get("code").upper()
+        data["is_active"] = data.get("is_active") == "on"
+
+        form = CouponForm(data)
+        if form.is_valid():
+            form.save()
             messages.success(request, "New Coupon Created Successfully")
             return redirect("products:coupons")
-        except ValidationError as e:
-            messages.error(request, "".join(e.messages))
-            return redirect("products:add_coupon")
-    return render(request, "admin/coupons/add_coupon.html")
+    return render(request, "admin/coupons/add_coupon.html", {"form": form})
 
 
 @superuser_required
@@ -1489,28 +1502,20 @@ def edit_coupon(request, id):
         Coupon,
         id=id,
     )
+    form = CouponForm(instance=coupon)
     if request.method == "POST":
+        data = request.POST.copy()
+        if data.get("code"):
+            data["code"] = data.get("code").upper()
+        data["is_active"] = data.get("is_active") == "on"
 
-        coupon.code = request.POST.get("code").upper()
-        coupon.is_active = request.POST.get("is_active") == "on"
-        coupon.discount_type = request.POST.get("discount_type")
-        coupon.discount_value = Decimal(request.POST.get("discount_value") or 0)
-        coupon.min_purchase_amount = Decimal(
-            request.POST.get("min_purchase_amount") or 0
-        )
-        coupon.start_date = request.POST.get("start_date") or None
-        coupon.end_date = request.POST.get("end_date") or None
-        try:
-            coupon.full_clean()
-            coupon.save()
-
+        form = CouponForm(data, instance=coupon)
+        if form.is_valid():
+            form.save()
             messages.success(request, "Coupon Updated Successfully")
             return redirect("products:coupons")
-        except ValidationError as e:
-            messages.error(request, "".join(e.messages))
-            return redirect("products:edit_coupon", coupon.id)
 
-    return render(request, "admin/coupons/edit_coupon.html", {"coupon": coupon})
+    return render(request, "admin/coupons/edit_coupon.html", {"coupon": coupon, "form": form})
 
 
 @superuser_required
@@ -1690,3 +1695,62 @@ def delete_offer(request, id):
         messages.success(request, "Offer has been deleted Successfully")
         return redirect("products:offers")
     return render(request, "admin/offers/delete_offer.html", {"offer": offer})
+
+
+
+@user_login_required
+def add_review(request, slug):
+    product = get_object_or_404(Product, slug=slug, is_deleted=False)
+    
+    has_purchased = OrderItem.objects.filter(
+        order__user=request.user, 
+        variant__product=product,
+        status='delivered'
+    ).exists()
+    
+    if not has_purchased:
+        messages.error(request, "You can only review products you have purchased and received.")
+        return redirect("products:product_detail", slug=slug)
+        
+    if request.method == "POST":
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment', '')
+        
+        if rating and rating.isdigit() and 1 <= int(rating) <= 5:
+            Review.objects.create(
+                user=request.user,
+                product=product,
+                rating=int(rating),
+                comment=comment
+            )
+            messages.success(request, "Review added successfully.")
+        else:
+            messages.error(request, "Failed to add review. Please provide a valid rating between 1 and 5.")
+            
+    return redirect("products:product_detail", slug=slug)
+
+@user_login_required
+def edit_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id, user=request.user)
+    
+    if request.method == "POST":
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment', '')
+        
+        if rating and rating.isdigit() and 1 <= int(rating) <= 5:
+            review.rating = int(rating)
+            review.comment = comment
+            review.save()
+            messages.success(request, "Review updated successfully.")
+        else:
+            messages.error(request, "Failed to update review. Please provide a valid rating between 1 and 5.")
+            
+    return redirect("products:product_detail", slug=review.product.slug)
+
+@user_login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id, user=request.user)
+    product_slug = review.product.slug
+    review.delete()
+    messages.success(request, "Review deleted successfully.")
+    return redirect("products:product_detail", slug=product_slug)

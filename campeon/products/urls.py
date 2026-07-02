@@ -18,6 +18,9 @@ urlpatterns = [
     path("delete-product/<slug:slug>", views.delete_product, name="delete_product"),
     path("all-products", views.all_products, name="all_products"),
     path("product-detail/<slug:slug>/", views.product_detail, name="product_detail"),
+    path("add-review/<slug:slug>/", views.add_review, name="add_review"),
+    path("edit-review/<int:review_id>/", views.edit_review, name="edit_review"),
+    path("delete-review/<int:review_id>/", views.delete_review, name="delete_review"),
     # Cart
     path("cart/", views.cart, name="cart"),
     path("add-to-cart/", views.add_to_cart, name="add_to_cart"),

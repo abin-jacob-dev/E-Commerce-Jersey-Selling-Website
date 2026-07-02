@@ -175,119 +175,71 @@
     </section>
 
     <!-- Reviews Section -->
-    {% comment %} <div>
+    <div class="mt-16">
       <div class="flex justify-between items-end mb-12">
         <div>
           <h3 class="text-5xl font-black uppercase tracking-tighter mb-4 tracking-tightest">CUSTOMER REVIEWS</h3>
           <div class="flex items-center gap-4">
-            <div class="flex gap-1 text-lime-dark">
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-            </div>
-            <span class="text-xs font-black">4.8 / 5.0</span>
-            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">(128 REVIEWS)</span>
+            <span class="text-xs font-black">{{ reviews.count }} REVIEWS</span>
           </div>
         </div>
-        <a href="Write a Review.html" class="bg-black text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg hover:bg-lime-dark transition-all">WRITE A REVIEW</a>
+        {% if request.user.is_authenticated and has_purchased and not user_review %}
+          <a href="#reviewFormSection" class="bg-black text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg hover:bg-lime-dark transition-all">WRITE A REVIEW</a>
+        {% endif %}
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-10 rounded-[2rem] shadow-sm">
+        {% for review in reviews %}
+        <div class="bg-white p-10 rounded-[2rem] shadow-sm relative group">
           <div class="flex justify-between items-start mb-6">
-            <h4 class="text-sm font-black uppercase tracking-tighter tracking-tightest">MARCUS V.</h4>
+            <h4 class="text-sm font-black uppercase tracking-tighter tracking-tightest">{{ review.user.username }}</h4>
             <div class="flex gap-0.5 text-lime-dark">
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
+              {% for i in "12345"|make_list %}
+                <svg class="w-3 h-3 {% if forloop.counter <= review.rating %}fill-current{% else %}text-gray-200 fill-current{% endif %}" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                </svg>
+              {% endfor %}
             </div>
           </div>
-          <div class="text-[8px] font-black uppercase tracking-widest text-gray-300 mb-6">VERIFIED PURCHASE • 2 DAYS AGO</div>
-          <h5 class="text-[10px] font-black uppercase tracking-widest text-lime-dark mb-2 tracking-tightest">ABSOLUTE PEAK PERFORMANCE</h5>
-          <p class="text-[9px] font-medium text-gray-500 leading-relaxed">The breathability on this year's authentic jersey is unmatched. I've worn it for three full 90-minute matches and it stays remarkably light even when saturated. The fit is aggressive but perfect for competitive play.</p>
-        </div>
-
-        <div class="bg-white p-10 rounded-[2rem] shadow-sm">
-          <div class="flex justify-between items-start mb-6">
-            <h4 class="text-sm font-black uppercase tracking-tighter tracking-tightest">JULIAN R.</h4>
-            <div class="flex gap-0.5 text-lime-dark">
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
+          <div class="text-[8px] font-black uppercase tracking-widest text-gray-300 mb-6">{{ review.created_at|date:"M d, Y" }}</div>
+          <p class="text-[9px] font-medium text-gray-500 leading-relaxed">{{ review.comment }}</p>
+          {% if request.user == review.user %}
+            <div class="mt-4 flex gap-4">
+                <a href="#reviewFormSection" class="bg-black text-white px-4 py-2 text-[8px] font-black uppercase tracking-[0.2em] shadow-lg hover:bg-lime-dark transition-all rounded-sm inline-block">Edit</a>
+                <a href="{% url 'products:delete_review' review.id %}" class="bg-black text-white px-4 py-2 text-[8px] font-black uppercase tracking-[0.2em] shadow-lg hover:bg-red-600 transition-all rounded-sm inline-block" onclick="return confirm('Are you sure you want to delete your review?')">Delete</a>
             </div>
-          </div>
-          <div class="text-[8px] font-black uppercase tracking-widest text-gray-300 mb-6">VERIFIED PURCHASE • 1 WEEK AGO</div>
-          <h5 class="text-[10px] font-black uppercase tracking-widest text-lime-dark mb-2 tracking-tightest">THE NEON POPS IN PERSON</h5>
-          <p class="text-[9px] font-medium text-gray-500 leading-relaxed">The website photos are good, but the vibrant green in real life is incredible. It has a slight iridescent shimmer in the sunlight that makes it look extremely premium. Definitely glad I grabbed the limited edition.</p>
+          {% endif %}
         </div>
-
-        <div class="bg-white p-10 rounded-[2rem] shadow-sm">
-          <div class="flex justify-between items-start mb-6">
-            <h4 class="text-sm font-black uppercase tracking-tighter tracking-tightest">S. AL-FARSI</h4>
-            <div class="flex gap-0.5 text-lime-dark">
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-              <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
-            </div>
-          </div>
-          <div class="text-[8px] font-black uppercase tracking-widest text-gray-300 mb-6">VERIFIED PURCHASE • 2 WEEKS AGO</div>
-          <h5 class="text-[10px] font-black uppercase tracking-widest text-lime-dark mb-2 tracking-tightest">TAILORED PERFECTION</h5>
-          <p class="text-[9px] font-medium text-gray-500 leading-relaxed">Usually "authentic" fits are too tight, but the kinetic tailoring here really works. It moves with you rather than restricting you. Shipping was exceptionally fast to London, arrived in 48 hours.</p>
-        </div>
+        {% empty %}
+          <p class="text-sm font-medium text-gray-500 col-span-3">No reviews yet. Be the first to review this product!</p>
+        {% endfor %}
       </div>
 
-      <div class="mt-20 text-center">
-        <button class="text-xs font-black uppercase tracking-widest text-[#00a300] border-b-2 border-[#00a300] pb-2 hover:text-black hover:border-black transition-all">READ ALL 128 REVIEWS</button>
-      </div>
-    </div> {% endcomment %}
+      {% if request.user.is_authenticated and has_purchased %}
+        <div id="reviewFormSection" class="mt-16 bg-white p-10 rounded-[2rem] shadow-sm max-w-2xl mx-auto">
+          <h4 class="text-xl font-black uppercase tracking-tighter mb-6 tracking-tightest">{% if user_review %}EDIT YOUR REVIEW{% else %}WRITE A REVIEW{% endif %}</h4>
+          <form action="{% if user_review %}{% url 'products:edit_review' user_review.id %}{% else %}{% url 'products:add_review' product.slug %}{% endif %}" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+              <label for="rating" class="block text-xs font-black uppercase tracking-widest mb-2">Rating</label>
+              <select name="rating" id="rating" class="w-full border border-gray-300 p-3 rounded-md text-sm" required>
+                  <option value="" disabled {% if not user_review %}selected{% endif %}>Select rating (1-5)</option>
+                  <option value="5" {% if user_review.rating == 5 %}selected{% endif %}>5 - Excellent</option>
+                  <option value="4" {% if user_review.rating == 4 %}selected{% endif %}>4 - Very Good</option>
+                  <option value="3" {% if user_review.rating == 3 %}selected{% endif %}>3 - Average</option>
+                  <option value="2" {% if user_review.rating == 2 %}selected{% endif %}>2 - Poor</option>
+                  <option value="1" {% if user_review.rating == 1 %}selected{% endif %}>1 - Terrible</option>
+              </select>
+            </div>
+            <div>
+              <label for="comment" class="block text-xs font-black uppercase tracking-widest mb-2">Comment</label>
+              <textarea name="comment" id="comment" rows="4" class="w-full border border-gray-300 p-3 rounded-md text-sm" placeholder="Tell us what you think..." required>{% if user_review %}{{ user_review.comment }}{% endif %}</textarea>
+            </div>
+            <button type="submit" class="bg-black text-white px-8 py-3 text-xs font-black uppercase tracking-[0.2em] shadow-lg hover:bg-lime-dark transition-all w-full">SUBMIT REVIEW</button>
+          </form>
+        </div>
+      {% endif %}
+    </div>
   </main>
 
   <script>
