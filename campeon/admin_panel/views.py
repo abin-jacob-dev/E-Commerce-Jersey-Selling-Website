@@ -14,7 +14,9 @@ from django.http import HttpResponse
 from weasyprint import HTML
 from openpyxl import Workbook
 from datetime import datetime
+import logging
 
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 @superuser_required

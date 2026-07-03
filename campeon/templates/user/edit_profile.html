@@ -22,7 +22,7 @@
             {% else %}
               {% static 'assets/user/user_profile.jpg' %}
             {% endif %}"
-            class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
+            class="w-full h-full object-cover  opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
 
           <button type="button" onclick="document.getElementById('photoInput').click()" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"><span class="text-white text-[12px] font-black uppercase tracking-widest">Change Photo</span></button>
 
@@ -36,11 +36,11 @@
             <a href="{% url 'user:change_email' %}" class="text-green-900 text-[12px] font-black uppercase tracking-widest ml-4 hover:text-green-700 transition-colors">Change Email</a>
           </div>
 
-          <p class="text-sm font-semibold text-gray-600 tracking-wide leading-relaxed">
+          {% comment %} <p class="text-sm font-semibold text-gray-600 tracking-wide leading-relaxed">
             Square format recommended.<br />
-          </p>
+          </p> {% endcomment %}
 
-          <a href="{% url 'user:remove_photo' %}" class="inline-block mt-3 text-[12px] font-black uppercase text-red-600 hover:text-red-800">Remove Photo</a>
+          {% comment %} <a href="{% url 'user:remove_photo' %}" class="inline-block mt-3 text-[12px] font-black uppercase text-red-600 hover:text-red-800">Remove Photo</a> {% endcomment %}
         </div>
       </div>
 

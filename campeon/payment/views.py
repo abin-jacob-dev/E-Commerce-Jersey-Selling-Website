@@ -8,7 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import razorpay
 from products.models import Cart, Order
+import logging
 
+logger = logging.getLogger(__name__)
 # Create your views here.
 
 

@@ -112,7 +112,47 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "campeon.wsgi.application"
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
 
+    "formatters": {
+        "standard": {
+            "format": "[{asctime}] {levelname} {name}: {message}",
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "project.log"),
+            "formatter": "standard",
+        },
+    },
+
+    "root": {
+        "handlers": ["console", "file"],
+        "level": "INFO",
+    },
+
+    "loggers": {
+        "django.server": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 

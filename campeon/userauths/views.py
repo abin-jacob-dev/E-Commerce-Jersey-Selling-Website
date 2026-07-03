@@ -18,7 +18,9 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+import logging
 
+logger = logging.getLogger(__name__)
 
 
 def superuser_required(func):
@@ -37,8 +39,8 @@ def user_login_required(func):
             logout(request)
             messages.error(request, "Your Account is blocked!")
             return redirect("userauths:signin")
-        if request.user.is_authenticated and request.user.is_superuser:
-            return redirect('admin_panel:dashboard')
+        # if request.user.is_authenticated and request.user.is_superuser:
+        #     return redirect('admin_panel:dashboard')
         if request.user.is_authenticated and not request.user.is_blocked :
             return func(request, *args, **kwargs)
         return redirect("userauths:signin")

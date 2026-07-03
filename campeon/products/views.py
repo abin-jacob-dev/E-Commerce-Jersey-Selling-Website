@@ -41,7 +41,9 @@ import razorpay
 from .service import WalletService
 from .offer_service import get_best_offer, get_discount_price
 from django.views.decorators.cache import never_cache
+import logging
 
+logger = logging.getLogger(__name__)
 # Create your views here.
 
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -177,7 +179,7 @@ def products_list(request):
     elif status == "Inactive":
         products_queryset = products_queryset.filter(is_active=False)
 
-    paginator = Paginator(products_queryset, 5)  # Show 1 products per page.
+    paginator = Paginator(products_queryset, 3)  # Show 1 products per page.
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -457,7 +459,7 @@ def all_products(request):
     else:
         products = products.order_by("-created_at")
 
-    paginator = Paginator(products, 6)
+    paginator = Paginator(products, 3)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -1013,7 +1015,7 @@ def select_payment(request):
     address_id = request.session.get("address_id")
     if not address_id:
         messages.error(request, "Select address first")
-        return redirect("product:checkout")
+        return redirect("products:checkout")
 
     address = get_object_or_404(Addresses, id=address_id, user=request.user)
 
@@ -1196,7 +1198,7 @@ def orders(request):
     search_query = request.GET.get("search")
     if search_query:
         orders_list = orders_list.filter(order_id__icontains=search_query)
-    paginator = Paginator(orders_list, 5)
+    paginator = Paginator(orders_list, 3)
 
     page_number = request.GET.get("page")
     orders = paginator.get_page(page_number)
@@ -1340,7 +1342,7 @@ def all_orders(request):
     search_query = request.GET.get("search")
     if search_query:
         orders_list = orders_list.filter(order_id__icontains=search_query)
-    paginator = Paginator(orders_list, 5)
+    paginator = Paginator(orders_list, 3)
     page_number = request.GET.get("page")
     orders = paginator.get_page(page_number)
     context = {"orders": orders}

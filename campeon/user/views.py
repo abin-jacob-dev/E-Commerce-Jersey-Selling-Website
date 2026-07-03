@@ -25,7 +25,9 @@ import razorpay
 from products.models import Wallet, WalletTransaction
 from payment.models import Payment
 from userauths.models import Account
+import logging
 
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 @never_cache

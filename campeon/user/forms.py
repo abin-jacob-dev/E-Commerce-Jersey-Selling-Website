@@ -96,6 +96,9 @@ class EditProfileForm(forms.ModelForm):
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get("phone_number")
+        if not phone_number:
+            raise forms.ValidationError('Phone number is required.')
+        phone_number = phone_number.strip()
         if not phone_number.isdigit():
             raise forms.ValidationError("Phone number must contain only digits.")
         if len(phone_number) < 10 or len(phone_number) > 15:

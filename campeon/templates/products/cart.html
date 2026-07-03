@@ -1,11 +1,11 @@
 {% extends 'partials/base.html' %}
 {% load static %}
 {% block content %}
-  {{ cart_subtotal }}
+  {% comment %} {{ cart_subtotal }}
   {{ cart_total }}
   {{ cart_count }}
   {{ coupon_discount }}
-  {{ applied_coupon }}
+  {{ applied_coupon }} {% endcomment %}
   <script>
     const couponAmount = document.getElementById('coupon-amount')
     const couponSection = document.getElementById('coupon-section')

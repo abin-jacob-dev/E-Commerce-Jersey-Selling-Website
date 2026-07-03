@@ -41,9 +41,13 @@ class CouponForm(forms.ModelForm):
                 self.add_error("end_date", "End date must be after start date")
         if discount_value is not None:
             if discount_value <= 0:
-                self.add_error("discount_value", "Discount Value must be greater than zero")
+                self.add_error(
+                    "discount_value", "Discount Value must be greater than zero"
+                )
             if discount_type == "percentage" and discount_value > 100:
-                self.add_error("discount_value", "Percentage discount cannot be greater than 100%")
+                self.add_error(
+                    "discount_value", "Percentage discount cannot be greater than 100%"
+                )
         return cleaned_data
 
 
@@ -51,3 +55,12 @@ class ReviewForm(forms.ModelForm):
     class Meta:
         model = Review
         fields = ["rating", "comment"]
+
+    def clean_comment(self):
+        comment = self.cleaned_data.get("comment")
+        if not comment:
+            raise forms.ValidationError("Comment is required")
+
+        if len(comment.strip()) < 3:
+            raise forms.ValidationError("Need more Characters")
+        return comment
