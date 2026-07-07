@@ -1570,7 +1570,7 @@ def remove_coupon(request):
 
 @superuser_required
 def offers(request):
-    offers = Offer.objects.all()
+    offers = Offer.objects.all().order_by('-created_at')
     return render(request, "admin/offers/offers.html", {"offers": offers})
 
 

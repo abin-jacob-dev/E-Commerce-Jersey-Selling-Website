@@ -2,9 +2,8 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.crypto import get_random_string
 
-from cloudinary.models import (
-    CloudinaryField,
-)  # Removed CloudinaryField; using URLField for image URLs
+from cloudinary.models import CloudinaryField
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import Sum
 from userauths.models import Account
@@ -60,12 +59,10 @@ class Coupon(models.Model):
         return True
 
 
-
-
 class Category(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
-    image = models.ImageField(upload_to="category/images")
+    image = CloudinaryField("category_image", folder="category_images")
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
@@ -171,8 +168,8 @@ class Offer(models.Model):
         ("fixed", "Fixed Amount"),
     ]
     TARGET_TYPE_CHOICES = [
-    ('product', 'Product'),
-    ('category', 'Category'),
+        ("product", "Product"),
+        ("category", "Category"),
     ]
 
     name = models.CharField(max_length=100)
@@ -195,7 +192,6 @@ class Offer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-   
     def __str__(self):
         return self.name
 
@@ -262,7 +258,7 @@ class VariantImage(models.Model):
     variant = models.ForeignKey(
         Variant, on_delete=models.CASCADE, related_name="images"
     )
-    image = models.ImageField(upload_to="variants/images")
+    image = CloudinaryField("variant_image", folder="variant_images")
 
     class Meta:
         ordering = ["id"]
@@ -512,10 +508,15 @@ class WalletTransaction(models.Model):
     transaction_type = models.CharField(choices=TRANSACTION_TYPE, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
 
+
 class Review(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="reviews")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="reviews"
+    )
     user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="reviews")
-    rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    rating = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

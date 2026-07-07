@@ -15,7 +15,7 @@ class CategoryForm(forms.ModelForm):
             raise forms.ValidationError("Name is required.")
         name = name.strip()
         if not re.fullmatch(r"^[A-Za-z]+(?: [A-Za-z]+)*$", name):
-            raise forms.ValidationError("Name can only contain letters and spaces.")
+            raise forms.ValidationError("Name can only contain letters.")
         if (
             Category.objects.filter(name__iexact=name)
             .exclude(pk=self.instance.pk)
@@ -64,6 +64,7 @@ class OfferForm(forms.ModelForm):
             "category",
             "target_type",
         ]
+        
 
         widgets = {
             "start_date": forms.DateTimeInput(
@@ -97,7 +98,7 @@ class OfferForm(forms.ModelForm):
             cleaned_data["name"] = name
 
             if not re.fullmatch(r"^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$", name):
-                self.add_error("name", "Name can only contain letters, numbers, and spaces.")
+                self.add_error("name", "Name can only contain letters and numbers.")
 
             if (
                 Offer.objects.filter(name__iexact=name)
@@ -200,7 +201,7 @@ class CouponForm(forms.ModelForm):
             cleaned_data["code"] = code
 
             if not re.fullmatch(r"^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$", code):
-                self.add_error("code", "Code can only contain letters, numbers, and spaces.")
+                self.add_error("code", "Code can only contain letters and numbers.")
 
             if (
                 Coupon.objects.filter(code__iexact=code)
