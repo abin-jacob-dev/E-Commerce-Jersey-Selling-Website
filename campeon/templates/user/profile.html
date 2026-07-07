@@ -16,7 +16,6 @@
     <div class="bg-white p-8 rounded-sm shadow-sm flex items-center gap-8 mb-8">
       <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-lime-light">
         <img src="{% if user.profile_image %}{{user.profile_image.url}}{% else %}{% static 'assets/user/user_profile.jpg' %}{% endif %}" alt="User" class="w-full h-full object-cover" />
-        <img src="{% if user.profile_image %}{{user.profile_image.url}}{% else %}{% static 'assets/user/user_profile.jpg' %}{% endif %}" alt="User" class="w-full h-full object-cover" />
       </div>
       <div>
         <h3 class="text-4xl font-black uppercase tracking-tighter tracking-tightest">{{ user.full_name }}</h3>

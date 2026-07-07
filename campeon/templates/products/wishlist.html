@@ -27,8 +27,9 @@
             <div class="bg-white shadow-sm flex flex-col lg:flex-row items-stretch relative">
               <!-- IMAGE -->
               <div class="w-full lg:w-[260px] h-[240px] lg:h-auto flex-shrink-0">
-                
-                <img src="{{ item.variant.images.first.image.url }}" class="w-full h-full object-cover" alt="{{ item.variant.product.name }}" />
+                {% include 'components/default_image.html' with image=item.variant.images.first.image.url alt=item.variant.product.name class='w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100' %}
+             
+                {% comment %} <img src="{{ item.variant.images.first.image.url }}" class="w-full h-full object-cover" alt="{{ item.variant.product.name }}" /> {% endcomment %}
               </div>
 
               <!-- INFO -->

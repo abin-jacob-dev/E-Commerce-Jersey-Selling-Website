@@ -134,7 +134,9 @@
   <!-- Clickable Image -->
   <a href="{% url 'products:product_detail' product.slug %}">
     <div class="bg-gray-50 aspect-[4/5] rounded-sm relative overflow-hidden mb-6">
-      <img src="{{ product.get_primary_image }}"
+      {% include 'components/default_image.html' with image=product.get_primary_image alt=product.name class='w-full h-full object-cover group-hover:grayscale-0 transition-all duration-500' %}
+
+      {% comment %} <img src="{{ product.get_primary_image }}" {% endcomment %}
            class="w-full h-full object-cover group-hover:grayscale-0 transition-all duration-500" />
 
       {% comment %} <a href="{% url 'products:add_to_wishlist' product.slug %}"

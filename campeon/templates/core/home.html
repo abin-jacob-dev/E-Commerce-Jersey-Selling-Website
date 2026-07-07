@@ -1,6 +1,8 @@
 {% extends 'partials/base.html' %}
 {% load static %}
-{% block title %}Campeon{% endblock title %}
+{% block title %}
+  Campeon
+{% endblock %}
 {% block content %}
   <section class="bg-[#121212] text-white py-20 relative overflow-hidden">
     <div class="container mx-auto px-4 text-center relative z-10">
@@ -30,7 +32,8 @@
             <!-- Category Image -->
             <div class="w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden bg-black/5 border-4 border-transparent group-hover:border-lime transition-all duration-300 shadow-sm">
               {% if category.image %}
-                <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                {% include 'components/default_image.html' with image=category.image.url alt=category.name class='w-full h-full object-cover group-hover:scale-110 transition-transform duration-500' %}
+                {% comment %} <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /> {% endcomment %}
               {% else %}
                 <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">No Image</div>
               {% endif %}
@@ -64,7 +67,9 @@
             <div class="text-left group cursor-pointer">
               <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
                 {% if product.get_primary_image %}
-                  <img src="{{ product.get_primary_image }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
+                  {% include 'components/default_image.html' with image=product.get_primary_image alt=product.name class='w-full h-full object-cover group-hover:scale-110 transition-transform duration-500' %}
+
+                  {% comment %} <img src="{{ product.get_primary_image }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" /> {% endcomment %}
                 {% else %}
                   <img src="https://via.placeholder.com/400x533?text=No+Image" alt="No image" class="w-full h-full object-cover" />
                 {% endif %}

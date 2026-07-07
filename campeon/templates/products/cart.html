@@ -34,7 +34,9 @@
             {% for item in items %}
               <div class="bg-white p-12 flex flex-col md:flex-row items-start md:items-center gap-12 shadow-sm relative overflow-hidden group mb-6 {% if item.error %}opacity-70{% endif %}">
                 <div class="w-56 h-56 bg-gray-50 flex-shrink-0 rounded-sm overflow-hidden">
-                  <img src="{{ item.variant.images.first.image.url }}" alt="{{ item.variant.product.name }}" class="w-full h-full object-cover" />
+                  {% include 'components/default_image.html' with image=item.variant.images.first.image.url alt=item.variant.product.name  class='w-full h-full object-cover' %}
+
+                  {% comment %} <img src="{{ item.variant.images.first.image.url }}" alt="{{ item.variant.product.name }}" class="w-full h-full object-cover" /> {% endcomment %}
                 </div>
                 <div class="flex-1 space-y-2">
                   <span class="text-[11px] font-black text-lime-dark uppercase tracking-[0.3em]">{{ item.variant.product.category.name }}</span>

@@ -1,0 +1,10 @@
+{% load static %}
+
+<img src="{% if image %}
+    {{ image }}
+  {% else %}
+    {% static 'assets/core/no_image.png' %}
+  {% endif %}"
+  alt="{{ alt|default:'' }}"
+  class="{{ class|default:'' }}"
+  onerror="this.onerror=null;this.src='{% static 'assets/core/no_image.png' %}';" />

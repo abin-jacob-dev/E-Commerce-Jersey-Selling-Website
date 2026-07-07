@@ -128,7 +128,9 @@
 
                   <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 shrink-0">
                     {% if item.variant and item.variant.images.first %}
-                      <img src="{{ item.variant.images.first.image.url }}" class="w-full h-full object-cover">
+                      {% include 'components/default_image.html' with image=item.variant.images.first.image.url alt=item.variant.product.name class='w-full h-full object-cover' %}
+             
+                    {% comment %} <img src="{{ item.variant.images.first.image.url }}" class="w-full h-full object-cover"> {% endcomment %}
                     {% else %}
                       <div class="flex items-center justify-center h-full text-[10px] text-gray-400">
                         NO IMAGE

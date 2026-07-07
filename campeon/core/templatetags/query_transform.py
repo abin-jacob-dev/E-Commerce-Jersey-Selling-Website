@@ -8,3 +8,4 @@ def query_transform(request, **kwargs):
     for k, v in kwargs.items():
         updated[k] = v
     return updated.urlencode()
+
