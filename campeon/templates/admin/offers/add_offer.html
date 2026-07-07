@@ -154,7 +154,7 @@
 									<input 
     type="datetime-local" 
     name="start_date"
-    value="{% if form.start_date.value %}{{ form.start_date.value|date:'Y-m-d\\TH:i' }}{% endif %}"
+    value="{{ form.start_date.value|default:'' }}"
     class="w-full h-12 bg-white px-4 rounded
     {% if form.start_date.errors %}border-2 border-red-500{% endif %}"
 >
@@ -174,7 +174,7 @@
 									<input 
     type="datetime-local" 
     name="end_date"
-    value="{% if form.end_date.value %}{{ form.end_date.value|date:'Y-m-d\\TH:i' }}{% endif %}"
+    value="{{ form.end_date.value|default:'' }}"
     class="w-full h-12 bg-white px-4 rounded
     {% if form.end_date.errors %}border-2 border-red-500{% endif %}"
 >

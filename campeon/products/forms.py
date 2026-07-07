@@ -93,7 +93,7 @@ class OfferForm(forms.ModelForm):
         if not name:
             self.add_error("name", "Name is required.")
         else:
-            name = name.strip()
+            name = name.strip().upper()
             cleaned_data["name"] = name
 
             if not re.fullmatch(r"^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$", name):
@@ -194,16 +194,16 @@ class CouponForm(forms.ModelForm):
         code = self.cleaned_data.get("code")
 
         if not code:
-            self.add_error("code", "code is required.")
+            self.add_error("code", "Code is required.")
         else:
-            code = code.strip()
+            code = code.strip().upper()
             cleaned_data["code"] = code
 
             if not re.fullmatch(r"^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$", code):
                 self.add_error("code", "Code can only contain letters, numbers, and spaces.")
 
             if (
-                Offer.objects.filter(code__iexact=code)
+                Coupon.objects.filter(code__iexact=code)
                 .exclude(pk=self.instance.pk)
                 .exists()
             ):
