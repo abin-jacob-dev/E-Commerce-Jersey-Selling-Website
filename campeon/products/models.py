@@ -170,6 +170,10 @@ class Offer(models.Model):
         ("percentage", "Percentage"),
         ("fixed", "Fixed Amount"),
     ]
+    TARGET_TYPE_CHOICES = [
+    ('product', 'Product'),
+    ('category', 'Category'),
+    ]
 
     name = models.CharField(max_length=100)
 
@@ -180,7 +184,7 @@ class Offer(models.Model):
     end_date = models.DateTimeField()
 
     is_active = models.BooleanField(default=True)
-
+    target_type = models.CharField(max_length=20, choices=TARGET_TYPE_CHOICES)
     product = models.ForeignKey(
         Product, null=True, blank=True, on_delete=models.CASCADE
     )
@@ -191,21 +195,7 @@ class Offer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def clean(self):
-        if not self.product and not self.category:
-            raise ValidationError("Offer must belong to either a product or category")
-        if self.product and self.category:
-            raise ValidationError("Offer cannot belong to both product and category")
-        if self.end_date <= self.start_date:
-            raise ValidationError("The Date Should be greater that start date")
-        if self.discount_value <= 0:
-            raise ValidationError("The Value should be greater than  0")
-        if self.discount_type == "percentage":
-            if self.discount_value >= 100:
-                raise ValidationError(
-                    "Percentage cannot be greater than or equal to  100"
-                )
-
+   
     def __str__(self):
         return self.name
 

@@ -1,5 +1,5 @@
 User 
-- "remove photo" shown for placeholder profile image
+
 - error on missing phone number in profile not handled  
 - improper phone number validation
 - payment failed redirection is broken

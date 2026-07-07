@@ -1,6 +1,7 @@
 from django import forms
 from .models import Addresses
 from userauths.models import Account
+import re
 
 
 class AddressesForm(forms.ModelForm):
@@ -34,10 +35,8 @@ class AddressesForm(forms.ModelForm):
         if not phone_number:
             raise forms.ValidationError("Phone number is required.")
         phone_number = phone_number.strip()
-        if not phone_number.isdigit():
-            raise forms.ValidationError("Phone number must contain only digits.")
-        if len(phone_number) < 10 or len(phone_number) > 15:
-            raise forms.ValidationError("Phone number must be 10–15 digits.")
+        if not re.fullmatch(r"^[6-9]\d{9}$", phone_number):
+            raise forms.ValidationError("Enter a valid Phone number")
         return phone_number
 
     def clean_address_line_1(self):
@@ -50,6 +49,14 @@ class AddressesForm(forms.ModelForm):
         if len(address_line_1) > 100:
             raise forms.ValidationError("Address is too long.")
         return address_line_1
+    
+    def clean_address_line_2(self):
+        address = self.cleaned_data.get("address_line_2")
+        if address:
+            address = address.strip()
+            if len(address) > 100:
+                raise forms.ValidationError("Address Line 2 is too long.")
+        return address
 
     def clean_city(self):
         city = self.cleaned_data.get("city")
@@ -59,6 +66,15 @@ class AddressesForm(forms.ModelForm):
         if not city.replace(" ", "").isalpha():
             raise forms.ValidationError("City must contain only letters.")
         return city.title()
+    
+    def clean_place(self):
+        place = self.cleaned_data.get("place")
+        if not place:
+            raise forms.ValidationError("Place is required.")
+        place = place.strip()
+        if len(place) < 2:
+            raise forms.ValidationError("Place name is too short.")
+        return place.title()
 
     def clean_state(self):
         state = self.cleaned_data.get("state")
@@ -74,8 +90,8 @@ class AddressesForm(forms.ModelForm):
         if not postal_code:
             raise forms.ValidationError("Postal code is required.")
         postal_code = postal_code.strip()
-        if not postal_code.isdigit():
-            raise forms.ValidationError("Postal code must contain only digits.")
+        if not re.fullmatch(r"\d{6}", postal_code):
+            raise forms.ValidationError("Postal code must be 6 digits")
         return postal_code
 
 
@@ -97,14 +113,14 @@ class EditProfileForm(forms.ModelForm):
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get("phone_number")
         if not phone_number:
-            raise forms.ValidationError('Phone number is required.')
+            raise forms.ValidationError("Phone number is required.")
         phone_number = phone_number.strip()
-        if not phone_number.isdigit():
-            raise forms.ValidationError("Phone number must contain only digits.")
-        if len(phone_number) < 10 or len(phone_number) > 15:
-            raise forms.ValidationError("Phone number must be 10–15 digits.")
+        if not re.fullmatch(r"[6-9]\d{9}", phone_number):
+            raise forms.ValidationError("Enter a valid mobile number.")
+        if (
+            Account.objects.filter(phone_number=phone_number)
+            .exclude(pk=self.instance.pk)
+            .exists()
+        ):
+            raise forms.ValidationError("This phone number is already in use.")
         return phone_number
-
-
-class ReferralForm(forms.Form):
-    referral_code = forms.CharField(max_length=20)

@@ -54,7 +54,7 @@
                     </label>
 
                     <input
-                        type="text"
+                        type="number"
                         name="{{ form.phone_number.name }}"
                         value="{{ form.phone_number.value|default:'' }}"
                         class="w-full bg-gray-50 border {% if form.phone_number.errors %}border-red-500{% else %}border-gray-100{% endif %} rounded-lg px-6 py-4 text-xs font-black tracking-widest">
@@ -154,7 +154,7 @@
                     </label>
 
                     <input
-                        type="number" minlength="6"
+                        type="text" maxlength="6" pattern="\d{6}"
                         name="{{ form.postal_code.name }}"
                         value="{{ form.postal_code.value|default:'' }}"
                         class="w-full bg-gray-50 border {% if form.postal_code.errors %}border-red-500{% else %}border-gray-100{% endif %} rounded-lg px-6 py-4 text-xs font-black tracking-widest">

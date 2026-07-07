@@ -29,31 +29,37 @@ def cart_summary(request):
             "coupon_discount": 0,
             "applied_coupon": None,
         }
-        
+
     cart, created = Cart.objects.get_or_create(user=request.user)
 
     subtotal = sum(item.offer_subtotal for item in cart.items.all())
-    
+
     coupon_discount = 0
     applied_coupon = None
     coupon_id = request.session.get("coupon_id")
     if coupon_id:
         try:
             applied_coupon = Coupon.objects.get(id=coupon_id, is_active=True)
-            if subtotal >= applied_coupon.min_purchase_amount:
+            if (
+                subtotal >= applied_coupon.min_purchase_amount
+                and applied_coupon.is_valid
+            ):
                 if applied_coupon.discount_type == "percentage":
                     from decimal import Decimal
-                    coupon_discount = (subtotal * applied_coupon.discount_value) / Decimal('100')
+
+                    coupon_discount = (
+                        subtotal * applied_coupon.discount_value
+                    ) / Decimal("100")
                 else:
                     coupon_discount = applied_coupon.discount_value
             else:
                 request.session.pop("coupon_id", None)
-                
+
         except Coupon.DoesNotExist:
             request.session.pop("coupon_id", None)
 
     final_total = max(subtotal - coupon_discount, 0)
-    
+
     return {
         "cart_subtotal": subtotal,
         "cart_total": final_total,

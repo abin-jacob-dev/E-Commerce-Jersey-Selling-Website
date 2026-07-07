@@ -74,7 +74,7 @@
                   </div>
                   <div class="mt-auto">
                     <p class="text-[9px] font-black uppercase tracking-widest text-gray-300 mb-1">Total</p>
-                    <span id="item-subtotal-{{ item.id }}" class="text-3xl font-black text-lime-dark">₹{{ item.offer_subtotal|default:item.subtotal }}</span>
+                    <span id="item-subtotal-{{ item.id }}" class="text-3xl font-black text-lime-dark">₹{{ item.offer_subtotal|default:item.subtotal  }}</span>
                   </div>
                 </div>
                 <a href="{% url 'products:remove_from_cart' item.id %}" class="absolute top-6 right-6 text-gray-400 hover:text-red-500 transition-colors">

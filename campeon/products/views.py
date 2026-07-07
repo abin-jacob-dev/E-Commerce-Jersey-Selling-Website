@@ -4,7 +4,7 @@ from django.db import transaction
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from products.forms import CategoryForm, ProductForm, CouponForm, ReviewForm
+from products.forms import CategoryForm, ProductForm, CouponForm, ReviewForm, OfferForm
 from products.models import (
     Category,
     Product,
@@ -886,6 +886,9 @@ def checkout(request):
     addresses = Addresses.objects.filter(user=request.user).order_by(
         "-is_default", "-created_at"
     )
+    # if items.filter(Q(variant__stock__lte=0) or Q(variant__is_active=FalseK)).exists():
+    #     print('product not  found ')
+    #     return redirect('products:cart')
     if not items.exists():
         messages.error(request, "Your Cart is empty.")
         return redirect("products:cart")
@@ -981,6 +984,10 @@ def select_payment(request):
 
     if not cart_items.exists():
         messages.error(request, "Your cart is empty")
+        return redirect("products:cart")
+    if cart_items.filter(
+        Q(variant__stock__lte=0) or Q(variant__is_active=False)
+    ).exists():
         return redirect("products:cart")
 
     raw_subtotal = sum(item.subtotal for item in cart_items)
@@ -1570,55 +1577,18 @@ def offers(request):
 @superuser_required
 def add_offer(request):
     if request.method == "POST":
-        product = None
-        category = None
-
-        try:
-            product_id = request.POST.get("product_id")
-            category_id = request.POST.get("category_id")
-            product = (
-                Product.objects.filter(id=product_id).first() if product_id else None
-            )
-            category = (
-                Category.objects.filter(id=category_id).first() if category_id else None
-            )
-            start_date = datetime.strptime(
-                request.POST.get("start_date"), "%Y-%m-%dT%H:%M"
-            )
-
-            end_date = datetime.strptime(request.POST.get("end_date"), "%Y-%m-%dT%H:%M")
-
-            offer = Offer(
-                name=request.POST.get("name"),
-                discount_type=request.POST.get("discount_type"),
-                discount_value=Decimal(request.POST.get("discount_value") or 0),
-                start_date=start_date,
-                end_date=end_date,
-                is_active=request.POST.get("is_active") == "on",
-                product=product,
-                category=category,
-            )
-            target_type = request.POST.get("target_type")
-            if target_type == "product" and not product:
-                messages.error(request, "Please select a product.")
-                return redirect("products:add_offer")
-
-            if target_type == "category" and not category:
-                messages.error(request, "Please select a category.")
-                return redirect("products:add_offer")
-
-            offer.full_clean()
-            offer.save()
+        form = OfferForm(request.POST)
+        if form.is_valid():
+            form.save()
             messages.success(request, "Offer has been Created Successfully")
             return redirect("products:offers")
-        except ValueError:
-            messages.error(request, "Invalid date format")
-            return redirect("products:add_offer")
-        except ValidationError as e:
-            messages.error(request, "".join(e.messages))
-            return redirect("products:add_offer")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = OfferForm()
 
     context = {
+        "form": form,
         "products": Product.objects.filter(is_active=True, is_deleted=False),
         "categories": Category.objects.filter(is_active=True, is_deleted=False),
     }
@@ -1630,59 +1600,19 @@ def edit_offer(request, id):
     offer = get_object_or_404(Offer, id=id)
 
     if request.method == "POST":
-        try:
-            product_id = request.POST.get("product_id")
-            category_id = request.POST.get("category_id")
-            target_type = request.POST.get("target_type")
-
-            product = (
-                Product.objects.filter(id=product_id).first() if product_id else None
-            )
-            category = (
-                Category.objects.filter(id=category_id).first() if category_id else None
-            )
-
-            # enforce single target
-            if target_type == "product":
-                category = None
-                if not product:
-                    messages.error(request, "Please select a product.")
-                    return redirect("products:edit_offer", offer.id)
-
-            elif target_type == "category":
-                product = None
-                if not category:
-                    messages.error(request, "Please select a category.")
-                    return redirect("products:edit_offer", offer.id)
-
-            offer.name = request.POST.get("name")
-            offer.discount_type = request.POST.get("discount_type")
-            offer.discount_value = Decimal(request.POST.get("discount_value") or 0)
-            offer.start_date = datetime.strptime(
-                request.POST.get("start_date"), "%Y-%m-%dT%H:%M"
-            )
-            offer.end_date = datetime.strptime(
-                request.POST.get("end_date"), "%Y-%m-%dT%H:%M"
-            )
-            offer.is_active = request.POST.get("is_active") == "on"
-
-            offer.product = product
-            offer.category = category
-
-            offer.full_clean()
-            offer.save()
-
+        form = OfferForm(request.POST, instance=offer)
+        if form.is_valid():
+            form.save()
             messages.success(request, "Offer Updated Successfully")
             return redirect("products:offers")
+        else:
+            messages.error(request, "Please correct the errors below.")
 
-        except ValidationError as e:
-            messages.error(request, ", ".join(e.messages))
-
-        except ValueError:
-            messages.error(request, "Invalid date format")
-
+    else:
+        form = OfferForm(instance=offer)
     context = {
-        "offer": offer,
+        "form": form,
+        "offer":offer,
         "products": Product.objects.filter(is_active=True, is_deleted=False),
         "categories": Category.objects.filter(is_active=True, is_deleted=False),
     }

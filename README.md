@@ -418,10 +418,7 @@ E-Commerce-Jersey-Selling-Website/
 │   │   └── partials/               # Reusable template partials
 │   ├── static/                     # Static files (CSS, JS, images)
 │   ├── manage.py                   # Django CLI entry point
-│   ├── requirements.txt            # Main Python dependencies
-│   ├── requirements1.txt           # Minimal dependencies
-│   ├── requirements2.txt           # Additional dependencies
-│   └── requirements3.txt           # Full dependencies (duplicate of main)
+│   └── requirements.txt           # Full dependencies (duplicate of main)
 ├── .env.example                    # Environment variable template
 ├── .gitignore
 └── README.md

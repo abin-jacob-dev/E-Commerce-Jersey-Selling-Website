@@ -27,7 +27,8 @@
             <div class="bg-white shadow-sm flex flex-col lg:flex-row items-stretch relative">
               <!-- IMAGE -->
               <div class="w-full lg:w-[260px] h-[240px] lg:h-auto flex-shrink-0">
-                <img src="{{ item.variant.product.get_primary_image }}" class="w-full h-full object-cover" alt="{{ item.variant.product.name }}" />
+                
+                <img src="{{ item.variant.images.first.image.url }}" class="w-full h-full object-cover" alt="{{ item.variant.product.name }}" />
               </div>
 
               <!-- INFO -->
@@ -47,9 +48,10 @@
               </div>
 
               <!-- PRICE (RIGHT SIDE PERFECT ALIGN) -->
-              {% comment %} <div class="flex items-center justify-end px-6 lg:px-8 border-t lg:border-t-0 lg:border-l border-gray-100 min-w-[140px]">
-                <span class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ item.variant.price }}</span>
-              </div> {% endcomment %}
+              <div class="flex items-center justify-end px-6 lg:px-8 border-t lg:border-t-0 lg:border-l border-gray-100 min-w-[140px]">
+                {% comment %} <span class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ item.variant.price }}</span> {% endcomment %}
+                <span class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ item.variant.offer_price }}</span>
+              </div>
 
               <!-- REMOVE -->
               <button class="remove-wishlist-btn absolute top-4 right-4 text-gray-400 hover:text-red-500" data-url="{% url 'products:remove_from_wishlist' item.id %}">✕</button>

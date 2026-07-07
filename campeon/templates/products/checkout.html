@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block content %}
-  {{ cart_subtotal }}
+  {% comment %} {{ cart_subtotal }}
   {{ cart_total }}
   {{ cart_count }}
   {{ coupon_discount }}
-  {{ applied_coupon }}
+  {{ applied_coupon }} {% endcomment %}
 	<main class="bg-[#e9f5db] min-h-screen py-16">
 		<div
 			class="container mx-auto px-4 sm:px-6">
@@ -152,7 +152,7 @@
 									<div>
 										<span class="text-[10px] uppercase tracking-[0.3em] opacity-50 font-black">Estimated Total</span>
 
-										<div class="text-5xl font-black text-lime-bright mt-2 leading-none">₹{{cart_total|default:'0'}}</div>
+										<div class="text-5xl font-black text-lime-bright mt-2 leading-none">₹{{cart_total|default:'0' }}</div>
 									</div>
 								</div>
 
