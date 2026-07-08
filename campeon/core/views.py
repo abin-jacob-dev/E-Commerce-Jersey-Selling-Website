@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 # Create your views here.
 def home(request):
     categories = Category.objects.filter(is_deleted=False, is_active=True)
@@ -35,5 +36,6 @@ def contact(request):
 def about(request):
     return render(request, "core/about.html")
 
-def page_not_found(request):
-    return render(request, "core/404.html")
+
+def page_not_found(request, exception):
+    return render(request, "core/404.html", status=404)

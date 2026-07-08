@@ -124,3 +124,34 @@ class EditProfileForm(forms.ModelForm):
         ):
             raise forms.ValidationError("This phone number is already in use.")
         return phone_number
+
+class ReferralForm(forms.Form):
+    referral_code = forms.CharField(
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Enter referral code"
+        })
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_referral_code(self):
+        code = self.cleaned_data.get("referral_code", "").strip()
+
+        if self.user.referred_by:
+            raise forms.ValidationError("You have already used a referral code.")
+
+        try:
+            ref_user = Account.objects.get(referral_code=code)
+        except Account.DoesNotExist:
+            raise forms.ValidationError("Invalid Referral code")
+
+        if ref_user == self.user:
+            raise forms.ValidationError("You cannot refer yourself")
+
+        self.ref_user = ref_user
+        return code

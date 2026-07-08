@@ -436,7 +436,7 @@ class OrderItem(models.Model):
         ("shipped", "Shipped"),
         ("delivered", "Delivered"),
         ("cancelled", "Cancelled"),
-        # ("partially_cancelled", "Partially Cancelled"),
+        ("partially_cancelled", "Partially Cancelled"),
         ("returned", "Returned"),
         ("partially_returned", "Partially Returned"),
     ]

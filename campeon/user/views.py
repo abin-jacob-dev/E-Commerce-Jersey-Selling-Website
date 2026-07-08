@@ -6,7 +6,7 @@ from django.contrib.auth.hashers import check_password
 from django.contrib import messages
 from .utility import OTP
 from django.http import HttpResponse
-from .forms import AddressesForm, EditProfileForm
+from .forms import AddressesForm, EditProfileForm, ReferralForm
 from user.models import Addresses
 import os
 from django.shortcuts import get_object_or_404
@@ -28,6 +28,7 @@ from userauths.models import Account
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 # Create your views here.
 @never_cache
@@ -258,17 +259,16 @@ def wallet(request):
 @user_login_required
 def referral(request):
     if request.method == "POST":
-        code = request.POST.get("referral_code", "").strip()
-        try:
-            if not request.user.referred_by:
-                ref_user = Account.objects.get(referral_code=code)
-                if ref_user == request.user:
-                    messages.error(request, "You can not refer for yourself")
-                    return redirect("user:referral")
-                apply_referral_bonus(request.user, code)
-                messages.success(request, "Referral applied successfully!")
-                return redirect("user:referral")
-        except Account.DoesNotExist:
-            messages.error(request, "Invalid Referral code")
+        form = ReferralForm(request.user, request.POST)
+
+        if form.is_valid():
+            apply_referral_bonus(request.user, form.cleaned_data["referral_code"])
+
+            messages.success(request, "Referral applied successfully!")
             return redirect("user:referral")
-    return render(request, "user/referral.html")
+
+    else:
+        form = ReferralForm(request.user)
+
+    return render(request, "user/referral.html", {"form": form})
+

@@ -48,11 +48,8 @@ def apply_referral_bonus(user, referral_code):
             transaction_type="credit",
         )
         # Give ₹5 to new user
-        print("NEW USER:", user.id, user.email)
-        user_wallet, _ = Wallet.objects.get_or_create(user=user)
 
-        print("WALLET:", user_wallet.id)
-        print("OLD BALANCE:", user_wallet.current_balance)
+        user_wallet, _ = Wallet.objects.get_or_create(user=user)
 
         user_wallet.current_balance = (
             user_wallet.current_balance or 0

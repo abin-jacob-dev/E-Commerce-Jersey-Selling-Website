@@ -3,7 +3,7 @@ User
 - payment failed redirection is broken
 - ratings and reviews functionality is incomplete 
 - design and show error pages properly 
-- errors when applying referral code not communicated  (check logic)
+
 
 Admin
 - no proper path hierarchy in admin URLs

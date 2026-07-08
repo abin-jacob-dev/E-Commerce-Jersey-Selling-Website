@@ -1,5 +1,6 @@
 from django.db import models
 
+
 from userauths.models import Account
 
 # Create your models here.
@@ -25,4 +26,5 @@ class Addresses(models.Model):
 
     class Meta:
         ordering = ["created_at"]
+
 

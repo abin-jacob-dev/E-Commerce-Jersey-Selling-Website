@@ -51,7 +51,7 @@
               <!-- PRICE (RIGHT SIDE PERFECT ALIGN) -->
               <div class="flex items-center justify-end px-6 lg:px-8 border-t lg:border-t-0 lg:border-l border-gray-100 min-w-[140px]">
                 {% comment %} <span class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ item.variant.price }}</span> {% endcomment %}
-                <span class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ item.variant.offer_price }}</span>
+                <span class="text-2xl sm:text-3xl lg:text-4xl font-black text-lime-dark">₹{{ item.variant.offer_price|floatformat:2 }}</span>
               </div>
 
               <!-- REMOVE -->

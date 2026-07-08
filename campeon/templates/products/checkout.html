@@ -136,7 +136,7 @@
 									{% if applied_coupon %}
 									<div class="flex justify-between">
 										<span class="text-[10px] uppercase opacity-60 font-black">Coupon ({{applied_coupon}})</span>
-										<span class="font-black text-lg">- ₹{{ coupon_discount|default:"0" }}</span>
+										<span class="font-black text-lg">- ₹{{ coupon_discount|default:"0"|floatformat:2 }}</span>
 									</div>
 									{% endif %}
 

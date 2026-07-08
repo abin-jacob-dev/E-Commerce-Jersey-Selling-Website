@@ -1,5 +1,6 @@
 {% extends 'user/partials/base.html' %}
 {% load static %}
+
 {% block content %}
   <main class="flex-1 bg-lime-light p-12">
     {% include 'partials/alert.html' %}
@@ -16,7 +17,7 @@
       <span class="text-[13px] font-black uppercase tracking-[0.3em] text-lime block mb-4">Your Referral Code</span>
 
       <p class="text-xs font-bold uppercase tracking-widest mb-8 text-gray-300">
-        Earn <span class="text-white">₹10 Wallet Credit</span> per referral
+        Earn <span class="text-white">₹10 Wallet Credit</span> per referral. Friend gets ₹5.
       </p>
 
       <div class="bg-white/10 border border-white/20 px-6 py-3 rounded-sm font-black text-lime tracking-widest w-fit">{{ user.referral_code }}</div>
@@ -26,27 +27,36 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
       <div class="bg-[#e2ead8] p-8 rounded-sm">
         <span class="text-[13px] font-black uppercase tracking-widest text-lime-dark block mb-2">Total Referrals</span>
+
         <p class="text-3xl font-black">{{ user.referral_count|default:0 }}</p>
       </div>
 
       <div class="bg-[#e2ead8] p-8 rounded-sm">
         <span class="text-[13px] font-black uppercase tracking-widest text-lime-dark block mb-2">Referral Earnings</span>
+
         <p class="text-3xl font-black">₹{{ user.total_referral_amount|floatformat:2 }}</p>
       </div>
     </div>
 
-    <!-- Apply Referral Code -->
     {% if not user.referred_by %}
       <!-- Apply Referral Code -->
       <div class="bg-white p-8 rounded-sm shadow-sm">
         <span class="text-[13px] font-black uppercase tracking-widest text-lime-dark block mb-6">Apply Referral Code</span>
 
-        <form method="post" class="flex gap-4 items-center">
+        <form method="post" class="flex gap-4 items-start">
           {% csrf_token %}
 
-          <input type="text" name="referral_code" placeholder="Enter referral code" class="w-full border border-gray-300 p-4 rounded-sm font-bold focus:outline-none focus:border-lime" />
+          <div class="flex-1">
+            <input type="text" name="referral_code" value="{{ form.referral_code.value|default:'' }}" placeholder="Enter referral code" class="w-full h-[52px] border border-gray-300 px-4 rounded-sm font-bold focus:outline-none focus:border-lime" />
 
-          <button type="submit" class="bg-lime-dark text-white px-8 py-4 text-[13px] font-black uppercase tracking-widest hover:bg-black transition-colors">Apply</button>
+            {% if form.referral_code.errors %}
+              {% for error in form.referral_code.errors %}
+                <p class="mt-2 text-sm text-red-600 font-medium">{{ error }}</p>
+              {% endfor %}
+            {% endif %}
+          </div>
+
+          <button type="submit" class="h-[52px] bg-lime-dark text-white px-8 rounded-sm text-[13px] font-black uppercase tracking-widest hover:bg-black transition-colors">Apply</button>
         </form>
       </div>
     {% endif %}

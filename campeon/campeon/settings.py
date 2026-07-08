@@ -30,7 +30,10 @@ import cloudinary.api
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG")
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+
+# DEBUG = False
+
 
 ALLOWED_HOSTS = ["*", "127.0.0.1"]
 
@@ -115,14 +118,12 @@ WSGI_APPLICATION = "campeon.wsgi.application"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-
     "formatters": {
         "standard": {
             "format": "[{asctime}] {levelname} {name}: {message}",
             "style": "{",
         },
     },
-
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
@@ -134,12 +135,10 @@ LOGGING = {
             "formatter": "standard",
         },
     },
-
     "root": {
         "handlers": ["console", "file"],
         "level": "INFO",
     },
-
     "loggers": {
         "django.server": {
             "handlers": ["console", "file"],
