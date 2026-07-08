@@ -264,11 +264,12 @@ def add_product(request):
             return redirect("products:add_product")
 
     categories = Category.objects.filter(is_active=True)
-
+    size_choices = Variant.SIZE_CHOICES
     return render(
         request,
         "admin/products/products/add_product.html",
         {
+            "size_choices": size_choices,
             "categories": categories,
             "slot_numbers": range(3),
         },
@@ -1570,7 +1571,7 @@ def remove_coupon(request):
 
 @superuser_required
 def offers(request):
-    offers = Offer.objects.all().order_by('-created_at')
+    offers = Offer.objects.all().order_by("-created_at")
     return render(request, "admin/offers/offers.html", {"offers": offers})
 
 
@@ -1612,7 +1613,7 @@ def edit_offer(request, id):
         form = OfferForm(instance=offer)
     context = {
         "form": form,
-        "offer":offer,
+        "offer": offer,
         "products": Product.objects.filter(is_active=True, is_deleted=False),
         "categories": Category.objects.filter(is_active=True, is_deleted=False),
     }
