@@ -35,7 +35,7 @@ def user_management_search(request):
         # users = Account.objects.filter(is_active=True)
         users = users.order_by("-full_name")
 
-    paginator = Paginator(users, 2)
+    paginator = Paginator(users, 3)
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -50,7 +50,7 @@ def user_management_search(request):
 def users(request):
     users = Account.objects.filter(is_superadmin=False).order_by("-full_name")
 
-    paginator = Paginator(users, 2)  # same as search view
+    paginator = Paginator(users, 3)  # same as search view
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 

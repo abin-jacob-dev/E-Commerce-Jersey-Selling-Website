@@ -1,0 +1,537 @@
+{% extends 'admin/partials/base.html' %}
+{% load static %}
+{% block title %}Campeon | Product{% endblock title %}
+{% block content %}
+	<main class="flex-1 overflow-y-auto">
+		<div class="p-12 space-y-12">
+			<form class="space-y-12" id="productForm" method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				<div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
+					<div>
+						<h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4">EDIT PRODUCT</h2>
+					</div>
+					<div
+						class="flex flex-wrap items-center gap-6">
+						<!-- Main Actions -->
+						<div class="flex gap-4">
+							<a href="{% url 'products:products_list' %}" class="bg-white border border-gray-100 text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-50 transition-all shadow-sm flex items-center">Cancel</a>
+
+							<button type="submit" class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-4 group">
+								<svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								</svg>Save Product
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- General Information Card -->
+				<section class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-50">
+					<div class="flex justify-between items-center mb-12">
+						<h3 class="text-2xl font-black uppercase tracking-tightest">General Information</h3>
+
+						<!-- GLOBAL STATUS -->
+						<div class="bg-[#121212] text-white pl-8 pr-6 py-4 rounded-2xl flex items-center gap-6 shadow-2xl">
+							<div class="text-right">
+								<p class="text-[8px] font-black uppercase tracking-widest text-gray-500 mb-0.5">Status</p>
+								<p class="text-[10px] font-black uppercase tracking-widest" id="statusLabel">
+									{% if product.is_active %}Active{% else %}Inactive
+									{% endif %}
+								</p>
+							</div>
+							<input type="hidden" name="is_active" id="isActiveInput" value="{% if product.is_active %}true{% else %}false{% endif %}">
+							<button type="button" onclick="toggleProductStatus()" id="statusToggle" class="w-10 h-6 {% if product.is_active %}bg-lime-bright{% else %}bg-gray-600{% endif %} rounded-full p-1 relative transition-all">
+								<span class="absolute {% if product.is_active %}right-1{% else %}left-1{% endif %} top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all"></span>
+							</button>
+						</div>
+					</div>
+
+					<!-- ROW 1: PRODUCT NAME + CATEGORY -->
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+						<div>
+							<label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Product Name</label>
+							<input type="text" name="name" value="{{ product.name }}" required class="w-full bg-[#f4fce3] border-none rounded-xl px-8 py-6 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10" placeholder="Product Name">
+						</div>
+
+						<div>
+							<label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Category</label>
+							<div class="relative">
+								<select name="category" class="w-full bg-[#f4fce3] border-none rounded-xl px-8 py-6 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-lime/10 appearance-none">
+									{% for cat in categories %}
+										<option value="{{ cat.id }}" {% if product.category.id == cat.id %} selected {% endif %}>{{ cat.name }}</option>
+									{% endfor %}
+								</select>
+								<svg class="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+								</svg>
+							</div>
+						</div>
+					</div>
+
+					<!-- ROW 2: DESCRIPTION + KEY HIGHLIGHTS -->
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+						<div>
+							<label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Description</label>
+							<textarea name="description" rows="6" placeholder="Detailed product story and features..." class="w-full bg-[#f4fce3] border-none rounded-2xl px-8 py-6 text-sm font-medium placeholder:text-gray-300 focus:ring-4 focus:ring-lime/10 transition-all">{{ product.description }}</textarea>
+						</div>
+
+						<div>
+							<label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Key
+								              Highlights</label>
+							<textarea name="highlights" rows="6" placeholder="Bullet points: Material, Breathability, Durability..." class="w-full bg-[#f4fce3] border-none rounded-2xl px-8 py-6 text-sm font-medium placeholder:text-gray-300 focus:ring-4 focus:ring-lime/10 transition-all">{{ product.highlights }}</textarea>
+						</div>
+					</div>
+				</section>
+
+				<!-- Product Variants Card -->
+				<section class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-50">
+					<div class="flex justify-between items-center mb-12">
+						<h3 class="text-2xl font-black uppercase tracking-tightest">Product Variants</h3>
+
+						<button type="button" id="addVariantBtn" class="bg-lime-bright text-black px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black hover:text-white transition-all flex items-center gap-3 group">
+							<div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-90 transition-transform">
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+								</svg>
+							</div>
+							Add Variant
+						</button>
+					</div>
+
+					<div id="variantsContainer">
+
+						{% for variant in variants %}
+							<div class="variant-item bg-gray-50/30 p-10 rounded-[2.5rem] border border-gray-100 relative mb-10">
+
+								<input type="hidden" name="variant_id" value="{{ variant.id }}"/>
+
+								<button type="button" class="deleteVariantBtn absolute top-8 right-8 text-gray-200 hover:text-red-500 transition-colors">
+									<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+									</svg>
+								</button>
+
+								<div
+									class="space-y-10">
+
+									<!-- ROW 1: SIZE | STOCK -->
+									<div
+										class="grid grid-cols-2 gap-10">
+
+										<!-- Size -->
+										<div>
+											<label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Size</label>
+											<div class="relative">
+												<select name="size" class="size-select w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest appearance-none focus:ring-4 focus:ring-lime/10">
+
+													{% for s_val, s_name in variant.SIZE_CHOICES %}
+														<option value="{{ s_val }}" {% if variant.size == s_val %} selected {% endif %}>
+															{{ s_name }}
+														</option>
+													{% endfor %}
+
+												</select>
+
+												<svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+												</svg>
+											</div>
+										</div>
+
+										<!-- Stock -->
+										<div>
+											<label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">Stock</label>
+											<input type="number" name="stock" value="{{ variant.stock }}" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10"/>
+										</div>
+
+									</div>
+
+									<!-- ROW 2: PRICE | STATUS -->
+									<div
+										class="grid grid-cols-2 gap-10">
+
+										<!-- Price -->
+										<div>
+											<label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">
+												Price (₹)
+											</label>
+											<input type="text" name="price" value="{{ variant.price }}" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-xs font-black focus:ring-4 focus:ring-lime/10"/>
+										</div>
+
+										<!-- Status -->
+										<div>
+											<label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-4">
+												Variant Status
+											</label>
+
+											<div class="relative">
+												<select name="variant_is_active" class="w-full bg-[#f4fce3] border-none rounded-xl px-6 py-5 text-[10px] font-black uppercase tracking-widest appearance-none focus:ring-4 focus:ring-lime/10">
+
+													<option value="true" {% if variant.is_active %} selected {% endif %}>Active</option>
+													<option value="false" {% if not variant.is_active %} selected {% endif %}>Inactive</option>
+
+												</select>
+
+												<svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+												</svg>
+											</div>
+										</div>
+
+									</div>
+
+									<!-- IMAGES -->
+<div>
+    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-6">
+        Variant Images
+        <span class="text-[7px] lowercase font-medium ml-2 text-gray-300">
+            3 images required
+        </span>
+    </label>
+
+    <div class="flex gap-6 items-start variantImageContainer">
+
+        <!-- 
+          We want exactly 3 image slots per variant. 
+          'variant.images.all.0' gets the first existing image from the database (if any).
+          'forloop.counter0' gives each variant its own unique ID number (0, 1, 2...) so images don't get mixed up.
+        -->
+        
+        <!-- === SLOT 0 (First Image) === -->
+        <div class="image-slot relative w-32 h-32">
+            {% if variant.images.all.0 %}
+                <!-- If the image already exists, show it here. Clicking it will open the file picker to replace it. -->
+                <img src="{{ variant.images.all.0.image.url }}" class="w-32 h-32 object-cover rounded-2xl border cursor-pointer" onclick="this.parentElement.querySelector('input[type=file]').click()">
+                <!-- We remember the old image's ID so we can delete it from the database if the user uploads a new one -->
+                <input type="hidden" class="existing-image-id" value="{{ variant.images.all.0.id }}">
+            {% else %}
+                <!-- If there's no image yet, show a dashed "Add Image" box. Clicking it opens the file picker. -->
+                <div class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all" onclick="this.parentElement.querySelector('input[type=file]').click()">
+                    <svg class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add Image</span>
+                </div>
+            {% endif %}
+            <!-- This is the actual file input that uploads the image. We hide it visually to keep the UI clean! -->
+            <input type="file" name="images_{{ forloop.counter0 }}[]" class="variantImages hidden" accept="image/*">
+        </div>
+
+        <!-- === SLOT 1 (Second Image) === -->
+        <div class="image-slot relative w-32 h-32">
+            {% if variant.images.all.1 %}
+                <img src="{{ variant.images.all.1.image.url }}" class="w-32 h-32 object-cover rounded-2xl border cursor-pointer" onclick="this.parentElement.querySelector('input[type=file]').click()">
+                <input type="hidden" class="existing-image-id" value="{{ variant.images.all.1.id }}">
+            {% else %}
+                <div class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all" onclick="this.parentElement.querySelector('input[type=file]').click()">
+                    <svg class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add Image</span>
+                </div>
+            {% endif %}
+            <input type="file" name="images_{{ forloop.counter0 }}[]" class="variantImages hidden" accept="image/*">
+        </div>
+
+        <!-- === SLOT 2 (Third Image) === -->
+        <div class="image-slot relative w-32 h-32">
+            {% if variant.images.all.2 %}
+                <img src="{{ variant.images.all.2.image.url }}" class="w-32 h-32 object-cover rounded-2xl border cursor-pointer" onclick="this.parentElement.querySelector('input[type=file]').click()">
+                <input type="hidden" class="existing-image-id" value="{{ variant.images.all.2.id }}">
+            {% else %}
+                <div class="w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all" onclick="this.parentElement.querySelector('input[type=file]').click()">
+                    <svg class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add Image</span>
+                </div>
+            {% endif %}
+            <input type="file" name="images_{{ forloop.counter0 }}[]" class="variantImages hidden" accept="image/*">
+        </div>
+
+    </div>
+</div>
+
+								</div>
+							</div>
+						{% endfor %}
+
+					</div>
+				</section>
+			</form>
+		</div>
+
+		<!-- Crop Modal -->
+		<div id="cropModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[100] backdrop-blur-sm">
+			<div class="bg-white p-8 rounded-[2rem] max-w-2xl w-full mx-4 shadow-2xl">
+				<div class="flex justify-between items-center mb-6">
+					<h4 class="text-xl font-black uppercase tracking-widest">Crop Image</h4>
+					<button onclick="closeCrop()" class="text-gray-400 hover:text-black transition-colors">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				<div class="max-h-[60vh] overflow-hidden rounded-2xl bg-gray-50 flex items-center justify-center">
+					<img id="cropImage" class="max-w-full" alt="Crop preview"/>
+				</div>
+				<div class="flex gap-4 mt-8">
+					<button type="button" onclick="applyCrop()" class="flex-1 bg-lime-bright text-black py-4 rounded-xl font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">Apply
+						          Crop</button>
+					<button type="button" onclick="closeCrop()" class="px-8 py-4 border border-gray-100 rounded-xl font-black uppercase tracking-widest hover:bg-gray-50 transition-all">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<script>
+		let cropper = null;
+let currentInput = null;
+
+/* ─────────────────────────────
+   1. PRODUCT STATUS TOGGLE
+───────────────────────────── */
+function toggleProductStatus() {
+const input = document.getElementById('isActiveInput');
+const toggle = document.getElementById('statusToggle');
+const label = document.getElementById('statusLabel');
+const dot = toggle.querySelector('span');
+
+const active = input.value === 'true';
+input.value = (! active).toString();
+
+toggle.classList.toggle('bg-lime-bright', ! active);
+toggle.classList.toggle('bg-gray-600', active);
+
+dot.classList.toggle('right-1', ! active);
+dot.classList.toggle('left-1', active);
+
+label.textContent = active ? 'Inactive' : 'Active';
+}
+
+/* ─────────────────────────────
+   2. VARIANT HELPERS
+───────────────────────────── */
+function getVariants() {
+return document.querySelectorAll('.variant-item');
+}
+
+function updateIndexes() {
+getVariants().forEach((v, i) => {
+v.querySelectorAll('.variantImages').forEach(input => {
+input.name = `images_${i}[]`;
+});
+});
+}
+
+/* ─────────────────────────────
+   3. SIZE DUPLICATE FIX (IMPORTANT)
+   Prevents DB UNIQUE constraint error
+───────────────────────────── */
+function updateSizeOptions() {
+const selects = document.querySelectorAll('.size-select');
+const selected = [... selects].map(s => s.value).filter(Boolean);
+
+selects.forEach(select => {
+const current = select.value;
+
+select.querySelectorAll('option').forEach(opt => {
+if (!opt.value) 
+return;
+
+
+opt.disabled = selected.includes(opt.value) && opt.value !== current;
+});
+});
+}
+
+/* ─────────────────────────────
+   4. ADD / DELETE VARIANT
+───────────────────────────── */
+document.addEventListener('click', (e) => { /* DELETE */
+if (e.target.closest('.deleteVariantBtn')) {
+if (getVariants().length === 1) {
+alert('At least one variant required');
+return;
+}
+
+e.target.closest('.variant-item').remove();
+updateIndexes();
+updateSizeOptions();
+}
+
+/* ADD */
+if (e.target.closest('#addVariantBtn')) {
+    const first = document.querySelector('.variant-item');
+    const clone = first.cloneNode(true);
+
+    clone.querySelectorAll('input').forEach(i => {
+        if (i.type !== 'hidden') 
+            i.value = '';
+    });
+
+    clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+
+    const hiddenId = clone.querySelector('input[name="variant_id"]');
+    if (hiddenId) 
+        hiddenId.remove();
+
+    // CLEAR IMAGES FOR THE NEW VARIANT
+    clone.querySelectorAll('.image-slot').forEach(slot => {
+        // Remove the cloned image preview if it exists
+        const img = slot.querySelector('img');
+        if (img) img.remove();
+        
+        // Remove the cloned existing image ID tag
+        const existingId = slot.querySelector('.existing-image-id');
+        if (existingId) existingId.remove();
+        
+        // Make sure the empty "Add Image" box is present
+        if (!slot.querySelector('div')) {
+            const emptyBox = document.createElement('div');
+            emptyBox.className = "w-32 h-32 bg-white rounded-2xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-lime-bright transition-all";
+            // Make the new box trigger the file input
+            emptyBox.onclick = function() { this.parentElement.querySelector('input[type=file]').click(); };
+            emptyBox.innerHTML = `
+                <svg class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span class="text-[8px] font-black uppercase tracking-widest text-gray-300 mt-2">Add Image</span>
+            `;
+            slot.prepend(emptyBox);
+        }
+    });
+
+    document.getElementById('variantsContainer').appendChild(clone);
+
+    updateIndexes();
+    updateSizeOptions();
+}
+});
+
+/* ─────────────────────────────
+   5. IMAGE INPUT CHANGE LISTENER (Handles when a user selects an image)
+───────────────────────────── */
+document.addEventListener('change', (e) => {
+    // Check if the user clicked an input meant for variant images
+    if (e.target.classList.contains('variantImages')) {
+        const file = e.target.files[0];
+        
+        // If they canceled or it's already a cropped image, do nothing
+        if (!file || file.name === 'cropped.jpg') return;
+
+        // Remember which input was clicked so we can put the cropped image into it later
+        currentInput = e.target;
+
+        // A FileReader lets us preview the image file before it's uploaded
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            // Load the chosen image into the crop window
+            const img = document.getElementById('cropImage');
+            img.src = ev.target.result;
+
+            // Show the crop popup modal
+            const modal = document.getElementById('cropModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // Reset the cropper if they cropped an image previously
+            if (cropper) cropper.destroy();
+
+            // Start a new image cropper set to a square aspect ratio (1:1)
+            cropper = new Cropper(img, {
+                aspectRatio: 1,
+                viewMode: 1
+            });
+        };
+        // Begin reading the image
+        reader.readAsDataURL(file);
+    }
+});
+
+/* ─────────────────────────────
+   6. CROPPER ACTIONS
+───────────────────────────── */
+function closeCrop() {
+    // Hide the crop modal popup
+    document.getElementById('cropModal').classList.add('hidden');
+    document.getElementById('cropModal').classList.remove('flex');
+
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+}
+
+function applyCrop() {
+    if (!cropper || !currentInput) return;
+
+    // Get the cropped version of the image
+    cropper.getCroppedCanvas({width: 800, height: 800}).toBlob(blob => {
+        // Create a new File object out of the cropped result
+        const file = new File([blob], 'cropped.jpg', {type: 'image/jpeg'});
+
+        // Place the new cropped file back into the original hidden input
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        currentInput.files = dt.files;
+
+        // --- UPDATE THE UI PREVIEW ---
+        const slot = currentInput.closest('.image-slot');
+        let preview = slot.querySelector('img');
+
+        // If there was no image before (empty dashed box), create a new image element
+        if (!preview) {
+            preview = document.createElement('img');
+            preview.className = "w-32 h-32 object-cover rounded-2xl border cursor-pointer";
+            preview.onclick = () => currentInput.click(); // Make it clickable so they can change it again
+
+            // Remove the empty dashed box UI
+            const emptyBox = slot.querySelector('div');
+            if (emptyBox) emptyBox.remove();
+
+            // Add the new image to the slot
+            slot.prepend(preview);
+        }
+
+        // Show the newly cropped image
+        preview.src = URL.createObjectURL(file);
+        
+        // --- HANDLE DELETING THE OLD IMAGE FROM THE DATABASE ---
+        // Check if there was an old image ID saved here
+        const existingIdInput = slot.querySelector('.existing-image-id');
+        if (existingIdInput) {
+            const deleteInput = document.createElement('input');
+            deleteInput.type = 'hidden';
+            deleteInput.name = 'delete_images';
+            deleteInput.value = existingIdInput.value;
+            document.getElementById('productForm').appendChild(deleteInput);
+            existingIdInput.remove(); // So we don't delete it again
+        }
+
+        closeCrop();
+    }, 'image/jpeg', 0.9);
+}
+
+/* ─────────────────────────────
+   7. FORM VALIDATION (FIX YOUR DB ERROR ROOT CAUSE)
+───────────────────────────── */
+document.getElementById('productForm').addEventListener('submit', (e) => {
+const usedSizes = new Set();
+let ok = true;
+
+getVariants().forEach((v, i) => {
+const size = v.querySelector('.size-select') ?. value;
+
+if (size) {
+if (usedSizes.has(size)) {
+alert(`Duplicate size "${size}" in variant ${
+i + 1
+}`);
+ok = false;
+}
+usedSizes.add(size);
+}
+});
+
+if (! ok) 
+e.preventDefault();
+
+});
+
+/* INIT */
+updateSizeOptions();
+	</script>
+{% endblock %}

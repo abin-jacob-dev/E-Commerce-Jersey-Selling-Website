@@ -4,14 +4,7 @@ from django.db import transaction
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from products.forms import (
-    CategoryForm,
-    ProductForm,
-    CouponForm,
-    ReviewForm,
-    OfferForm,
-    VariantForm,
-)
+from products.forms import CategoryForm, ProductForm, CouponForm, ReviewForm, OfferForm
 from products.models import (
     Category,
     Product,
@@ -209,89 +202,76 @@ def products_list(request):
 
 @superuser_required
 def add_product(request):
-    form = ProductForm()
-    variant_forms = []
-    image_errors = []
     if request.method == "POST":
-        form = ProductForm(request.POST)
-        sizes = request.POST.getlist("size")
-        prices = request.POST.getlist("price")
-        stocks = request.POST.getlist("stock")
-        variant_status = request.POST.getlist("variant_is_active")
-        seen_sizes = set()
-        variant_forms = []
-        errors = []
-        valid = True
+        if not request.POST.get("name", "").strip():
+            messages.error(request, "Please enter the Name of the product")
+            return redirect("products:add_product")
+        try:
+            with transaction.atomic():
 
-        # Validate product form first
-        if not form.is_valid():
-            valid = False
+                is_active = request.POST.get("is_active", "true") == "true"
 
-        # Validate variants
-        for i in range(len(sizes)):
-            variant_data = {
-                "size": sizes[i],
-                "price": prices[i] if i < len(prices) else 0,
-                "stock": stocks[i] if i < len(stocks) else 0,
-                "is_active": (
-                    variant_status[i] == "true" if i < len(variant_status) else True
-                ),
-            }
-            variant_form = VariantForm(variant_data)
-            variant_forms.append(variant_form)
-            
-            if not variant_form.is_valid():
-                valid = False
-            
-            # Check for duplicate sizes
-            if sizes[i] in seen_sizes:
-                errors.append(f"Duplicate size '{sizes[i]}'")
-                valid = False
-            seen_sizes.add(sizes[i])
-            
-            # Check image count
-            images = request.FILES.getlist(f"images_{i}[]")
-            if len(images) < 3:
-                image_errors.append(i)
-                valid = False
+                product = Product.objects.create(
+                    name=request.POST.get("name"),
+                    category_id=request.POST.get("category"),
+                    description=request.POST.get("description"),
+                    highlights=request.POST.get("highlights"),
+                    is_active=is_active,
+                )
 
-        if valid and form.is_valid():
-            try:
-                with transaction.atomic():
-                    product = form.save()
-                    for i in range(len(sizes)):
-                        variant = variant_forms[i].save(commit=False)
-                        variant.product = product
-                        variant.save()
-                        images = request.FILES.getlist(f"images_{i}[]")
-                        for image in images:
-                            VariantImage.objects.create(
-                                variant=variant,
-                                image=image,
-                            )
-                    messages.success(request, "Product created successfully")
-                    return redirect("products:products_list")
+                sizes = request.POST.getlist("size")
 
-            except Exception as e:
-                messages.error(request, str(e))
-        else:
-            # Show a single generic error message
-            messages.error(request, "Please fix all the errors below")
+                prices = request.POST.getlist("price")
+                # discounts = request.POST.getlist("discount")
+                stocks = request.POST.getlist("stock")
+                variant_status = request.POST.getlist("variant_is_active")
+
+                seen_sizes = set()
+                for size in sizes:
+                    if size in seen_sizes:
+                        messages.error(request, f"Duplicate size:{size}")
+                        return redirect("products:add_product")
+                    seen_sizes.add(size)
+                for i in range(len(sizes)):
+
+                    # discount = discounts[i] if i < len(discounts) else 0
+                    stock = stocks[i] if i < len(stocks) else 0
+                    variant_active = (
+                        variant_status[i] == "true" if i < len(variant_status) else True
+                    )
+
+                    variant = Variant.objects.create(
+                        product=product,
+                        size=sizes[i],
+                        price=prices[i],
+                        # discount=discount,
+                        stock=stock,
+                        is_active=variant_active,
+                    )
+
+                    # Standard file handling from request.FILES
+                    images = request.FILES.getlist(f"images_{i}[]")
+                    for image in images:
+                        VariantImage.objects.create(variant=variant, image=image)
+
+            messages.success(request, "Product created successfully")
+            return redirect("products:products_list")
+
+        except Exception as e:
+
+            print("ERROR adding product:", str(e))
+            messages.error(request, f"Failed to save product: {e}")
+            return redirect("products:add_product")
 
     categories = Category.objects.filter(is_active=True, is_deleted=False)
     size_choices = Variant.SIZE_CHOICES
-    
     return render(
         request,
         "admin/products/products/add_product.html",
         {
-            'form':form,
-            "variant_forms": variant_forms,
             "size_choices": size_choices,
             "categories": categories,
             "slot_numbers": range(3),
-            "post_data": request.POST if request.method == "POST" else None,
-            "image_errors": image_errors,
         },
     )
 
@@ -299,108 +279,97 @@ def add_product(request):
 @superuser_required
 def edit_product(request, slug):
     product = get_object_or_404(Product, slug=slug)
-    form = ProductForm(instance=product)
-    variant_forms = []
-    errors = []
-    image_errors = []
 
     if request.method == "POST":
-        form = ProductForm(request.POST, instance=product)
-        # Count how many variants we have (by checking size_0, size_1, etc.)
-        variant_count = 0
-        while True:
-            if f"size_{variant_count}" in request.POST:
-                variant_count += 1
-            else:
-                break
-                
-        seen_sizes = set()
-        variant_forms = []
-        valid = True
+        product_form = ProductForm(request.POST)
+
         
-        # Validate product form first
-        if not form.is_valid():
-            valid = False
-            
-        # Validate variants
-        for i in range(variant_count):
-            variant_data = {
-                "size": request.POST.get(f"size_{i}"),
-                "price": request.POST.get(f"price_{i}"),
-                "stock": request.POST.get(f"stock_{i}"),
-                "is_active": (
-                    request.POST.get(f"variant_is_active_{i}") == "true"
-                ),
-            }
-            variant_id = request.POST.get(f"variant_id_{i}")
-            if variant_id and variant_id.isdigit():
-                variant = Variant.objects.filter(id=int(variant_id), product=product).first()
-                if variant:
-                    variant_form = VariantForm(variant_data, instance=variant)
-                else:
-                    variant_form = VariantForm(variant_data)
-            else:
-                variant_form = VariantForm(variant_data)
-            variant_forms.append(variant_form)
-            
-            if not variant_form.is_valid():
-                valid = False
-                
-            # Check for duplicate sizes
-            size = request.POST.get(f"size_{i}")
-            if size in seen_sizes:
-                errors.append(f"Duplicate size '{size}'")
-                valid = False
-            seen_sizes.add(size)
-            
-            # Check image count
-            images = request.FILES.getlist(f"images_{i}[]")
-            # If it's an existing variant, we only need to check if new images are added
-            # If it's a new variant, we need at least 3 images
-            if not variant_id:
-                if len(images) < 3:
-                    image_errors.append(i)
-                    valid = False
-        
-        if valid and form.is_valid():
-            try:
-                with transaction.atomic():
-                    product = form.save()
-                    processed_variant_ids = []
-                    
-                    for i in range(variant_count):
-                        variant = variant_forms[i].save(commit=False)
-                        variant.product = product
-                        variant.save()
-                        processed_variant_ids.append(variant.id)
-                        
-                        # Handle new image uploads for this variant
-                        new_images = request.FILES.getlist(f"images_{i}[]")
-                        for img in new_images:
-                            VariantImage.objects.create(variant=variant, image=img)
-                            
-                    # Delete variants not present in the form
-                    Variant.objects.filter(product=product).exclude(id__in=processed_variant_ids).delete()
-                    
-                    messages.success(request, "Product updated successfully")
-                    return redirect("products:products_list")
-                    
-            except Exception as e:
-                messages.error(request, str(e))
-        else:
-            # Show a single generic error message
-            messages.error(request, "Please fix all the errors below")
+        if not request.POST.get("name", "").strip():
+            messages.error(request, "Please enter the Name of the product")
+            return redirect("products:edit_product", slug=product.slug)
+        try:
+            with transaction.atomic():
+                # Update main product
+                product.name = request.POST.get("name")
+                product.category_id = request.POST.get("category")
+                product.description = request.POST.get("description")
+                product.highlights = request.POST.get("highlights")
+                product.is_active = request.POST.get("is_active") == "true"
+                product.save()
+
+                # Process variants
+                # Count how many variants we have (by checking size_0, size_1, etc.)
+                variant_count = 0
+                while True:
+                    if f"size_{variant_count}" in request.POST:
+                        variant_count += 1
+                    else:
+                        break
+
+                processed_variant_ids = []
+                seen_sizes = set()
+
+                # First pass: collect sizes and check for duplicates
+                for i in range(variant_count):
+                    size = request.POST.get(f"size_{i}")
+                    if size in seen_sizes:
+                        messages.error(request, f"Duplicate size:{size}")
+                        return redirect("products:edit_product", slug=product.slug)
+                    seen_sizes.add(size)
+
+                for i in range(variant_count):
+                    variant_id = request.POST.get(f"variant_id_{i}")
+                    size = request.POST.get(f"size_{i}")
+                    price = request.POST.get(f"price_{i}")
+                    stock = request.POST.get(f"stock_{i}")
+                    variant_active = (
+                        request.POST.get(f"variant_is_active_{i}") == "true"
+                    )
+
+                    variant_data = {
+                        "size": size,
+                        "price": price,
+                        "stock": stock if stock else 0,
+                        "is_active": variant_active,
+                    }
+
+                    if variant_id and variant_id.isdigit():
+                        # Update existing variant
+                        variant = Variant.objects.filter(
+                            id=int(variant_id), product=product
+                        ).first()
+                        if variant:
+                            for attr, value in variant_data.items():
+                                setattr(variant, attr, value)
+                            variant.save()
+                    else:
+                        # Create new variant
+                        variant = Variant.objects.create(
+                            product=product, **variant_data
+                        )
+
+                    processed_variant_ids.append(variant.id)
+
+                    # Handle new image uploads for this variant
+                    new_images = request.FILES.getlist(f"images_{i}[]")
+                    for img in new_images:
+                        VariantImage.objects.create(variant=variant, image=img)
+
+                # Delete variants not present in the form
+                Variant.objects.filter(product=product).exclude(
+                    id__in=processed_variant_ids
+                ).delete()
+
+            messages.success(request, "Product updated successfully")
+            return redirect("products:products_list")
+
+        except Exception as e:
+            print(f"ERROR editing product: {str(e)}")
+            messages.error(request, f"Failed to update product: {str(e)}")
+            return redirect("products:edit_product", slug=product.slug)
 
     categories = Category.objects.filter(is_active=True, is_deleted=False)
     variants = product.variants.all()
-    # Combine variants and variant_forms
-    combined_variants = []
-    for i, variant in enumerate(variants):
-        variant_form = variant_forms[i] if i < len(variant_forms) else None
-        combined_variants.append((variant, variant_form, i))
-    # Add remaining variant_forms as new variants
-    for i in range(len(variants), len(variant_forms)):
-        combined_variants.append((None, variant_forms[i], i))
     return render(
         request,
         "admin/products/products/edit_product.html",
@@ -411,11 +380,6 @@ def edit_product(request, slug):
             "size_choices": Variant.SIZE_CHOICES,
             "slot_numbers": range(3),
             "empty_slots": range(3),
-            'form': form,
-            "variant_forms": variant_forms,
-            "combined_variants": combined_variants,
-            "post_data": request.POST if request.method == "POST" else None,
-            "image_errors": image_errors,
         },
     )
 

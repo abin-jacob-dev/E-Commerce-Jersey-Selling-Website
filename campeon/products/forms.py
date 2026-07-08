@@ -1,5 +1,5 @@
 from django import forms
-from products.models import Category, Product, Coupon, Review, Offer
+from products.models import Category, Product, Coupon, Review, Offer, Variant
 import re
 
 
@@ -64,7 +64,6 @@ class OfferForm(forms.ModelForm):
             "category",
             "target_type",
         ]
-        
 
         widgets = {
             "start_date": forms.DateTimeInput(
@@ -76,7 +75,6 @@ class OfferForm(forms.ModelForm):
                 format="%Y-%m-%dT%H:%M",
             ),
         }
-        
 
     def clean(self):
         cleaned_data = super().clean()
@@ -98,7 +96,7 @@ class OfferForm(forms.ModelForm):
             cleaned_data["name"] = name
 
             if not re.fullmatch(r"^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$", name):
-                self.add_error("name", "Name can only contain letters and numbers.")
+                self.add_error("name", "Name can only contain letters, numbers, spaces, hyphens, and apostrophes.")
 
             if (
                 Offer.objects.filter(name__iexact=name)
@@ -107,49 +105,38 @@ class OfferForm(forms.ModelForm):
             ):
                 self.add_error("name", "Offer already exists.")
 
-           # Target validation
+            # Target validation
             if not target_type:
-                self.add_error(
-                    "target_type",
-                    "Please select a target type."
-                )
+                self.add_error("target_type", "Please select a target type.")
 
             elif target_type == "product":
 
                 if not product:
-                    self.add_error(
-                        "product",
-                        "Please select a product."
-                    )
+                    self.add_error("product", "Please select a product.")
 
                 if category:
                     self.add_error(
                         "category",
-                        "Category should not be selected for a product offer."
+                        "Category should not be selected for a product offer.",
                     )
-
 
             elif target_type == "category":
 
                 if not category:
-                    self.add_error(
-                        "category",
-                        "Please select a category."
-                    )
+                    self.add_error("category", "Please select a category.")
 
                 if product:
                     self.add_error(
                         "product",
-                        "Product should not be selected for a category offer."
+                        "Product should not be selected for a category offer.",
                     )
-
 
             # Date validation
             if start_date and end_date:
                 if end_date <= start_date:
                     self.add_error(
                         "end_date",
-                        "The end date should be greater than the start date."
+                        "The end date should be greater than the start date.",
                     )
 
         # Discount validation
@@ -171,6 +158,89 @@ class ProductForm(forms.ModelForm):
         model = Product
         # Added 'is_active' — it's a required field on the model (no default)
         fields = ["name", "category", "description", "highlights", "is_active"]
+
+    def clean_name(self):
+        name = self.cleaned_data.get("name")
+        if not name:
+            raise forms.ValidationError("Product name is required.")
+        name = " ".join(name.strip().split())
+        if not re.fullmatch(r"^[A-Za-z0-9]+(?:[A-Za-z0-9\s\-']*[A-Za-z0-9])?$", name):
+            raise forms.ValidationError("Name can only contain letters.")
+        if (
+            Product.objects.filter(name__iexact=name)
+            .exclude(pk=self.instance.pk)
+            .exists()
+        ):
+            raise forms.ValidationError("Product already exists.")
+        return name
+
+    def clean_category(self):
+        category = self.cleaned_data.get("category")
+
+        if not category:
+            raise forms.ValidationError("Please select a category.")
+
+        return category
+
+    def clean_description(self):
+        description = self.cleaned_data.get("description")
+
+        if not description:
+            raise forms.ValidationError("Description is required.")
+
+        description = description.strip()
+
+        if len(description) < 10:
+            raise forms.ValidationError(
+                "Description must be at least 10 characters long."
+            )
+
+        if len(description) > 500:
+            raise forms.ValidationError("Description cannot exceed 500 characters.")
+
+        return description
+
+    def clean_highlights(self):
+        highlights = self.cleaned_data.get("highlights")
+
+        if not highlights:
+            raise forms.ValidationError("Highlights is required.")
+
+        highlights = highlights.strip()
+
+        if len(highlights) < 10:
+            raise forms.ValidationError(
+                "Highlights must be at least 10 characters long."
+            )
+
+        if len(highlights) > 500:
+            raise forms.ValidationError("Highlights cannot exceed 500 characters.")
+
+        return highlights
+
+
+class VariantForm(forms.ModelForm):
+    class Meta:
+        model = Variant
+        fields = [
+            "size",
+            "price",
+            "stock",
+            "is_active",
+        ]
+
+    def clean_price(self):
+        price = self.cleaned_data.get("price")
+        if price < 0:
+            raise forms.ValidationError("Price cannot be negative.")
+
+        return price
+
+    def clean_stock(self):
+        stock = self.cleaned_data.get("stock")
+        if stock < 0:
+            raise forms.ValidationError("Stock cannot be negative.")
+        return stock
 
 
 class CouponForm(forms.ModelForm):

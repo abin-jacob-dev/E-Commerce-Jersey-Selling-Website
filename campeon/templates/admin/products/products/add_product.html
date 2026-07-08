@@ -2,20 +2,20 @@
 {% load static %}
 
 {% block title %}
-  Campeon | Add Product
+Campeon | Add Product
 {% endblock %}
 
 {% block content %}
-  <main class="flex-1 overflow-y-auto bg-gray-50">
-    <div class="p-6 md:p-12 space-y-10">
-      <!--     =========================
+<main class="flex-1 overflow-y-auto bg-gray-50">
+  <div class="p-6 md:p-12 space-y-10">
+    <!--     =========================
 MESSAGES
 =========================     -->
 
-      <div id="messagesContainer">
-        {% if messages %}
-          {% for message in messages %}
-            <div class="
+    {% comment %} <div id="messagesContainer">
+      {% if messages %}
+      {% for message in messages %}
+      <div class="
 p-5
 rounded-xl
 mb-5
@@ -33,7 +33,6 @@ text-red-600
 
 
 
-
               {% else %}
                 
                 
@@ -46,14 +45,13 @@ text-green-600
 
 
 
-
               {% endif %}
 ">
-              <p class="font-bold text-sm">{{ message }}</p>
-            </div>
-          {% endfor %}
-        {% endif %}
+        <p class="font-bold text-sm">{{ message }}</p>
       </div>
+      {% endfor %}
+      {% endif %}
+    </div> {% endcomment %}
 
       <!--     =========================
 PRODUCT FORM
@@ -105,7 +103,10 @@ BASIC INFORMATION
             <div>
               <label class="font-bold block mb-2">Product Name</label>
 
-              <input type="text" name="name" placeholder="Example: Apex Strike Jersey" class="w-full bg-gray-50 border rounded-xl px-5 py-4" />
+              <input type="text" name="name" placeholder="Example: Apex Strike Jersey" class="w-full bg-gray-50 border rounded-xl px-5 py-4" value="{% if post_data %}{{ post_data.name }}{% elif form %}{{ form.name.value|default:'' }}{% endif %}" />
+              {% if form and form.name.errors %}
+                <p class="text-red-500 text-sm mt-2">{% for error in form.name.errors %}{{ error }}{% endfor %}</p>
+              {% endif %}
             </div>
 
             <div>
@@ -115,11 +116,14 @@ BASIC INFORMATION
                 <option value="">Select Category</option>
 
                 {% for cat in categories %}
-                  <option value="{{ cat.id }}">{{ cat.name }}</option>
+                  <option value="{{ cat.id }}" {% if post_data and post_data.category == cat.id|stringformat:"s" %}selected{% elif form and form.category.value == cat.id %}selected{% endif %}>{{ cat.name }}</option>
                 {% empty %}
                   <option disabled>No category available</option>
                 {% endfor %}
               </select>
+              {% if form and form.category.errors %}
+                <p class="text-red-500 text-sm mt-2">{% for error in form.category.errors %}{{ error }}{% endfor %}</p>
+              {% endif %}
             </div>
           </div>
 
@@ -129,7 +133,10 @@ BASIC INFORMATION
             <div>
               <label class="font-bold block mb-2">Description</label>
 
-              <textarea name="description" rows="6" class="w-full bg-gray-50 border rounded-xl px-5 py-4"></textarea>
+              <textarea name="description" rows="6" class="w-full bg-gray-50 border rounded-xl px-5 py-4">{% if post_data %}{{ post_data.description }}{% elif form %}{{ form.description.value|default:'' }}{% endif %}</textarea>
+              {% if form and form.description.errors %}
+                <p class="text-red-500 text-sm mt-2">{% for error in form.description.errors %}{{ error }}{% endfor %}</p>
+              {% endif %}
             </div>
 
             <div>
@@ -137,7 +144,10 @@ BASIC INFORMATION
 
               <textarea name="highlights" rows="6" placeholder="Premium material
 Lightweight
-Durable" class="w-full bg-gray-50 border rounded-xl px-5 py-4"></textarea>
+Durable" class="w-full bg-gray-50 border rounded-xl px-5 py-4">{% if post_data %}{{ post_data.highlights }}{% elif form %}{{ form.highlights.value|default:'' }}{% endif %}</textarea>
+              {% if form and form.highlights.errors %}
+                <p class="text-red-500 text-sm mt-2">{% for error in form.highlights.errors %}{{ error }}{% endfor %}</p>
+              {% endif %}
             </div>
           </div>
         </section>
@@ -153,82 +163,263 @@ PRODUCT VARIANTS
           </div>
 
           <div id="variantsContainer">
-            <!--     =========================
+          <!--     =========================
 SINGLE VARIANT
 =========================     -->
 
-            <div class="variant-item bg-gray-50 border rounded-3xl p-6 mb-8 relative">
-              <button type="button" class="deleteVariantBtn absolute right-5 top-5 text-gray-400 hover:text-red-500 text-xl">×</button>
+          {% for variant_form in variant_forms %}
+          <div class="variant-item bg-gray-50 border rounded-3xl p-6 mb-8 relative" data-variant-index="{{ forloop.counter0 }}">
+            <button type="button"
+              class="deleteVariantBtn absolute right-5 top-5 text-gray-400 hover:text-red-500 text-xl">×</button>
 
-              <!-- SIZE + STOCK -->
+            <!-- SIZE + STOCK -->
 
-              <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label class="font-bold block mb-2">Size</label>
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="font-bold block mb-2">Size</label>
 
-                  <select name="size" class="size-select w-full bg-white border rounded-xl px-5 py-4">
-                    {% for value, label in size_choices %}
-                      <option value="{{ value }}">{{ label }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-
-                <div>
-                  <label class="font-bold block mb-2">Stock Quantity</label>
-
-                  <input type="number" name="stock" value="0" min="0" class="w-full bg-white border rounded-xl px-5 py-4" />
-                </div>
+                <select name="size_{{ forloop.counter0 }}" class="size-select w-full bg-white border rounded-xl px-5 py-4">
+                  {% for value, label in size_choices %}
+                  <option value="{{ value }}" {% if variant_form.size.value == value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+                {% if variant_form.size.errors %}
+                <p class="text-red-500 text-sm mt-2">{% for error in variant_form.size.errors %}{{ error }}{% endfor %}</p>
+                {% endif %}
               </div>
 
-              <!-- PRICE + STATUS -->
+              <div>
+                <label class="font-bold block mb-2">Stock Quantity</label>
 
-              <div class="grid md:grid-cols-2 gap-6 mt-6">
-                <div>
-                  <label class="font-bold block mb-2">Price (₹)</label>
+                <input type="number" name="stock_{{ forloop.counter0 }}" value="{% if variant_form.stock.value %}{{ variant_form.stock.value }}{% else %}0{% endif %}" min="0"
+                  class="w-full bg-white border rounded-xl px-5 py-4" />
+                {% if variant_form.stock.errors %}
+                <p class="text-red-500 text-sm mt-2">{% for error in variant_form.stock.errors %}{{ error }}{% endfor %}</p>
+                {% endif %}
+              </div>
+            </div>
 
-                  <input type="number" name="price" value="0" min="0" class="w-full bg-white border rounded-xl px-5 py-4" />
-                </div>
+            <!-- PRICE + STATUS -->
 
-                <div>
-                  <label class="font-bold block mb-2">Variant Status</label>
+            <div class="grid md:grid-cols-2 gap-6 mt-6">
+              <div>
+                <label class="font-bold block mb-2">Price (₹)</label>
 
-                  <select name="variant_is_active" class="w-full bg-white border rounded-xl px-5 py-4">
-                    <option value="true">Active</option>
-
-                    <option value="false">Inactive</option>
-                  </select>
-                </div>
+                <input type="number" name="price_{{ forloop.counter0 }}" value="{% if variant_form.price.value %}{{ variant_form.price.value }}{% else %}0{% endif %}" min="0"
+                  class="w-full bg-white border rounded-xl px-5 py-4" />
+                {% if variant_form.price.errors %}
+                <p class="text-red-500 text-sm mt-2">{% for error in variant_form.price.errors %}{{ error }}{% endfor %}</p>
+                {% endif %}
               </div>
 
-              <!--     =========================
+              <div>
+                <label class="font-bold block mb-2">Variant Status</label>
+
+                <select name="variant_is_active_{{ forloop.counter0 }}" class="w-full bg-white border rounded-xl px-5 py-4">
+                  <option value="true" {% if variant_form.is_active.value %}selected{% endif %}>Active</option>
+
+                  <option value="false" {% if not variant_form.is_active.value %}selected{% endif %}>Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <!--     =========================
 VARIANT IMAGES
 =========================     -->
 
-              <div class="mt-8">
-                <label class="font-bold block mb-2">Variant Images</label>
+            <div class="mt-8">
+              <label class="font-bold block mb-2">Variant Images</label>
 
-                <p class="text-xs text-gray-400 mb-5">Minimum 3 images required.</p>
+              <p class="text-xs text-gray-400 mb-5">Minimum 3 images required.</p>
 
-                <div class="variantImageSlots flex flex-wrap gap-5">
-                  {% for slot_num in slot_numbers %}
-                    <div class="image-slot w-28 h-28 relative">
-                      <div class="upload-box w-full h-full border-2 border-dashed rounded-2xl bg-white flex items-center justify-center cursor-pointer overflow-hidden hover:border-lime-400 transition" onclick="this.querySelector('input').click()">
-                        <div class="upload-icon text-center">
-                          <svg class="w-8 h-8 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                          </svg>
+              {% if forloop.counter0 in image_errors %}
+              <p class="text-red-500 text-sm mb-3 font-bold">Please upload at least 3 images for this variant</p>
+              {% endif %}
 
-                          <p class="text-xs text-gray-400">Upload</p>
-                        </div>
+              <div class="variantImageSlots flex flex-wrap gap-5">
+                {% for slot_num in slot_numbers %}
+                <div class="image-slot w-28 h-28 relative">
+                  <div
+                    class="upload-box w-full h-full border-2 border-dashed rounded-2xl bg-white flex items-center justify-center cursor-pointer overflow-hidden hover:border-lime-400 transition"
+                    onclick="this.querySelector('input').click()">
+                    <div class="upload-icon text-center">
+                      <svg class="w-8 h-8 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
 
-                        <input type="file" accept="image/*" class="variantImages hidden" />
-                      </div>
+                      <p class="text-xs text-gray-400">Upload</p>
                     </div>
-                  {% endfor %}
+
+                    <input type="file" accept="image/*" name="images_{{ forloop.parentloop.counter0 }}[]" class="variantImages hidden" />
+                  </div>
                 </div>
+                {% endfor %}
               </div>
             </div>
           </div>
+          {% empty %}
+          <div class="variant-item bg-gray-50 border rounded-3xl p-6 mb-8 relative" data-variant-index="0">
+            <button type="button"
+              class="deleteVariantBtn absolute right-5 top-5 text-gray-400 hover:text-red-500 text-xl">×</button>
+
+            <!-- SIZE + STOCK -->
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="font-bold block mb-2">Size</label>
+
+                <select name="size_0" class="size-select w-full bg-white border rounded-xl px-5 py-4">
+                  {% for value, label in size_choices %}
+                  <option value="{{ value }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div>
+                <label class="font-bold block mb-2">Stock Quantity</label>
+
+                <input type="number" name="stock_0" value="0" min="0"
+                  class="w-full bg-white border rounded-xl px-5 py-4" />
+              </div>
+            </div>
+
+            <!-- PRICE + STATUS -->
+
+            <div class="grid md:grid-cols-2 gap-6 mt-6">
+              <div>
+                <label class="font-bold block mb-2">Price (₹)</label>
+
+                <input type="number" name="price_0" value="0" min="0"
+                  class="w-full bg-white border rounded-xl px-5 py-4" />
+              </div>
+
+              <div>
+                <label class="font-bold block mb-2">Variant Status</label>
+
+                <select name="variant_is_active_0" class="w-full bg-white border rounded-xl px-5 py-4">
+                  <option value="true">Active</option>
+
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <!--     =========================
+VARIANT IMAGES
+=========================     -->
+
+            <div class="mt-8">
+              <label class="font-bold block mb-2">Variant Images</label>
+
+              <p class="text-xs text-gray-400 mb-5">Minimum 3 images required.</p>
+
+              {% if 0 in image_errors %}
+              <p class="text-red-500 text-sm mb-3 font-bold">Please upload at least 3 images for this variant</p>
+              {% endif %}
+
+              <div class="variantImageSlots flex flex-wrap gap-5">
+                {% for slot_num in slot_numbers %}
+                <div class="image-slot w-28 h-28 relative">
+                  <div
+                    class="upload-box w-full h-full border-2 border-dashed rounded-2xl bg-white flex items-center justify-center cursor-pointer overflow-hidden hover:border-lime-400 transition"
+                    onclick="this.querySelector('input').click()">
+                    <div class="upload-icon text-center">
+                      <svg class="w-8 h-8 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+
+                      <p class="text-xs text-gray-400">Upload</p>
+                    </div>
+
+                    <input type="file" accept="image/*" name="images_0[]" class="variantImages hidden" />
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <!--     =========================
+EMPTY VARIANT (FOR ADDING NEW)
+=========================     -->
+          <div class="variant-item bg-gray-50 border rounded-3xl p-6 mb-8 relative" id="emptyVariant" style="display: none;">
+            <button type="button"
+              class="deleteVariantBtn absolute right-5 top-5 text-gray-400 hover:text-red-500 text-xl">×</button>
+
+            <!-- SIZE + STOCK -->
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="font-bold block mb-2">Size</label>
+
+                <select name="size" class="size-select w-full bg-white border rounded-xl px-5 py-4">
+                  {% for value, label in size_choices %}
+                  <option value="{{ value }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div>
+                <label class="font-bold block mb-2">Stock Quantity</label>
+
+                <input type="number" name="stock" value="0" min="0"
+                  class="w-full bg-white border rounded-xl px-5 py-4" />
+              </div>
+            </div>
+
+            <!-- PRICE + STATUS -->
+
+            <div class="grid md:grid-cols-2 gap-6 mt-6">
+              <div>
+                <label class="font-bold block mb-2">Price (₹)</label>
+
+                <input type="number" name="price" value="0" min="0"
+                  class="w-full bg-white border rounded-xl px-5 py-4" />
+              </div>
+
+              <div>
+                <label class="font-bold block mb-2">Variant Status</label>
+
+                <select name="variant_is_active" class="w-full bg-white border rounded-xl px-5 py-4">
+                  <option value="true">Active</option>
+
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <!--     =========================
+VARIANT IMAGES
+=========================     -->
+
+            <div class="mt-8">
+              <label class="font-bold block mb-2">Variant Images</label>
+
+              <p class="text-xs text-gray-400 mb-5">Minimum 3 images required.</p>
+
+              <div class="variantImageSlots flex flex-wrap gap-5">
+                {% for slot_num in slot_numbers %}
+                <div class="image-slot w-28 h-28 relative">
+                  <div
+                    class="upload-box w-full h-full border-2 border-dashed rounded-2xl bg-white flex items-center justify-center cursor-pointer overflow-hidden hover:border-lime-400 transition"
+                    onclick="this.querySelector('input').click()">
+                    <div class="upload-icon text-center">
+                      <svg class="w-8 h-8 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+
+                      <p class="text-xs text-gray-400">Upload</p>
+                    </div>
+
+                    <input type="file" accept="image/*" class="variantImages hidden" />
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
 
           <!-- ADD VARIANT -->
 
@@ -338,10 +529,11 @@ CROPPER JS + CSS
                 */
     
       function addVariant() {
-        const first = document.querySelector('.variant-item')
-    
+        const first = document.getElementById('emptyVariant')
         const clone = first.cloneNode(true)
-    
+        clone.removeAttribute('id')
+        clone.style.display = 'block'
+
         // Reset inputs
         clone.querySelectorAll('input').forEach((input) => {
           if (input.type === 'file') {
@@ -350,45 +542,50 @@ CROPPER JS + CSS
             input.value = '0'
           }
         })
-    
+
         // Remove old previews
         clone.querySelectorAll('.preview-img').forEach((img) => {
           img.remove()
         })
-    
+
         // Reset upload icons
         clone.querySelectorAll('.upload-icon').forEach((icon) => {
           icon.style.display = 'block'
         })
-    
+
+        // Remove error messages
+        clone.querySelectorAll('.text-red-500.text-sm').forEach((el) => {
+          el.remove()
+        })
+
         // Select next available size
         const sizeSelect = clone.querySelector('.size-select')
-    
-        const usedSizes = [...document.querySelectorAll('.size-select')].map((select) => select.value).filter((value) => value !== '')
-    
+
+        const usedSizes = [...document.querySelectorAll('.variant-item:not(#emptyVariant) .size-select')].map((select) => select.value).filter((value) => value !== '')
+
         let selected = false
-    
+
         ;[...sizeSelect.options].forEach((option) => {
           if (option.value !== '' && !usedSizes.includes(option.value) && !selected) {
             sizeSelect.value = option.value
-    
+
             selected = true
           }
         })
-    
+
         // If no size available stop adding
         if (!selected) {
           showMessage('All sizes are already added.')
-    
+
           return
         }
-    
+
         container.appendChild(clone)
-    
+
         updateIndexes()
-    
+
         updateSizes()
-    
+
         toggleAddButton()
       }
     
@@ -401,21 +598,21 @@ CROPPER JS + CSS
     
       document.addEventListener('click', (e) => {
         const button = e.target.closest('.deleteVariantBtn')
-    
+
         if (!button) return
-    
-        const variants = document.querySelectorAll('.variant-item')
-    
+
+        const variants = document.querySelectorAll('.variant-item:not(#emptyVariant)')
+
         if (variants.length <= 1) {
           showMessage('At least one variant is required')
-    
+
           return
         }
-    
+
         button.closest('.variant-item').remove()
-    
+
         updateIndexes()
-    
+
         updateSizes()
       })
     
@@ -426,7 +623,11 @@ CROPPER JS + CSS
                 */
     
       function updateIndexes() {
-        document.querySelectorAll('.variant-item').forEach((variant, index) => {
+        document.querySelectorAll('.variant-item:not(#emptyVariant)').forEach((variant, index) => {
+          variant.querySelector('.size-select').name = `size_${index}`
+          variant.querySelector('input[name="stock"]').name = `stock_${index}`
+          variant.querySelector('input[name="price"]').name = `price_${index}`
+          variant.querySelector('select[name="variant_is_active"]').name = `variant_is_active_${index}`
           variant.querySelectorAll('.variantImages').forEach((input) => {
             input.name = `images_${index}[]`
           })
@@ -440,10 +641,10 @@ CROPPER JS + CSS
                 */
     
       function updateSizes() {
-        const selects = [...document.querySelectorAll('.size-select')]
-    
+        const selects = [...document.querySelectorAll('.variant-item:not(#emptyVariant) .size-select')]
+
         const usedSizes = selects.map((select) => select.value).filter((value) => value !== '')
-    
+
         selects.forEach((currentSelect) => {
           currentSelect.querySelectorAll('option').forEach((option) => {
             if (option.value !== '' && usedSizes.includes(option.value) && option.value !== currentSelect.value) {
@@ -453,8 +654,29 @@ CROPPER JS + CSS
             }
           })
         })
-    
+
         toggleAddButton()
+      }
+    
+      /*
+                ===========================
+                TOGGLE ADD BUTTON
+                ===========================
+                */
+    
+      function toggleAddButton() {
+        const btn = document.getElementById('addVariantBottomBtn')
+        const selects = [...document.querySelectorAll('.variant-item:not(#emptyVariant) .size-select')]
+        const usedSizes = selects.map((select) => select.value).filter((value) => value !== '')
+        const allSizes = [...document.getElementById('emptyVariant').querySelector('.size-select').options].map(opt => opt.value).filter(v => v !== '')
+
+        if (usedSizes.length >= allSizes.length) {
+          btn.disabled = true
+          btn.classList.add('opacity-50', 'cursor-not-allowed')
+        } else {
+          btn.disabled = false
+          btn.classList.remove('opacity-50', 'cursor-not-allowed')
+        }
       }
     
       /*
@@ -600,64 +822,6 @@ CROPPER JS + CSS
           cropper = null
         }
       }
-    
-      /*
-                ===========================
-                FORM VALIDATION
-                ===========================
-                */
-    
-      form.addEventListener('submit', (e) => {
-        let valid = true
-    
-        const productName = document.querySelector('[name="name"]').value.trim()
-    
-        const category = document.querySelector('[name="category"]').value
-    
-        if (!productName) {
-          valid = false
-    
-          showMessage('Please enter product name')
-        }
-    
-        if (!category) {
-          valid = false
-    
-          showMessage('Please select category')
-        }
-    
-        document.querySelectorAll('.variant-item').forEach((variant, index) => {
-          const price = variant.querySelector('[name="price"]').value
-    
-          const stock = variant.querySelector('[name="stock"]').value
-    
-          if (price === '' || Number(price) < 0) {
-            valid = false
-    
-            showMessage(`Invalid price in Variant ${index + 1}`)
-          }
-    
-          if (stock === '' || Number(stock) < 0) {
-            valid = false
-    
-            showMessage(`Invalid stock in Variant ${index + 1}`)
-          }
-    
-          let imageCount = 0
-    
-          variant.querySelectorAll('.variantImages').forEach((input) => {
-            if (input.files.length > 0) imageCount++
-          })
-    
-          if (imageCount < 3) {
-            valid = false
-    
-            showMessage(`Variant ${index + 1} requires minimum 3 images`)
-          }
-        })
-    
-        if (!valid) e.preventDefault()
-      })
     
       /*
                 ===========================
