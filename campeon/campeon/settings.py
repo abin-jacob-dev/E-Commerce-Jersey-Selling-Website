@@ -130,7 +130,7 @@ LOGGING = {
         },
         "file": {
             "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "project.log"),
+            "filename": os.path.join(BASE_DIR, "project1.log"),
             "formatter": "standard",
         },
     },

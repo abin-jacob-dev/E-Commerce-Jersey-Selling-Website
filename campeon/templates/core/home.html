@@ -81,10 +81,10 @@
                 {% with variant=product.cheapest_variant %}
                   {% if variant %}
                     {% if variant.offer_price < variant.price %}
-                      <span class="text-green-600">₹{{ variant.offer_price }}</span>
-                      <span class="line-through text-gray-400">₹{{ variant.price }}</span>
+                      <span class="text-green-600">₹{{ variant.offer_price|floatformat:2 }}</span>
+                      <span class="line-through text-gray-400">₹{{ variant.price|floatformat:2 }}</span>
                     {% else %}
-                      <span>₹{{ variant.price }}</span>
+                      <span>₹{{ variant.price|floatformat:2 }}</span>
                     {% endif %}
                   {% endif %}
                 {% endwith %}

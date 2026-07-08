@@ -297,7 +297,7 @@
                 </table>
               </td>
 
-              <td class="center">₹{{ item.price }}</td>
+              <td class="center">₹{{ item.price|floatformat:2 }}</td>
 
               <td class="center">{{ item.quantity }}</td>
 
@@ -305,7 +305,7 @@
                 <span class="status">{{ item.get_status_display }}</span>
               </td>
 
-              <td class="right">₹{{ item.subtotal }}</td>
+              <td class="right">₹{{ item.subtotal|floatformat:2 }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -316,7 +316,7 @@
       <table class="totals">
         <tr>
           <td class="totals-label">Subtotal</td>
-          <td class="right">₹{{ order.subtotal }}</td>
+          <td class="right">₹{{ order.subtotal|floatformat:2 }}</td>
         </tr>
         {% if order.get_coupon_discount > 0 %}
           <tr>
@@ -336,7 +336,7 @@
         </tr>
         <tr class="grand-total">
           <td>Total</td>
-          <td class="right">₹{{ order.get_total_after_discount }}</td>
+          <td class="right">₹{{ order.get_total_after_discount|floatformat:2 }}</td>
         </tr>
       </table>
 

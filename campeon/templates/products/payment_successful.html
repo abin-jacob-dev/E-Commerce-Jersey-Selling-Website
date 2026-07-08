@@ -54,7 +54,7 @@
         </div>
         <div class="border-t pt-4 flex justify-between items-center">
           <span class="text-gray-500 text-[11px] font-black uppercase tracking-widest">Order Total</span>
-          <span class="text-[#008000] text-xl font-black">₹{{ order.total_amount }}</span>
+          <span class="text-[#008000] text-xl font-black">₹{{ order.total_amount|floatformat:2 }}</span>
         </div>
 
         <!-- Buttons -->

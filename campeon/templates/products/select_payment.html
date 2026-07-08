@@ -72,7 +72,7 @@
                     <p class="text-xs text-gray-500">Qty: {{ item.quantity }}</p>
                   </div>
 
-                  <p class="font-black">₹{{ item.subtotal }}</p>
+                  <p class="font-black">₹{{ item.subtotal|floatformat:2 }}</p>
                 </div>
               {% endfor %}
             </div>
@@ -86,13 +86,13 @@
             {% if offer %}
               <div class="flex justify-between font-bold mb-2">
                 <span>Offer Discount</span>
-                <span>- ₹{{ offer_discount|default:'0' }}</span>
+                <span>- ₹{{ offer_discount|default:'0'|floatformat:2 }}</span>
               </div>
             {% endif %}
             {% if coupon %}
               <div class="flex justify-between font-bold mb-2">
                 <span>Coupon ({{ coupon.code }})</span>
-                <span>- ₹{{ coupon_discount|default:'0' }}</span>
+                <span>- ₹{{ coupon_discount|default:'0'|floatformat:2 }}</span>
               </div>
             {% endif %}
             
@@ -103,7 +103,7 @@
 
             <div class="flex justify-between text-2xl font-black mb-8">
               <span>Total</span>
-              <span>₹{{ cart_total }}</span>
+              <span>₹{{ cart_total|floatformat:2 }}</span>
             </div>
 
             <button type="submit" class="w-full bg-[#006400] text-white font-black py-5 uppercase tracking-widest">PLACE ORDER</button>

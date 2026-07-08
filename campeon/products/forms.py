@@ -96,7 +96,10 @@ class OfferForm(forms.ModelForm):
             cleaned_data["name"] = name
 
             if not re.fullmatch(r"^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$", name):
-                self.add_error("name", "Name can only contain letters, numbers, spaces, hyphens, and apostrophes.")
+                self.add_error(
+                    "name",
+                    "Name can only contain letters, numbers, spaces, hyphens, and apostrophes.",
+                )
 
             if (
                 Offer.objects.filter(name__iexact=name)
@@ -164,8 +167,8 @@ class ProductForm(forms.ModelForm):
         if not name:
             raise forms.ValidationError("Product name is required.")
         name = " ".join(name.strip().split())
-        if not re.fullmatch(r"^[A-Za-z0-9]+(?:[A-Za-z0-9\s\-']*[A-Za-z0-9])?$", name):
-            raise forms.ValidationError("Name can only contain letters.")
+        if not re.fullmatch(r"^[\w\s\-.,&+()/'%:]+$", name):
+            raise forms.ValidationError("Invalid product name.")
         if (
             Product.objects.filter(name__iexact=name)
             .exclude(pk=self.instance.pk)
@@ -263,6 +266,7 @@ class CouponForm(forms.ModelForm):
         discount_value = cleaned_data.get("discount_value")
         discount_type = cleaned_data.get("discount_type")
         code = self.cleaned_data.get("code")
+        min_purchase_amount = self.cleaned_data.get("min_purchase_amount")
 
         if not code:
             self.add_error("code", "Code is required.")
@@ -287,9 +291,15 @@ class CouponForm(forms.ModelForm):
                 self.add_error(
                     "discount_value", "Discount Value must be greater than zero"
                 )
-            if discount_type == "percentage" and discount_value > 100:
+            if discount_type == "percentage" and discount_value >= 100:
                 self.add_error(
-                    "discount_value", "Percentage discount cannot be greater than 100%"
+                    "discount_value",
+                    "Percentage cannot be greater than or equal to 100.",
+                )
+            if discount_type == "fixed" and min_purchase_amount <= discount_value:
+                self.add_error(
+                    "discount_value",
+                    "Fixed discount value must be less than the minimum purchase amount.",
                 )
         return cleaned_data
 

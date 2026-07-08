@@ -130,7 +130,7 @@
 								<div class="border-t border-white/10 pt-8 space-y-5 mb-8">
 									<div class="flex justify-between">
 										<span class="text-[10px] uppercase opacity-60 font-black">Subtotal</span>
-										<span class="font-black text-lg">₹{{ cart_subtotal }}</span>
+										<span class="font-black text-lg">₹{{ cart_subtotal|floatformat:2 }}</span>
 									</div>
 
 									{% if applied_coupon %}
@@ -152,7 +152,7 @@
 									<div>
 										<span class="text-[10px] uppercase tracking-[0.3em] opacity-50 font-black">Estimated Total</span>
 
-										<div class="text-5xl font-black text-lime-bright mt-2 leading-none">₹{{cart_total|default:'0' }}</div>
+										<div class="text-5xl font-black text-lime-bright mt-2 leading-none">₹{{cart_total|default:'0'|floatformat:2 }}</div>
 									</div>
 								</div>
 
