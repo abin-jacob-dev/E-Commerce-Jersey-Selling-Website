@@ -225,7 +225,7 @@
                 if (data.redirect_url) {
                   window.location.href = data.redirect_url
                 } else {
-                  window.location.href = '/payment-failed/'
+                  window.location.href = `/payment-failed/${data.order_id}`
                 }
               }
             })
