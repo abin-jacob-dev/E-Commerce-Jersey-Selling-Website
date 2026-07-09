@@ -77,34 +77,18 @@ Campeon | Offer {% endblock title %} {% block content %}
 
                 <option
                   value="product"
-                  {%
-                  if
-                  form.target_type.value=""
-                  ="product"
-                  or
-                  offer.product
-                  %}
+                  {% if form.is_bound and form.target_type.value == "product" or not form.is_bound and offer.target_type == "product" %}
                   selected
-                  {%
-                  endif
-                  %}
+                  {% endif %}
                 >
                   Product
                 </option>
 
                 <option
                   value="category"
-                  {%
-                  if
-                  form.target_type.value=""
-                  ="category"
-                  or
-                  offer.category
-                  %}
+                  {% if form.is_bound and form.target_type.value == "category" or not form.is_bound and offer.target_type == "category" %}
                   selected
-                  {%
-                  endif
-                  %}
+                  {% endif %}
                 >
                   Category
                 </option>
@@ -121,7 +105,7 @@ Campeon | Offer {% endblock title %} {% block content %}
 
             <div
               id="productBox"
-              class="{% if not offer.product %}hidden{% endif %} mt-6"
+              class="{% if form.is_bound and form.target_type.value != 'product' or not form.is_bound and not offer.product %}hidden{% endif %} mt-6"
             >
               <label
                 class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-3 block"
@@ -139,17 +123,9 @@ Campeon | Offer {% endblock title %} {% block content %}
 
                 <option
                   value="{{ product.id }}"
-                  {%
-                  if
-                  offer.product
-                  and
-                  offer.product.id=""
-                  ="product.id"
-                  %}
+                  {% if form.is_bound and form.product.value|stringformat:"s" == product.id|stringformat:"s" or not form.is_bound and offer.product_id == product.id %}
                   selected
-                  {%
-                  endif
-                  %}
+                  {% endif %}
                 >
                   {{ product.name }}
                 </option>
@@ -168,7 +144,7 @@ Campeon | Offer {% endblock title %} {% block content %}
 
             <div
               id="categoryBox"
-              class="{% if not offer.category %}hidden{% endif %} mt-6"
+              class="{% if form.is_bound and form.target_type.value != 'category' or not form.is_bound and not offer.category %}hidden{% endif %} mt-6"
             >
               <label
                 class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-3 block"
@@ -186,17 +162,9 @@ Campeon | Offer {% endblock title %} {% block content %}
 
                 <option
                   value="{{ category.id }}"
-                  {%
-                  if
-                  offer.category
-                  and
-                  offer.category.id=""
-                  ="category.id"
-                  %}
+                  {% if form.is_bound and form.category.value|stringformat:"s" == category.id|stringformat:"s" or not form.is_bound and offer.category_id == category.id %}
                   selected
-                  {%
-                  endif
-                  %}
+                  {% endif %}
                 >
                   {{ category.name }}
                 </option>
@@ -227,30 +195,18 @@ Campeon | Offer {% endblock title %} {% block content %}
                 >
                   <option
                     value="percentage"
-                    {%
-                    if
-                    offer.discount_type=""
-                    ="percentage"
-                    %}
+                    {% if form.is_bound and form.discount_type.value == "percentage" or not form.is_bound and offer.discount_type == "percentage" %}
                     selected
-                    {%
-                    endif
-                    %}
+                    {% endif %}
                   >
                     Percentage (%)
                   </option>
 
                   <option
                     value="fixed"
-                    {%
-                    if
-                    offer.discount_type=""
-                    ="fixed"
-                    %}
+                    {% if form.is_bound and form.discount_type.value == "fixed" or not form.is_bound and offer.discount_type == "fixed" %}
                     selected
-                    {%
-                    endif
-                    %}
+                    {% endif %}
                   >
                     Fixed Amount (₹)
                   </option>

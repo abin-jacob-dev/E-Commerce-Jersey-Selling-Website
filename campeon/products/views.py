@@ -540,7 +540,7 @@ def product_detail(request, slug):
         messages.warning(request, "This product is out of stock")
         return redirect("products:all_products")
     default_variant = min(active_variants, key=lambda v: v.price)
-    offer = get_best_offer(product)
+    offer = get_best_offer(product, variant=default_variant)
     discount_price = get_discount_price(default_variant)
     similar_products = Product.objects.filter(category=product.category).exclude(
         pk=product.id
@@ -1110,7 +1110,7 @@ def select_payment(request):
 
                 # save items
                 for item in cart_items:
-                    item_offer = get_best_offer(item.variant.product)
+                    item_offer = get_best_offer(item.variant.product, variant=item.variant)
                     OrderItem.objects.create(
                         order=order,
                         variant=item.variant,
