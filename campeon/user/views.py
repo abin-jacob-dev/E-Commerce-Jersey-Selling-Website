@@ -51,9 +51,14 @@ def edit_profile(request):
     if request.method == "POST":
         form = EditProfileForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Profile saved successfully.")
-            return redirect("user:profile")
+            try:
+                form.save()
+                messages.success(request, "Profile saved successfully.")
+                return redirect("user:profile")
+            except Exception as e:
+                logger.error(f"Profile save failed: {e}")
+                messages.error(request, "Failed to save profile. Please try again.")
+
         messages.error(request, "Please Correct the errors below")
     else:
         form = EditProfileForm(instance=user)
@@ -271,4 +276,3 @@ def referral(request):
         form = ReferralForm(request.user)
 
     return render(request, "user/referral.html", {"form": form})
-

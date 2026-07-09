@@ -14,20 +14,20 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 
 
-# def payment_page(request):
-#     order_id = request.session.get("order_id")
-#     razorpay_order_id = request.session.get("razorpay_order_id")
+def payment_page(request):
+    order_id = request.session.get("order_id")
+    razorpay_order_id = request.session.get("razorpay_order_id")
 
-#     if not razorpay_order_id:
-#         return redirect("products:cart")
+    if not razorpay_order_id:
+        return redirect("products:cart")
 
-#     order = Order.objects.get(id=order_id)
+    order = Order.objects.get(id=order_id)
 
-#     context = {
-#         "razorpay_order_id": razorpay_order_id,
-#         "amount": int(order.total_amount * 100),
-#         "key_id": settings.RAZORPAY_KEY_ID,
-#     }
+    context = {
+        "razorpay_order_id": razorpay_order_id,
+        "amount": int(order.total_amount * 100),
+        "key_id": settings.RAZORPAY_KEY_ID,
+    }
 
-#     return render(request, "payments/payment.html", context)
+    return render(request, "payments/payment.html", context)
 

@@ -331,7 +331,7 @@ def edit_product(request, slug):
                 "is_active": (request.POST.get(f"variant_is_active_{i}") == "true"),
             }
             variant_id = request.POST.get(f"variant_id_{i}")
-            if variant_id and variant_id.isdigit():
+            if variant_id is not None and variant_id.isdigit():
                 variant = Variant.objects.filter(
                     id=int(variant_id), product=product
                 ).first()
@@ -542,7 +542,7 @@ def product_detail(request, slug):
     default_variant = min(active_variants, key=lambda v: v.price)
     offer = get_best_offer(product)
     discount_price = get_discount_price(default_variant)
-    similar_products = Product.objects.filter(category=product.category)
+    similar_products = Product.objects.filter(category=product.category).exclude(pk=product.id)[:4]
     print(similar_products)
     if request.user.is_authenticated:
         wishlist_variant_ids = set(
@@ -637,7 +637,10 @@ def cart(request):
 def add_to_cart(request):
     if request.method == "POST":
         variant_id = request.POST.get("variant_id")
-        quantity = int(request.POST.get("quantity", 1))
+        try:
+            quantity = int(request.POST.get("quantity", 1))
+        except (ValueError,TypeError):
+            return JsonResponse({'status':'error','message':'Invalid quantity.'})
 
         variant = get_object_or_404(Variant, id=variant_id)
 
@@ -1277,25 +1280,25 @@ def return_order_item_request(request, item_id):
         "partially_returned",
     ]:
         return redirect("products:order_details", order_id=item.order.order_id)
-    if item.variant:
-        item.variant.stock += item.quantity
-        item.variant.save()
-        item.status = "partially_returned"
-        item.returned_at = timezone.now()
-        reason = request.POST.get("reason", "")
-        if reason == "other":
-            reason = request.POST.get("other_reason", "Other")
-        item.returned_reason = reason
-        item.save()
+    # if item.variant:
+    # item.variant.stock += item.quantity
+    # item.variant.save()
+    item.status = "partially_returned"
+    item.returned_at = timezone.now()
+    reason = request.POST.get("reason", "")
+    if reason == "other":
+        reason = request.POST.get("other_reason", "Other")
+    item.returned_reason = reason
+    item.save()
 
-        order = item.order
-        active_items = order.items.exclude(status="partially_returned")
-        if not active_items:
-            order.order_status = "returned"
-        else:
-            order.order_status = "partially_returned"
-        order.save()
-        return redirect("products:order_details", order_id=order.order_id)
+    order = item.order
+    active_items = order.items.exclude(status="partially_returned")
+    if not active_items:
+        order.order_status = "returned"
+    else:
+        order.order_status = "partially_returned"
+    order.save()
+    return redirect("products:order_details", order_id=order.order_id)
 
 
 @user_login_required
@@ -1325,9 +1328,9 @@ def cancel_order_item_request(request, item_id):
     ]:
         return redirect("products:order_details", order_id=item.order.order_id)
 
-    if item.variant:
-        item.variant.stock += item.quantity
-        item.variant.save()
+    # if item.variant:
+    #     item.variant.stock += item.quantity
+    #     item.variant.save()
 
     item.status = "partially_cancelled"
     item.cancelled_at = timezone.now()
@@ -1473,6 +1476,7 @@ def order_view(request, order_id):
         elif "approve_return" in request.POST:
 
             item_id = request.POST.get("item_id")
+            
 
             if item_id:
 
@@ -1485,6 +1489,10 @@ def order_view(request, order_id):
                 item.status = "returned"
                 item.refund_amount = item.final_paid_price
                 item.save()
+
+                if item.variant:
+                    item.variant.stock += item.quantity
+                    item.variant.save()
 
                 all_returned = order.items.exclude(status="returned").exists()
 
@@ -1515,7 +1523,7 @@ def order_view(request, order_id):
         elif "approve_cancel" in request.POST:
 
             item_id = request.POST.get("item_id")
-
+            
             if item_id:
 
                 item = get_object_or_404(
@@ -1524,9 +1532,12 @@ def order_view(request, order_id):
                     order=order,
                 )
 
-                item.status = "returned"
+                item.status = "cancelled"
                 item.refund_amount = item.final_paid_price
                 item.save()
+                if item.variant:
+                    item.variant.stock += item.quantity
+                    item.variant.save()
 
                 all_returned = order.items.exclude(status="returned").exists()
 

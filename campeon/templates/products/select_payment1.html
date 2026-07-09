@@ -1,7 +1,11 @@
 {% extends 'partials/base.html' %}
 {% load static %}
 {% block content %}
-
+  {% comment %} {{ cart_subtotal }}
+  {{ cart_total }}
+  {{ cart_count }}
+  {{ coupon_discount }}
+  {{ applied_coupon }} {% endcomment %}
   <main class="bg-[#e9f5db] min-h-screen py-16">
     <div class="container mx-auto px-6">
       <h2 class="text-6xl font-black uppercase mb-12 tracking-tightest">SELECT PAYMENT METHOD</h2>
@@ -77,7 +81,7 @@
 
             <div class="flex justify-between font-bold mb-2">
               <span>Subtotal</span>
-              <span>₹{{ subtotal|floatformat:2 }}</span>
+              <span>₹{{ subtotal }}</span>
             </div>
             {% if offer %}
               <div class="flex justify-between font-bold mb-2">
@@ -91,7 +95,7 @@
                 <span>- ₹{{ coupon_discount|default:'0'|floatformat:2 }}</span>
               </div>
             {% endif %}
-            
+
             <div class="flex justify-between font-bold mb-6">
               <span>Shipping</span>
               <span>FREE</span>
@@ -205,7 +209,7 @@
         order_id: data.razorpay_order_id,
     
         handler: function (response) {
-          fetch('/verify-payment/', {
+          fetch('/products/verify-payment/', {
             method: 'POST',
             headers: {
               'X-CSRFToken': csrftoken,
@@ -219,21 +223,24 @@
           })
             .then((res) => res.json())
             .then((data) => {
+              console.log('Verify payment response:', data)
+    
               if (data.success) {
-                window.location.href = `/payment-successful/${data.order_id}`
+                console.log('Redirecting...')
+                window.location.href = `/products/payment-successful/${data.order_id}`
               } else {
-                if (data.redirect_url) {
-                  window.location.href = data.redirect_url
-                } else {
-                  window.location.href = '/payment-failed/'
-                }
+                console.log('Verification failed')
+                console.log(data)
               }
+            })
+            .catch((err) => {
+              console.error(err)
             })
         },
     
         modal: {
           ondismiss: function () {
-            window.location.href = `/payment-failed/${data.order_id}`
+            window.location.href = `/products/payment-failed/${data.order_id}`
           }
         }
       }

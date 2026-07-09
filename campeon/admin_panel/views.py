@@ -14,7 +14,9 @@ from django.http import HttpResponse
 from weasyprint import HTML
 from openpyxl import Workbook
 from datetime import datetime
+from django.contrib import messages
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +81,11 @@ def block_user(request, id):
 
 @superuser_required
 def delete_user(request, id):
-    user = Account.objects.get(id=id)
+    try:
+        user = Account.objects.get(id=id)
+    except Account.DoesNotExist:
+        messages.error(request,'User not found.')
+        return redirect('admin_panel:users')
     if "delete_user_confirmed" in request.POST:
         user.delete()
         return redirect("admin_panel:users")
