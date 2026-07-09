@@ -21,17 +21,20 @@ class UserSignupForm(forms.ModelForm):
         return cleaned_data
 
     def clean_full_name(self):
-        full_name = self.cleaned_data.get("full_name").strip()
-        if not re.fullmatch(r"^[A-Za-z ]+$", full_name):
-            raise forms.ValidationError(
-                "Full name should contain only letters and spaces."
-            )
+        full_name = self.cleaned_data.get("full_name")
+        if not full_name:
+            raise forms.ValidationError("Full name is required.")
+
+        full_name = full_name.strip()
         if len(full_name) < 3:
             raise forms.ValidationError("Minimum length of name is 3")
         return full_name
 
     def clean_password(self):
         password = self.cleaned_data.get("password")
+
+        if not password:
+            raise forms.ValidationError("Password is required.")
 
         if len(password) < 8:
             raise forms.ValidationError("Password must be at least 8 characters")

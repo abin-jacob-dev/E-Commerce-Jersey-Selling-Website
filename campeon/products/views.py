@@ -149,7 +149,7 @@ def edit_category(request, slug):
 @never_cache
 @superuser_required
 def delete_category(request, slug):
-    category = Category.objects.get(slug=slug)
+    category = get_object_or_404(Category, slug=slug)
     if request.method == "POST":
         category.is_deleted = True
         category.save()
@@ -542,7 +542,9 @@ def product_detail(request, slug):
     default_variant = min(active_variants, key=lambda v: v.price)
     offer = get_best_offer(product)
     discount_price = get_discount_price(default_variant)
-    similar_products = Product.objects.filter(category=product.category).exclude(pk=product.id)[:4]
+    similar_products = Product.objects.filter(category=product.category).exclude(
+        pk=product.id
+    )[:4]
     print(similar_products)
     if request.user.is_authenticated:
         wishlist_variant_ids = set(
@@ -639,8 +641,8 @@ def add_to_cart(request):
         variant_id = request.POST.get("variant_id")
         try:
             quantity = int(request.POST.get("quantity", 1))
-        except (ValueError,TypeError):
-            return JsonResponse({'status':'error','message':'Invalid quantity.'})
+        except (ValueError, TypeError):
+            return JsonResponse({"status": "error", "message": "Invalid quantity."})
 
         variant = get_object_or_404(Variant, id=variant_id)
 
@@ -958,9 +960,18 @@ def verify_payment(request):
     razorpay_order_id = request.POST.get("razorpay_order_id")
     razorpay_signature = request.POST.get("razorpay_signature")
 
-    payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
-
+    # payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
+    try:
+        payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
+    except Payment.DoesNotExist:
+        return JsonResponse(
+            {"success": False, "message": "Payment record not found."}, status=404
+        )
     order = payment.order
+    if order is None:
+        return JsonResponse(
+            {"success": False, "message": "Order not found."}, status=404
+        )
 
     if payment.status == "paid":
         return JsonResponse({"success": True, "order_id": order.order_id})
@@ -995,7 +1006,7 @@ def verify_payment(request):
 
         return JsonResponse({"success": True, "order_id": order.order_id})
 
-    except Exception as e:
+    except Exception:
 
         payment.status = "failed"
         payment.save()
@@ -1009,7 +1020,8 @@ def verify_payment(request):
                 "redirect_url": reverse(
                     "products:payment_failed", args=[order.order_id]
                 ),
-            }
+            },
+            status=400,
         )
 
 
@@ -1229,6 +1241,7 @@ def payment_successful(request, order_id):
     return render(request, "products/payment_successful.html", context)
 
 
+@user_login_required
 def payment_failed(request, order_id):
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
     context = {"order": order}
@@ -1260,12 +1273,14 @@ def order_details(request, order_id):
     return render(request, "user/orders/order_details.html", context)
 
 
+@user_login_required
 def return_order_item(request, item_id):
     item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
     context = {"item": item, "order": item.order}
     return render(request, "user/orders/return_request.html", context)
 
 
+@user_login_required
 def return_order_item_request(request, item_id):
     item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
     if request.method != "POST":
@@ -1476,7 +1491,6 @@ def order_view(request, order_id):
         elif "approve_return" in request.POST:
 
             item_id = request.POST.get("item_id")
-            
 
             if item_id:
 
@@ -1523,7 +1537,7 @@ def order_view(request, order_id):
         elif "approve_cancel" in request.POST:
 
             item_id = request.POST.get("item_id")
-            
+
             if item_id:
 
                 item = get_object_or_404(
@@ -1539,10 +1553,10 @@ def order_view(request, order_id):
                     item.variant.stock += item.quantity
                     item.variant.save()
 
-                all_returned = order.items.exclude(status="returned").exists()
+                all_returned = order.items.exclude(status="cancelled").exists()
 
                 if not all_returned:
-                    order.order_status = "returned"
+                    order.order_status = "cancelled"
 
                 order.total_refund_amount = sum(
                     item.refund_amount for item in order.items.all()

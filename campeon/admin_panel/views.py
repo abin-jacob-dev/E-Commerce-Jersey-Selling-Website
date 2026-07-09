@@ -189,7 +189,7 @@ def dashboard(request):
 
     return render(request, "admin/dashboard.html", context)
 
-
+@superuser_required
 def sales(request):
     period = request.GET.get("period", "daily")
     start_date = request.GET.get("start_date")
@@ -269,7 +269,7 @@ def sales(request):
     }
     return render(request, "admin/sales/sales.html", context)
 
-
+@superuser_required
 def sales_report_pdf(request):
     period = request.GET.get("period", "daily")
     start_date = request.GET.get("start_date")
@@ -358,7 +358,7 @@ def sales_report_pdf(request):
 
     return response
 
-
+@superuser_required
 def sales_report_excel(request):
     period = request.GET.get("period", "daily")
     start_date = request.GET.get("start_date")

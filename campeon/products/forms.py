@@ -14,8 +14,10 @@ class CategoryForm(forms.ModelForm):
         if not name:
             raise forms.ValidationError("Name is required.")
         name = name.strip()
-        if not re.fullmatch(r"^[A-Za-z]+(?: [A-Za-z]+)*$", name):
-            raise forms.ValidationError("Name can only contain letters.")
+        if not re.fullmatch(r"^[A-Za-z0-9]+(?:[ '-][A-Za-z0-9]+)*$", name):
+            raise forms.ValidationError(
+                "Name can only contain letters, numbers, spaces, hyphens, and apostrophes."
+            )
         if (
             Category.objects.filter(name__iexact=name)
             .exclude(pk=self.instance.pk)

@@ -37,7 +37,7 @@ def profile(request):
     try:
         address = Addresses.objects.get(user=request.user, is_default=True)
 
-    except:
+    except Addresses.DoesNotExist:
         address = None
     return render(
         request, "user/profile.html", {"address": address, "account": request.user}
@@ -219,7 +219,7 @@ def add_address(request):
 @never_cache
 @user_login_required
 def edit_address(request, id):
-    address = Addresses.objects.get(id=id)
+    address = Addresses.objects.get(id=id,user=request.user)
     if request.method == "POST":
         form = AddressesForm(request.POST, instance=address)
         if form.is_valid():
@@ -237,7 +237,7 @@ def edit_address(request, id):
 @never_cache
 @user_login_required
 def delete_address(request, id):
-    address = Addresses.objects.get(id=id)
+    address = Addresses.objects.get(id=id,user=request.user)
     if request.method == "POST":
         if not address.is_default:
             address.delete()
