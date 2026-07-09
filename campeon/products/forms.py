@@ -118,23 +118,23 @@ class OfferForm(forms.ModelForm):
 
                 if not product:
                     self.add_error("product", "Please select a product.")
-
-                if category:
-                    self.add_error(
-                        "category",
-                        "Category should not be selected for a product offer.",
-                    )
+                cleaned_data["category"] = None
+                # if category:
+                #     self.add_error(
+                #         "category",
+                #         "Category should not be selected for a product offer.",
+                #     )
 
             elif target_type == "category":
 
                 if not category:
                     self.add_error("category", "Please select a category.")
-
-                if product:
-                    self.add_error(
-                        "product",
-                        "Product should not be selected for a category offer.",
-                    )
+                cleaned_data["product"] = None
+                # if product:
+                #     self.add_error(
+                #         "product",
+                #         "Product should not be selected for a category offer.",
+                #     )
 
             # Date validation
             if start_date and end_date:

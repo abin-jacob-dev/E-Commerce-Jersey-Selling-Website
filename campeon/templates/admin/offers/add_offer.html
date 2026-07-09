@@ -201,31 +201,54 @@
 		</main>
 
 		<script>
-			const targetType = document.getElementById('targetType')
+document.addEventListener("DOMContentLoaded", function () {
+    const targetType = document.getElementById("targetType");
 
-const productBox = document.getElementById('productBox')
+    const productBox = document.getElementById("productBox");
+    const categoryBox = document.getElementById("categoryBox");
 
-const categoryBox = document.getElementById('categoryBox')
+    const productSelect = productBox.querySelector('select[name="product"]');
+    const categorySelect = categoryBox.querySelector('select[name="category"]');
 
-function toggleTargets() {
-if (targetType.value === 'product') {
-productBox.classList.remove('hidden')
+    function toggleTargets() {
+        const type = targetType.value;
 
-categoryBox.classList.add('hidden')
-} else if (targetType.value === 'category') {
-categoryBox.classList.remove('hidden')
+        if (type === "product") {
+            // Show product
+            productBox.classList.remove("hidden");
+            productSelect.disabled = false;
 
-productBox.classList.add('hidden')
-} else {
-productBox.classList.add('hidden')
+            // Hide category
+            categoryBox.classList.add("hidden");
+            categorySelect.disabled = true;
+            categorySelect.value = "";
+        } else if (type === "category") {
+            // Show category
+            categoryBox.classList.remove("hidden");
+            categorySelect.disabled = false;
 
-categoryBox.classList.add('hidden')
-}
-}
+            // Hide product
+            productBox.classList.add("hidden");
+            productSelect.disabled = true;
+            productSelect.value = "";
+        } else {
+            // Hide everything
+            productBox.classList.add("hidden");
+            categoryBox.classList.add("hidden");
 
-targetType.addEventListener('change', toggleTargets)
+            productSelect.disabled = true;
+            categorySelect.disabled = true;
 
-toggleTargets()
-		</script>
+            productSelect.value = "";
+            categorySelect.value = "";
+        }
+    }
+
+    targetType.addEventListener("change", toggleTargets);
+
+    // Initialize on page load
+    toggleTargets();
+});
+</script>
 	</body>
 {% endblock %}

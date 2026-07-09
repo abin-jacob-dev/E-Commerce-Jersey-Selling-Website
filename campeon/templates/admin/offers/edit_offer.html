@@ -1,401 +1,410 @@
-{% extends 'admin/partials/base.html' %}
-{% load static %}
-
-{% block title %}
-	Campeon | Offer
-{% endblock title %}
-
-{% block content %}
-
-	<body class="bg-lime-light min-h-screen flex font-montserrat antialiased">
-
-		<main class="flex-1 p-12 overflow-y-auto">
-
-			<form action="{% url 'products:edit_offer' offer.id %}" method="POST">
-
-				{% csrf_token %}
-
-
-				{% if form.non_field_errors %}
-					<div class="text-red-600 text-sm mb-5">
-						{{ form.non_field_errors.0 }}
-					</div>
-				{% endif %}
-
-
-				<div class="flex items-start justify-between mb-12">
-
-					<h2 class="text-5xl font-black uppercase tracking-tighter leading-none">
-						EDIT OFFER
-					</h2>
-
-				</div>
-
-
-				<div
-					class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-
-
-					<!-- LEFT SIDE -->
-
-					<div class="lg:col-span-8 space-y-8">
-
-
-						<div
-							class="bg-white p-8 rounded-lg shadow-sm">
-
-
-							<!-- NAME + ACTIVE -->
-
-							<div class="flex items-center justify-between mb-6">
-
-								<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-									OFFER NAME
-								</label>
-
-
-								<div class="flex items-center gap-3">
-
-									<span class="text-sm font-bold">
-										Active
-									</span>
-
-
-									<input type="checkbox" name="is_active" {% if offer.is_active %} checked {% endif %}>
-
-								</div>
-
-							</div>
-
-
-							<!-- NAME -->
-
-							<input type="text" name="name" value="{{ form.name.value|default:offer.name }}" class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold text-gray-700 rounded
-																								{% if form.name.errors %}border-2 border-red-500{% endif %}">
-
-
-							{% if form.name.errors %}
-								<p class="text-red-600 text-sm mt-1">
-									{{ form.name.errors.0 }}
-								</p>
-							{% endif %}
-
-
-							<!-- TARGET TYPE -->
-
-							<div class="mb-6 mt-6">
-
-								<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block">
-									TARGET TYPE
-								</label>
-
-								<select name="target_type" id="targetType" class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold rounded">
-
-									<option value="">
-										Select
-									</option>
-
-									<option value="product" {% if form.target_type.value == "product" or offer.product %} selected {% endif %}>
-										Product
-									</option>
-
-									<option value="category" {% if form.target_type.value == "category" or offer.category %} selected {% endif %}>
-										Category
-									</option>
-
-								</select>
-
-								{% if form.target_type.errors %}
-									<p class="text-red-600 text-sm mt-1">
-										{{ form.target_type.errors.0 }}
-									</p>
-								{% endif %}
-
-							</div>
-
-
-							<!-- PRODUCT -->
-
-
-							<div id="productBox" class="{% if not offer.product %}hidden{% endif %} mt-6">
-
-
-								<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-3 block">
-									SELECT PRODUCT
-								</label>
-
-
-								<select name="product" class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold rounded">
-
-
-									<option value="">
-										Choose Product
-									</option>
-
-
-									{% for product in products %}
-
-										<option value="{{ product.id }}" {% if offer.product and offer.product.id == product.id %} selected {% endif %}>
-
-											{{ product.name }}
-
-										</option>
-
-									{% endfor %}
-
-
-								</select>
-
-
-								{% if form.product.errors %}
-									<p class="text-red-600 text-sm mt-1">
-										{{ form.product.errors.0 }}
-									</p>
-								{% endif %}
-
-
-							</div>
-
-
-							<!-- CATEGORY -->
-
-
-							<div id="categoryBox" class="{% if not offer.category %}hidden{% endif %} mt-6">
-
-
-								<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-3 block">
-									SELECT CATEGORY
-								</label>
-
-
-								<select name="category" class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold rounded">
-
-
-									<option value="">
-										Choose Category
-									</option>
-
-
-									{% for category in categories %}
-
-										<option value="{{ category.id }}" {% if offer.category and offer.category.id == category.id %} selected {% endif %}>
-
-											{{ category.name }}
-
-										</option>
-
-									{% endfor %}
-
-
-								</select>
-
-
-								{% if form.category.errors %}
-									<p class="text-red-600 text-sm mt-1">
-										{{ form.category.errors.0 }}
-									</p>
-								{% endif %}
-
-
-							</div>
-
-
-							<!-- DISCOUNT -->
-
-							<div class="grid grid-cols-2 gap-6 mt-8">
-
-
-								<div>
-
-
-									<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block">
-										DISCOUNT TYPE
-									</label>
-
-
-									<select name="discount_type" class="w-full h-14 bg-[#eef6df] px-4 rounded">
-
-
-										<option value="percentage" {% if offer.discount_type == "percentage" %} selected {% endif %}>
-											Percentage (%)
-										</option>
-
-
-										<option value="fixed" {% if offer.discount_type == "fixed" %} selected {% endif %}>
-											Fixed Amount (₹)
-										</option>
-
-
-									</select>
-
-
-								</div>
-
-
-								<div>
-
-
-									<label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block">
-										VALUE
-									</label>
-
-
-									<input type="number" name="discount_value" value="{{ form.discount_value.value|default:offer.discount_value }}" class="w-full h-14 bg-[#eef6df] px-4 rounded
-																														{% if form.discount_value.errors %}border-2 border-red-500{% endif %}">
-
-
-									{% if form.discount_value.errors %}
-										<p class="text-red-600 text-sm mt-1">
-											{{ form.discount_value.errors.0 }}
-										</p>
-									{% endif %}
-
-
-								</div>
-
-
-							</div>
-
-
-						</div>
-
-					</div>
-
-
-					<!-- RIGHT SIDE -->
-
-
-					<div class="lg:col-span-4 space-y-8">
-
-
-						<div class="bg-[#e2ead8] p-6 rounded-lg">
-
-
-							<div class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600 mb-6">
-								SCHEDULE
-							</div>
-
-
-							<div class="space-y-4">
-
-
-								<div>
-
-
-									<label class="text-[10px] font-bold text-gray-500 mb-2 block">
-										Start Date
-									</label>
-
-
-									<input type="datetime-local" name="start_date" value="{% if form.start_date.value %}{{ form.start_date.value|date:'Y-m-d\TH:i' }}{% else %}{{ offer.start_date|date:'Y-m-d\TH:i' }}{% endif %}" class="w-full h-12 bg-white px-4 rounded
-										    {% if form.start_date.errors %}border-2 border-red-500{% endif %}">
-
-
-									{% if form.start_date.errors %}
-										<p class="text-red-600 text-sm mt-1">
-											{{ form.start_date.errors.0 }}
-										</p>
-									{% endif %}
-
-
-								</div>
-
-
-								<div>
-
-
-									<label class="text-[10px] font-bold text-gray-500 mb-2 block">
-										End Date
-									</label>
-
-
-									<input type="datetime-local" name="end_date" value="{% if form.end_date.value %}{{ form.end_date.value|date:'Y-m-d\TH:i' }}{% else %}{{ offer.end_date|date:'Y-m-d\TH:i' }}{% endif %}" class="w-full h-12 bg-white px-4 rounded
-										    {% if form.end_date.errors %}border-2 border-red-500{% endif %}">
-
-
-									{% if form.end_date.errors %}
-										<p class="text-red-600 text-sm mt-1">
-											{{ form.end_date.errors.0 }}
-										</p>
-									{% endif %}
-
-
-								</div>
-
-
-							</div>
-
-
-						</div>
-
-
-						<div class="space-y-4">
-
-
-							<button type="submit" class="w-full h-14 bg-green-900 text-white rounded-lg font-black uppercase">
-								UPDATE OFFER
-							</button>
-
-
-							<a href="{% url 'products:offers' %}" class="w-full h-12 bg-[#e2ead8] text-gray-700 rounded-lg flex items-center justify-center font-bold">
-
-								Cancel
-
-							</a>
-
-
-						</div>
-
-
-					</div>
-
-
-				</div>
-
-
-			</form>
-
-
-		</main>
-
-
-		<script>
-
-			const targetType = document.getElementById("targetType");
-
-const productBox = document.getElementById("productBox");
-
-const categoryBox = document.getElementById("categoryBox");
-
-
-function toggleTargets() {
-
-if (targetType.value === "product") {
-
-productBox.classList.remove("hidden");
-categoryBox.classList.add("hidden");
-
-} else if (targetType.value === "category") {
-
-categoryBox.classList.remove("hidden");
-productBox.classList.add("hidden");
-
-} else {
-
-productBox.classList.add("hidden");
-categoryBox.classList.add("hidden");
-
-}
-
-}
-
-
-targetType.addEventListener("change", toggleTargets);
-
-toggleTargets();
-		</script>
-
-
-	</body>
+{% extends 'admin/partials/base.html' %} {% load static %} {% block title %}
+Campeon | Offer {% endblock title %} {% block content %}
+
+<body class="bg-lime-light min-h-screen flex font-montserrat antialiased">
+  <main class="flex-1 p-12 overflow-y-auto">
+    <form action="{% url 'products:edit_offer' offer.id %}" method="POST">
+      {% csrf_token %} {% if form.non_field_errors %}
+      <div class="text-red-600 text-sm mb-5">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+
+      <div class="flex items-start justify-between mb-12">
+        <h2 class="text-5xl font-black uppercase tracking-tighter leading-none">
+          EDIT OFFER
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <!-- LEFT SIDE -->
+
+        <div class="lg:col-span-8 space-y-8">
+          <div class="bg-white p-8 rounded-lg shadow-sm">
+            <!-- NAME + ACTIVE -->
+
+            <div class="flex items-center justify-between mb-6">
+              <label
+                class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500"
+              >
+                OFFER NAME
+              </label>
+
+              <div class="flex items-center gap-3">
+                <span class="text-sm font-bold"> Active </span>
+
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  {%
+                  if
+                  offer.is_active
+                  %}
+                  checked
+                  {%
+                  endif
+                  %}
+                />
+              </div>
+            </div>
+
+            <!-- NAME -->
+
+            <input
+              type="text"
+              name="name"
+              value="{{ form.name.value|default:offer.name }}"
+              class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold text-gray-700 rounded {% if form.name.errors %}border-2 border-red-500{% endif %}"
+            />
+
+            {% if form.name.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.name.errors.0 }}</p>
+            {% endif %}
+
+            <!-- TARGET TYPE -->
+
+            <div class="mb-6 mt-6">
+              <label
+                class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block"
+              >
+                TARGET TYPE
+              </label>
+
+              <select
+                name="target_type"
+                id="targetType"
+                class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold rounded"
+              >
+                <option value="">Select</option>
+
+                <option
+                  value="product"
+                  {%
+                  if
+                  form.target_type.value=""
+                  ="product"
+                  or
+                  offer.product
+                  %}
+                  selected
+                  {%
+                  endif
+                  %}
+                >
+                  Product
+                </option>
+
+                <option
+                  value="category"
+                  {%
+                  if
+                  form.target_type.value=""
+                  ="category"
+                  or
+                  offer.category
+                  %}
+                  selected
+                  {%
+                  endif
+                  %}
+                >
+                  Category
+                </option>
+              </select>
+
+              {% if form.target_type.errors %}
+              <p class="text-red-600 text-sm mt-1">
+                {{ form.target_type.errors.0 }}
+              </p>
+              {% endif %}
+            </div>
+
+            <!-- PRODUCT -->
+
+            <div
+              id="productBox"
+              class="{% if not offer.product %}hidden{% endif %} mt-6"
+            >
+              <label
+                class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-3 block"
+              >
+                SELECT PRODUCT
+              </label>
+
+              <select
+                name="product"
+                class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold rounded"
+              >
+                <option value="">Choose Product</option>
+
+                {% for product in products %}
+
+                <option
+                  value="{{ product.id }}"
+                  {%
+                  if
+                  offer.product
+                  and
+                  offer.product.id=""
+                  ="product.id"
+                  %}
+                  selected
+                  {%
+                  endif
+                  %}
+                >
+                  {{ product.name }}
+                </option>
+
+                {% endfor %}
+              </select>
+
+              {% if form.product.errors %}
+              <p class="text-red-600 text-sm mt-1">
+                {{ form.product.errors.0 }}
+              </p>
+              {% endif %}
+            </div>
+
+            <!-- CATEGORY -->
+
+            <div
+              id="categoryBox"
+              class="{% if not offer.category %}hidden{% endif %} mt-6"
+            >
+              <label
+                class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-3 block"
+              >
+                SELECT CATEGORY
+              </label>
+
+              <select
+                name="category"
+                class="w-full h-14 bg-[#eef6df] px-4 text-base font-bold rounded"
+              >
+                <option value="">Choose Category</option>
+
+                {% for category in categories %}
+
+                <option
+                  value="{{ category.id }}"
+                  {%
+                  if
+                  offer.category
+                  and
+                  offer.category.id=""
+                  ="category.id"
+                  %}
+                  selected
+                  {%
+                  endif
+                  %}
+                >
+                  {{ category.name }}
+                </option>
+
+                {% endfor %}
+              </select>
+
+              {% if form.category.errors %}
+              <p class="text-red-600 text-sm mt-1">
+                {{ form.category.errors.0 }}
+              </p>
+              {% endif %}
+            </div>
+
+            <!-- DISCOUNT -->
+
+            <div class="grid grid-cols-2 gap-6 mt-8">
+              <div>
+                <label
+                  class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block"
+                >
+                  DISCOUNT TYPE
+                </label>
+
+                <select
+                  name="discount_type"
+                  class="w-full h-14 bg-[#eef6df] px-4 rounded"
+                >
+                  <option
+                    value="percentage"
+                    {%
+                    if
+                    offer.discount_type=""
+                    ="percentage"
+                    %}
+                    selected
+                    {%
+                    endif
+                    %}
+                  >
+                    Percentage (%)
+                  </option>
+
+                  <option
+                    value="fixed"
+                    {%
+                    if
+                    offer.discount_type=""
+                    ="fixed"
+                    %}
+                    selected
+                    {%
+                    endif
+                    %}
+                  >
+                    Fixed Amount (₹)
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 block"
+                >
+                  VALUE
+                </label>
+
+                <input
+                  type="number"
+                  name="discount_value"
+                  value="{{ form.discount_value.value|default:offer.discount_value }}"
+                  class="w-full h-14 bg-[#eef6df] px-4 rounded {% if form.discount_value.errors %}border-2 border-red-500{% endif %}"
+                />
+
+                {% if form.discount_value.errors %}
+                <p class="text-red-600 text-sm mt-1">
+                  {{ form.discount_value.errors.0 }}
+                </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT SIDE -->
+
+        <div class="lg:col-span-4 space-y-8">
+          <div class="bg-[#e2ead8] p-6 rounded-lg">
+            <div
+              class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600 mb-6"
+            >
+              SCHEDULE
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label class="text-[10px] font-bold text-gray-500 mb-2 block">
+                  Start Date
+                </label>
+
+                <input
+                  type="datetime-local"
+                  name="start_date"
+                  value="{% if form.start_date.value %}{{ form.start_date.value|date:'Y-m-d\TH:i' }}{% else %}{{ offer.start_date|date:'Y-m-d\TH:i' }}{% endif %}"
+                  class="w-full h-12 bg-white px-4 rounded {% if form.start_date.errors %}border-2 border-red-500{% endif %}"
+                />
+
+                {% if form.start_date.errors %}
+                <p class="text-red-600 text-sm mt-1">
+                  {{ form.start_date.errors.0 }}
+                </p>
+                {% endif %}
+              </div>
+
+              <div>
+                <label class="text-[10px] font-bold text-gray-500 mb-2 block">
+                  End Date
+                </label>
+
+                <input
+                  type="datetime-local"
+                  name="end_date"
+                  value="{% if form.end_date.value %}{{ form.end_date.value|date:'Y-m-d\TH:i' }}{% else %}{{ offer.end_date|date:'Y-m-d\TH:i' }}{% endif %}"
+                  class="w-full h-12 bg-white px-4 rounded {% if form.end_date.errors %}border-2 border-red-500{% endif %}"
+                />
+
+                {% if form.end_date.errors %}
+                <p class="text-red-600 text-sm mt-1">
+                  {{ form.end_date.errors.0 }}
+                </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <button
+              type="submit"
+              class="w-full h-14 bg-green-900 text-white rounded-lg font-black uppercase"
+            >
+              UPDATE OFFER
+            </button>
+
+            <a
+              href="{% url 'products:offers' %}"
+              class="w-full h-12 bg-[#e2ead8] text-gray-700 rounded-lg flex items-center justify-center font-bold"
+            >
+              Cancel
+            </a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const targetType = document.getElementById("targetType");
+
+    const productBox = document.getElementById("productBox");
+    const categoryBox = document.getElementById("categoryBox");
+
+    const productSelect = productBox.querySelector('select[name="product"]');
+    const categorySelect = categoryBox.querySelector('select[name="category"]');
+
+    function toggleTargets() {
+        const type = targetType.value;
+
+        switch (type) {
+            case "product":
+                // Show product
+                productBox.classList.remove("hidden");
+                productSelect.disabled = false;
+
+                // Hide category
+                categoryBox.classList.add("hidden");
+                categorySelect.disabled = true;
+                categorySelect.value = "";
+                break;
+
+            case "category":
+                // Show category
+                categoryBox.classList.remove("hidden");
+                categorySelect.disabled = false;
+
+                // Hide product
+                productBox.classList.add("hidden");
+                productSelect.disabled = true;
+                productSelect.value = "";
+                break;
+
+            default:
+                productBox.classList.add("hidden");
+                categoryBox.classList.add("hidden");
+
+                productSelect.disabled = true;
+                categorySelect.disabled = true;
+
+                productSelect.value = "";
+                categorySelect.value = "";
+        }
+    }
+
+    targetType.addEventListener("change", toggleTargets);
+
+    toggleTargets();
+});
+</script>
+</body>
 
 {% endblock %}
