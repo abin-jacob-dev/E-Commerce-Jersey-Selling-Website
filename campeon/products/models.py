@@ -63,7 +63,7 @@ class Category(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
     image = CloudinaryField(
-        "category_image", folder="category_images", default="defaults/no_image.png"
+        "category_image", folder="category_images"
     )
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
@@ -512,6 +512,13 @@ class WalletTransaction(models.Model):
 
 
 class Review(models.Model):
+    # RATING_CHOICES = [
+    #     ("5", "Excellent"),
+    #     ("4", "Very Good"),
+    #     ("3", "Average"),
+    #     ("2", "Poor"),
+    #     ("1", "Bad"),
+    # ]
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="reviews"
     )

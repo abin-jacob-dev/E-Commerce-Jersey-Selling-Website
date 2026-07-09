@@ -4,11 +4,6 @@ User
 - ratings and reviews functionality is incomplete 
 - design and show error pages properly 
 
-
-Admin
-- no proper path hierarchy in admin URLs
-- admin order cancellation (with confirmation)
-
 General
 - use proper status codes 
 - merge to dev branch

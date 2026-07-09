@@ -7,15 +7,15 @@ app_name = "products"
 
 urlpatterns = [
     # categories
-    path("categories/", views.categories, name="categories"),
-    path("add-new-category/", views.add_new_category, name="add_new_category"),
-    path("edit-category/<slug:slug>", views.edit_category, name="edit_category"),
-    path("delete-category/<slug:slug>", views.delete_category, name="delete_category"),
+    path("admin-panel/categories/", views.categories, name="categories"),
+    path("admin-panel/add-new-category/", views.add_new_category, name="add_new_category"),
+    path("admin-panel/edit-category/<slug:slug>", views.edit_category, name="edit_category"),
+    path("admin-panel/delete-category/<slug:slug>", views.delete_category, name="delete_category"),
     # products
-    path("products-list/", views.products_list, name="products_list"),
-    path("add-product/", views.add_product, name="add_product"),
-    path("edit-product/<slug:slug>", views.edit_product, name="edit_product"),
-    path("delete-product/<slug:slug>", views.delete_product, name="delete_product"),
+    path("admin-panel/products-list/", views.products_list, name="products_list"),
+    path("admin-panel/add-product/", views.add_product, name="add_product"),
+    path("admin-panel/edit-product/<slug:slug>", views.edit_product, name="edit_product"),
+    path("admin-panel/delete-product/<slug:slug>", views.delete_product, name="delete_product"),
     path("all-products", views.all_products, name="all_products"),
     path("product-detail/<slug:slug>/", views.product_detail, name="product_detail"),
     path("add-review/<slug:slug>/", views.add_review, name="add_review"),
@@ -118,34 +118,34 @@ urlpatterns = [
     ),
     # admin panel side
     path(
-        "all-orders",
+        "admin-panel/all-orders",
         views.all_orders,
         name="all_orders",
     ),
     path(
-        "order-view/<str:order_id>",
+        "admin-panel/order-view/<str:order_id>",
         views.order_view,
         name="order_view",
     ),
     # ---------------------------------coupons ------------------------------------------
     # admin side
     path(
-        "coupons/",
+        "admin-panel/coupons/",
         views.coupons,
         name="coupons",
     ),
     path(
-        "add-coupon/",
+        "admin-panel/add-coupon/",
         views.add_coupon,
         name="add_coupon",
     ),
     path(
-        "edit-coupon/<int:id>",
+        "admin-panel/edit-coupon/<int:id>",
         views.edit_coupon,
         name="edit_coupon",
     ),
     path(
-        "delete-coupon/<int:id>",
+        "admin-panel/delete-coupon/<int:id>",
         views.delete_coupon,
         name="delete_coupon",
     ),
@@ -162,22 +162,22 @@ urlpatterns = [
     ),
     # -------------------------------offer-------------------------
     path(
-        "offers",
+        "admin-panel/offers",
         views.offers,
         name="offers",
     ),
     path(
-        "add-offer/",
+        "admin-panel/add-offer/",
         views.add_offer,
         name="add_offer",
     ),
     path(
-        "edit-offer/<int:id>/",
+        "admin-panel/edit-offer/<int:id>/",
         views.edit_offer,
         name="edit_offer",
     ),
     path(
-        "delete-offer/<int:id>/",
+        "admin-panel/delete-offer/<int:id>/",
         views.delete_offer,
         name="delete_offer",
     ),

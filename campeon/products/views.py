@@ -239,16 +239,16 @@ def add_product(request):
             }
             variant_form = VariantForm(variant_data)
             variant_forms.append(variant_form)
-            
+
             if not variant_form.is_valid():
                 valid = False
-            
+
             # Check for duplicate sizes
             if sizes[i] in seen_sizes:
                 errors.append(f"Duplicate size '{sizes[i]}'")
                 valid = False
             seen_sizes.add(sizes[i])
-            
+
             # Check image count
             images = request.FILES.getlist(f"images_{i}[]")
             if len(images) < 3:
@@ -280,12 +280,12 @@ def add_product(request):
 
     categories = Category.objects.filter(is_active=True, is_deleted=False)
     size_choices = Variant.SIZE_CHOICES
-    
+
     return render(
         request,
         "admin/products/products/add_product.html",
         {
-            'form':form,
+            "form": form,
             "variant_forms": variant_forms,
             "size_choices": size_choices,
             "categories": categories,
@@ -313,28 +313,28 @@ def edit_product(request, slug):
                 variant_count += 1
             else:
                 break
-                
+
         seen_sizes = set()
         variant_forms = []
         valid = True
-        
+
         # Validate product form first
         if not form.is_valid():
             valid = False
-            
+
         # Validate variants
         for i in range(variant_count):
             variant_data = {
                 "size": request.POST.get(f"size_{i}"),
                 "price": request.POST.get(f"price_{i}"),
                 "stock": request.POST.get(f"stock_{i}"),
-                "is_active": (
-                    request.POST.get(f"variant_is_active_{i}") == "true"
-                ),
+                "is_active": (request.POST.get(f"variant_is_active_{i}") == "true"),
             }
             variant_id = request.POST.get(f"variant_id_{i}")
             if variant_id and variant_id.isdigit():
-                variant = Variant.objects.filter(id=int(variant_id), product=product).first()
+                variant = Variant.objects.filter(
+                    id=int(variant_id), product=product
+                ).first()
                 if variant:
                     variant_form = VariantForm(variant_data, instance=variant)
                 else:
@@ -342,17 +342,17 @@ def edit_product(request, slug):
             else:
                 variant_form = VariantForm(variant_data)
             variant_forms.append(variant_form)
-            
+
             if not variant_form.is_valid():
                 valid = False
-                
+
             # Check for duplicate sizes
             size = request.POST.get(f"size_{i}")
             if size in seen_sizes:
                 errors.append(f"Duplicate size '{size}'")
                 valid = False
             seen_sizes.add(size)
-            
+
             # Check image count
             images = request.FILES.getlist(f"images_{i}[]")
             # If it's an existing variant, we only need to check if new images are added
@@ -361,30 +361,32 @@ def edit_product(request, slug):
                 if len(images) < 3:
                     image_errors.append(i)
                     valid = False
-        
+
         if valid and form.is_valid():
             try:
                 with transaction.atomic():
                     product = form.save()
                     processed_variant_ids = []
-                    
+
                     for i in range(variant_count):
                         variant = variant_forms[i].save(commit=False)
                         variant.product = product
                         variant.save()
                         processed_variant_ids.append(variant.id)
-                        
+
                         # Handle new image uploads for this variant
                         new_images = request.FILES.getlist(f"images_{i}[]")
                         for img in new_images:
                             VariantImage.objects.create(variant=variant, image=img)
-                            
+
                     # Delete variants not present in the form
-                    Variant.objects.filter(product=product).exclude(id__in=processed_variant_ids).delete()
-                    
+                    Variant.objects.filter(product=product).exclude(
+                        id__in=processed_variant_ids
+                    ).delete()
+
                     messages.success(request, "Product updated successfully")
                     return redirect("products:products_list")
-                    
+
             except Exception as e:
                 messages.error(request, str(e))
         else:
@@ -411,7 +413,7 @@ def edit_product(request, slug):
             "size_choices": Variant.SIZE_CHOICES,
             "slot_numbers": range(3),
             "empty_slots": range(3),
-            'form': form,
+            "form": form,
             "variant_forms": variant_forms,
             "combined_variants": combined_variants,
             "post_data": request.POST if request.method == "POST" else None,
@@ -1327,7 +1329,7 @@ def cancel_order_item_request(request, item_id):
         item.variant.stock += item.quantity
         item.variant.save()
 
-    item.status = "cancelled"
+    item.status = "partially_cancelled"
     item.cancelled_at = timezone.now()
 
     reason = request.POST.get("reason", "")
@@ -1337,11 +1339,12 @@ def cancel_order_item_request(request, item_id):
     item.save()
     order = item.order
 
-    if item.order.payment_status == "paid":
-
-        WalletService.credit_wallet(
-            user=order.user, amount=item.final_paid_price, order=order, source="refund"
-        )
+    # WalletService.credit_wallet(
+    #     user=order.user,
+    #     amount=item.final_paid_price,
+    #     order=order,
+    #     source="refund",
+    # )
 
     active_items = order.items.exclude(status="cancelled")
     if not active_items.exists():
@@ -1403,12 +1406,12 @@ def order_view(request, order_id):
 
         if "update_order" in request.POST:
 
-            # if order.order_status == "cancelled":
-            #     messages.error(request, "Cancelled orders cannot be modified.")
-            #     return redirect(
-            #         "products:order_view",
-            #         order_id=order.order_id,
-            #     )
+            if order.order_status == "cancelled":
+                messages.error(request, "Cancelled orders cannot be modified.")
+                return redirect(
+                    "products:order_view",
+                    order_id=order.order_id,
+                )
 
             order_status = request.POST.get("order_status")
 
@@ -1442,13 +1445,13 @@ def order_view(request, order_id):
                     order=order,
                 )
 
-                # if item.status == "cancelled":
-                #     messages.error(request, "Cancelled items cannot be modified.")
+                if item.status == "cancelled":
+                    messages.error(request, "Cancelled items cannot be modified.")
 
-                #     return redirect(
-                #         "products:order_view",
-                #         order_id=order.order_id,
-                #     )
+                    return redirect(
+                        "products:order_view",
+                        order_id=order.order_id,
+                    )
 
                 item.status = item_status
                 item.save()
@@ -1493,12 +1496,55 @@ def order_view(request, order_id):
                 )
 
                 order.save()
-                WalletService.credit_wallet(
-                    order.user,
-                    item.refund_amount,
-                    order,
-                    source="refund",
+                if order.payment_method != "cod":
+                    WalletService.credit_wallet(
+                        order.user,
+                        item.refund_amount,
+                        order,
+                        source="refund",
+                    )
+                messages.success(
+                    request,
+                    f"Item status updated to {item.get_status_display()}",
                 )
+
+                return redirect(
+                    "products:order_view",
+                    order_id=order.order_id,
+                )
+        elif "approve_cancel" in request.POST:
+
+            item_id = request.POST.get("item_id")
+
+            if item_id:
+
+                item = get_object_or_404(
+                    OrderItem,
+                    id=item_id,
+                    order=order,
+                )
+
+                item.status = "returned"
+                item.refund_amount = item.final_paid_price
+                item.save()
+
+                all_returned = order.items.exclude(status="returned").exists()
+
+                if not all_returned:
+                    order.order_status = "returned"
+
+                order.total_refund_amount = sum(
+                    item.refund_amount for item in order.items.all()
+                )
+
+                order.save()
+                if order.payment_method != "cod":
+                    WalletService.credit_wallet(
+                        order.user,
+                        item.refund_amount,
+                        order,
+                        source="refund",
+                    )
                 messages.success(
                     request,
                     f"Item status updated to {item.get_status_display()}",
