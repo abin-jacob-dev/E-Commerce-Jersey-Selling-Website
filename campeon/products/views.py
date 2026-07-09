@@ -59,13 +59,13 @@ client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_S
 @never_cache
 @superuser_required
 def categories(request):
-    categories_list = Category.objects.filter(is_deleted=False).order_by("-created_at")
+    categories = Category.objects.filter(is_deleted=False).order_by("-created_at")
     search_query = request.GET.get("search")
 
     if search_query:
-        categories_list = categories_list.filter(name__icontains=search_query)
+        categories = categories.filter(name__icontains=search_query)
 
-    paginator = Paginator(categories_list, 3)  # Show 5 categories per page.
+    paginator = Paginator(categories, 3)  # Show 5 categories per page.
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -542,7 +542,7 @@ def product_detail(request, slug):
     default_variant = min(active_variants, key=lambda v: v.price)
     offer = get_best_offer(product, variant=default_variant)
     discount_price = get_discount_price(default_variant)
-    similar_products = Product.objects.filter(category=product.category).exclude(
+    similar_products = Product.objects.filter(category=product.category,is_active=True,is_deleted=False).exclude(
         pk=product.id
     )[:4]
     print(similar_products)
@@ -1110,7 +1110,9 @@ def select_payment(request):
 
                 # save items
                 for item in cart_items:
-                    item_offer = get_best_offer(item.variant.product, variant=item.variant)
+                    item_offer = get_best_offer(
+                        item.variant.product, variant=item.variant
+                    )
                     OrderItem.objects.create(
                         order=order,
                         variant=item.variant,
@@ -1587,8 +1589,27 @@ def order_view(request, order_id):
 @superuser_required
 def coupons(request):
     coupons = Coupon.objects.order_by("-created_at")
+
+    search_query = request.GET.get("search")
+
+    if search_query:
+        coupons = coupons.filter(code__icontains=search_query)
+
+    paginator = Paginator(coupons, 3)  # Show 5 categories per page.
+
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    query_params = request.GET.copy()
+
+    if "page" in query_params:
+        del query_params["page"]
+
     context = {
-        "coupons": coupons,
+        "coupons": page_obj,
+        "page_obj": page_obj,
+        "search_query": search_query,
+        "query_params": query_params.urlencode(),
     }
     return render(request, "admin/coupons/coupons.html", context)
 
@@ -1676,7 +1697,30 @@ def remove_coupon(request):
 @superuser_required
 def offers(request):
     offers = Offer.objects.all().order_by("-created_at")
-    return render(request, "admin/offers/offers.html", {"offers": offers})
+
+    search_query = request.GET.get("search")
+
+    if search_query:
+        offers = offers.filter(name__icontains=search_query)
+
+    paginator = Paginator(offers, 3)  # Show 5 categories per page.
+
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    query_params = request.GET.copy()
+
+    if "page" in query_params:
+        del query_params["page"]
+
+    return render(
+        request,
+        "admin/offers/offers.html",
+        {
+            "offers": offers,
+            "page_obj": page_obj,
+        },
+    )
 
 
 @superuser_required

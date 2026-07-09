@@ -30,8 +30,8 @@
           {% for variant in product.variants.all %}
             {% for image in variant.images.all %}
               <div data-variant-id="{{ variant.id }}" class="thumb-wrapper min-w-[60px] w-16 h-16 sm:w-20 sm:h-20 border border-gray-200 rounded-sm overflow-hidden cursor-pointer flex-shrink-0">
-                {% include 'components/default_image.html' with image=image.image.url alt=product.name class='thumb w-full h-full object-cover opacity-60 hover:opacity-100 transition cursor-pointer' %}
-                {% comment %} <img src="{{ image.image.url }}" onclick="changeImage(this)" class="thumb w-full h-full object-cover opacity-60 hover:opacity-100 transition cursor-pointer" /> {% endcomment %}
+                {% comment %} {% include 'components/default_image.html' with image=image.image.url alt=product.name class='thumb w-full h-full object-cover opacity-60 hover:opacity-100 transition cursor-pointer' %} {% endcomment %}
+                <img src="{{ image.image.url }}" onerror="this.onerror=null; this.src='{% static 'images/default-image.png' %}';" onclick="changeImage(this)" class="thumb w-full h-full object-cover opacity-60 hover:opacity-100 transition cursor-pointer" />
 
               </div>
             {% endfor %}
@@ -41,9 +41,9 @@
         <!-- Main Image -->
         <div class="flex-1 bg-white rounded-2xl shadow-sm relative group">
           <div class="overflow-hidden rounded-2xl">
-            {% include 'components/default_image.html' with image=product.get_primary_image alt=product.name class='w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover cursor-crosshair' %}
+            {% comment %} {% include 'components/default_image.html' with image=product.get_primary_image alt=product.name class='w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover cursor-crosshair' %} {% endcomment %}
                 
-            {% comment %} <img id="mainImage" src="{{ product.get_primary_image }}" data-zoom="{{ product.get_primary_image }}" class="w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover cursor-crosshair" /> {% endcomment %}
+            <img id="mainImage" onerror="this.onerror=null; this.src='{% static 'images/default-image.png' %}';" src="{{ product.get_primary_image }}" data-zoom="{{ product.get_primary_image }}" class="w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover cursor-crosshair" />
           </div>
           <!-- Zoom Pane container (invisible when not active) -->
           <div id="zoomPane" class="hidden absolute top-0 left-[calc(100%+2rem)] w-[500px] h-[500px] z-[100] pointer-events-none"></div>
@@ -156,9 +156,9 @@
               <div class="text-left group cursor-pointer">
                 <div class="bg-[#121212] aspect-[3/4] mb-4 overflow-hidden relative">
                   {% if product.get_primary_image %}
-                  {% include 'components/default_image.html' with image=product.get_primary_image alt=product.name class='w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100' %}
+                  {% comment %} {% include 'components/default_image.html' with image=product.get_primary_image alt=product.name class='w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100' %} {% endcomment %}
              
-                    {% comment %} <img src="{{ product.get_primary_image }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" /> {% endcomment %}
+                    <img src="{{ product.get_primary_image }}" onerror="this.onerror=null; this.src='{% static 'images/default-image.png' %}';" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
                   {% else %}
                     <img src="https://via.placeholder.com/400x533?text=No+Image" alt="No image" class="w-full h-full object-cover" />
                   {% endif %}

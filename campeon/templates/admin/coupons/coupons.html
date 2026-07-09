@@ -1,6 +1,8 @@
 {% extends 'admin/partials/base.html' %}
 {% load static %}
-{% block title %}Campeon | Coupons{% endblock title %}
+{% block title %}
+  Campeon | Coupons
+{% endblock %}
 {% block content %}
   <main class="flex-1 p-12 overflow-y-auto">
     <div class="flex justify-between items-end mb-12">
@@ -13,6 +15,16 @@
       <div class="flex items-center gap-6">
         <a href="{% url 'products:add_coupon' %}" class="bg-[#006400] text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center gap-3">Add Coupon</a>
       </div>
+    </div>
+
+    <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <form method="GET" class="flex gap-3 w-full md:w-auto">
+        <input type="text" name="search" value="{{ search_query|default:'' }}" placeholder="Search Coupons..." class="w-full md:w-72 bg-white border border-gray-200 rounded-lg px-4 py-3 text-[12px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime-200" />
+
+        <button type="submit" class="bg-lime-500 text-white px-4 py-3 rounded-lg text-xs font-bold uppercase hover:bg-lime-600 transition">Search</button>
+
+        <a href="{% url 'products:coupons' %}" class="bg-black text-white px-4 py-3 text-xs font-bold uppercase rounded-lg hover:bg-gray-800 transition flex items-center">Clear</a>
+      </form>
     </div>
 
     <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden">
@@ -142,8 +154,26 @@
         {% endfor %}
       </div>
 
-      <div class="border-t p-6">
-        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Coupons: {{ coupons.count }}</p>
+      <div class="border-t p-6 flex justify-between items-center">
+        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Coupons: {{ coupons.paginator.count }}</p>
+
+        <div class="flex items-center gap-2">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&{{ query_params }}" class="px-3 py-1 text-xs font-bold bg-gray-100 rounded">Prev</a>
+          {% endif %}
+
+          {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+              <span class="px-3 py-1 text-xs font-bold bg-black text-white rounded">{{ num }}</span>
+            {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+              <a href="?page={{ num }}&{{ query_params }}" class="px-3 py-1 text-xs font-bold border rounded hover:bg-gray-100">{{ num }}</a>
+            {% endif %}
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&{{ query_params }}" class="px-3 py-1 text-xs font-bold bg-gray-100 rounded">Next</a>
+          {% endif %}
+        </div>
       </div>
     </div>
   </main>

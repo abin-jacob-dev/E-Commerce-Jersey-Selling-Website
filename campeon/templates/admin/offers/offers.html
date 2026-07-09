@@ -1,205 +1,176 @@
 {% extends 'admin/partials/base.html' %}
 {% load static %}
-{% block title %}Campeon | Offers{% endblock title %}
+{% block title %}
+  Campeon | Offers
+{% endblock %}
 {% block content %}
-<main class="flex-1 p-12 overflow-y-auto">
+  <main class="flex-1 p-12 overflow-y-auto">
+    <!-- HEADER -->
+    <div class="flex justify-between items-end mb-12">
+      <div>
+        <h2 class="text-6xl font-black uppercase tracking-tighter leading-none mb-4 text-dark-lime">Offers</h2>
 
-  <!-- HEADER -->
-  <div class="flex justify-between items-end mb-12">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Manage discount offers and promotions</p>
+      </div>
 
-    <div>
-      <h2 class="text-6xl font-black uppercase tracking-tighter leading-none mb-4 text-dark-lime">
-        Offers
-      </h2>
-
-      <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">
-        Manage discount offers and promotions
-      </p>
+      <div class="flex items-center gap-6">
+        <a href="{% url 'products:add_offer' %}" class="bg-[#006400] text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center gap-3">Add Offer</a>
+      </div>
     </div>
 
-    <div class="flex items-center gap-6">
-      <a href="{% url 'products:add_offer' %}"
-         class="bg-[#006400] text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg shadow-xl hover:bg-black transition-all flex items-center gap-3">
-        Add Offer
-      </a>
+    <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <form method="GET" class="flex gap-3 w-full md:w-auto">
+        <input type="text" name="search" value="{{ search_query|default:'' }}" placeholder="Search Offers..." class="w-full md:w-72 bg-white border border-gray-200 rounded-lg px-4 py-3 text-[12px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-lime-200" />
+
+        <button type="submit" class="bg-lime-500 text-white px-4 py-3 rounded-lg text-xs font-bold uppercase hover:bg-lime-600 transition">Search</button>
+
+        <a href="{% url 'products:offers' %}" class="bg-black text-white px-4 py-3 text-xs font-bold uppercase rounded-lg hover:bg-gray-800 transition flex items-center">Clear</a>
+      </form>
     </div>
 
-  </div>
+    <!-- TABLE -->
+    <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden">
+      <!-- DESKTOP -->
+      <div class="hidden xl:block">
+        <table class="w-full">
+          <thead class="bg-[#e2ead8] text-[9px] font-black uppercase tracking-[0.2em] text-gray-600 border-b border-gray-100">
+            <tr>
+              <th class="px-6 py-6">Offer Code</th>
+              <th class="px-6 py-6">Discount</th>
+              <th class="px-6 py-6">Start Date</th>
+              <th class="px-6 py-6">Expiry Date</th>
+              <th class="px-6 py-6">Status</th>
+              <th class="px-6 py-6 text-right">Actions</th>
+            </tr>
+          </thead>
 
-  <!-- TABLE -->
-  <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden">
+          <tbody>
+            {% for offer in page_obj %}
+              <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="px-6 py-6 font-black text-black">{{ offer.name }}</td>
 
-    <!-- DESKTOP -->
-    <div class="hidden xl:block">
-      <table class="w-full">
+                <td class="px-6 py-6 font-black text-green-700">
+                  {% if offer.discount_type == 'percentage' %}
+                    {{ offer.discount_value }}%
+                  {% else %}
+                    ₹{{ offer.discount_value }}
+                  {% endif %}
+                </td>
 
-        <thead class="bg-[#e2ead8] text-[9px] font-black uppercase tracking-[0.2em] text-gray-600 border-b border-gray-100">
-          <tr>
-            <th class="px-6 py-6">Offer Code</th>
-            <th class="px-6 py-6">Discount</th>
-            <th class="px-6 py-6">Start Date</th>
-            <th class="px-6 py-6">Expiry Date</th>
-            <th class="px-6 py-6">Status</th>
-            <th class="px-6 py-6 text-right">Actions</th>
-          </tr>
-        </thead>
+                <td class="px-6 py-6 text-black whitespace-nowrap">{{ offer.start_date|date:'d M Y' }}</td>
 
-        <tbody>
-          {% for offer in offers %}
-          <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="px-6 py-6 text-black whitespace-nowrap">{{ offer.end_date|date:'d M Y' }}</td>
 
-            <td class="px-6 py-6 font-black text-black">
-              {{ offer.name }}
-            </td>
+                <td class="px-6 py-6">
+                  {% if offer.is_active %}
+                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold">Active</span>
+                  {% else %}
+                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold">Inactive</span>
+                  {% endif %}
+                </td>
 
-            <td class="px-6 py-6 font-black text-green-700">
-              {% if offer.discount_type == 'percentage' %}
-                {{ offer.discount_value }}%
-              {% else %}
-                ₹{{ offer.discount_value }}
-              {% endif %}
-            </td>
+                <td class="px-6 py-6">
+                  <div class="flex justify-end gap-3">
+                    <a href="{% url 'products:edit_offer' offer.id %}" class="text-gray-400 hover:text-black">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </a>
 
-           
+                    <a href="{% url 'products:delete_offer' offer.id %}" class="text-gray-400 hover:text-red-500">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-            <td class="px-6 py-6 text-black whitespace-nowrap">
-              {{ offer.start_date|date:'d M Y' }}
-            </td>
+      <!-- MOBILE -->
+      <div class="xl:hidden p-4 space-y-4">
+        {% for offer in offers %}
+          <div class="border rounded-2xl p-5 bg-white shadow-sm">
+            <div class="flex justify-between mb-4">
+              <div>
+                <h3 class="font-black text-lg break-all">{{ offer.code }}</h3>
 
-            <td class="px-6 py-6 text-black whitespace-nowrap">
-              {{ offer.end_date|date:'d M Y' }}
-            </td>
-
-            <td class="px-6 py-6">
-              {% if offer.is_active %}
-                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold">
-                  Active
-                </span>
-              {% else %}
-                <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold">
-                  Inactive
-                </span>
-              {% endif %}
-            </td>
-
-            <td class="px-6 py-6">
-              <div class="flex justify-end gap-3">
-
-                <a href="{% url 'products:edit_offer' offer.id %}"
-                   class="text-gray-400 hover:text-black">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                </a>
-
-                <a href="{% url 'products:delete_offer' offer.id %}"
-                   class="text-gray-400 hover:text-red-500">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                  </svg>
-                </a>
-
+                <p class="text-sm text-black">Offer</p>
               </div>
-            </td>
 
-          </tr>
-          {% endfor %}
-        </tbody>
+              {% if offer.is_active %}
+                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold">Active</span>
+              {% else %}
+                <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold">Inactive</span>
+              {% endif %}
+            </div>
 
-      </table>
-    </div>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="text-gray-400 uppercase text-[10px] mb-1">Discount</p>
 
-    <!-- MOBILE -->
-    <div class="xl:hidden p-4 space-y-4">
+                <p class="font-bold text-green-700">
+                  {% if offer.discount_type == 'percentage' %}
+                    {{ offer.discount_value }}%
+                  {% else %}
+                    ₹{{ offer.discount_value }}
+                  {% endif %}
+                </p>
+              </div>
 
-      {% for offer in offers %}
-      <div class="border rounded-2xl p-5 bg-white shadow-sm">
+              <div>
+                <p class="text-gray-400 uppercase text-[10px] mb-1">Min Purchase</p>
+                <p class="font-bold">₹{{ offer.min_purchase_amount }}</p>
+              </div>
 
-        <div class="flex justify-between mb-4">
+              <div>
+                <p class="text-gray-400 uppercase text-[10px] mb-1">Start</p>
+                <p>{{ offer.start_date|date:'d M Y' }}</p>
+              </div>
 
-          <div>
-            <h3 class="font-black text-lg break-all">
-              {{ offer.code }}
-            </h3>
+              <div>
+                <p class="text-gray-400 uppercase text-[10px] mb-1">Expiry</p>
+                <p>{{ offer.end_date|date:'d M Y' }}</p>
+              </div>
+            </div>
 
-            <p class="text-sm text-black">
-              Offer
-            </p>
+            <div class="flex gap-4 mt-5 pt-4 border-t">
+              <a href="" class="flex-1 text-center py-2 rounded-lg bg-gray-100 hover:bg-gray-200 font-bold">Edit</a>
+
+              <a href="" class="flex-1 text-center py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-bold">Delete</a>
+            </div>
           </div>
+        {% empty %}
+          <div class="text-center py-20">
+            <h3 class="font-bold text-black">No Offers Found</h3>
+          </div>
+        {% endfor %}
+      </div>
 
-          {% if offer.is_active %}
-            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold">
-              Active
-            </span>
-          {% else %}
-            <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold">
-              Inactive
-            </span>
+      <div class="border-t p-6 flex justify-between items-center">
+        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Offers: {{ offers.count }}</p>
+
+        <div class="flex items-center gap-2">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 text-xs font-bold bg-gray-100 rounded">Prev</a>
           {% endif %}
 
+          {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+              <span class="px-3 py-1 text-xs font-bold bg-black text-white rounded">{{ num }}</span>
+            {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+              <a href="?page={{ num }}" class="px-3 py-1 text-xs font-bold border rounded hover:bg-gray-100">{{ num }}</a>
+            {% endif %}
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 text-xs font-bold bg-gray-100 rounded">Next</a>
+          {% endif %}
         </div>
-
-        <div class="grid grid-cols-2 gap-4 text-sm">
-
-          <div>
-            <p class="text-gray-400 uppercase text-[10px] mb-1">Discount</p>
-
-            <p class="font-bold text-green-700">
-              {% if offer.discount_type == 'percentage' %}
-                {{ offer.discount_value }}%
-              {% else %}
-                ₹{{ offer.discount_value }}
-              {% endif %}
-            </p>
-          </div>
-
-          <div>
-            <p class="text-gray-400 uppercase text-[10px] mb-1">Min Purchase</p>
-            <p class="font-bold">₹{{ offer.min_purchase_amount }}</p>
-          </div>
-
-          <div>
-            <p class="text-gray-400 uppercase text-[10px] mb-1">Start</p>
-            <p>{{ offer.start_date|date:'d M Y' }}</p>
-          </div>
-
-          <div>
-            <p class="text-gray-400 uppercase text-[10px] mb-1">Expiry</p>
-            <p>{{ offer.end_date|date:'d M Y' }}</p>
-          </div>
-
-        </div>
-
-        <div class="flex gap-4 mt-5 pt-4 border-t">
-
-          <a href="" class="flex-1 text-center py-2 rounded-lg bg-gray-100 hover:bg-gray-200 font-bold">
-            Edit
-          </a>
-
-          <a href="" class="flex-1 text-center py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-bold">
-            Delete
-          </a>
-
-        </div>
-
       </div>
-      {% empty %}
-        <div class="text-center py-20">
-          <h3 class="font-bold text-black">No Offers Found</h3>
-        </div>
-      {% endfor %}
-
     </div>
-
-    <div class="border-t p-6">
-      <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">
-        Total Offers: {{ offers.count }}
-      </p>
-    </div>
-
-  </div>
-
-</main>
+  </main>
 {% endblock %}
