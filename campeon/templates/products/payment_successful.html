@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block content %}
-  {{ cart_subtotal }}
+  {% comment %} {{ cart_subtotal }}
   {{ cart_total }}
   {{ cart_count }}
   {{ coupon_discount }}
-  {{ applied_coupon }}
+  {{ applied_coupon }} {% endcomment %}
   <div class="min-h-screen bg-[#e9f5db] flex items-center justify-center px-4 py-10">
     <div class="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl">
       <!-- Success Header -->

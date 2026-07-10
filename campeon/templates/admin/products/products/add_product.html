@@ -624,10 +624,18 @@ CROPPER JS + CSS
     
       function updateIndexes() {
         document.querySelectorAll('.variant-item:not(#emptyVariant)').forEach((variant, index) => {
-          variant.querySelector('.size-select').name = `size_${index}`
-          variant.querySelector('input[name="stock"]').name = `stock_${index}`
-          variant.querySelector('input[name="price"]').name = `price_${index}`
-          variant.querySelector('select[name="variant_is_active"]').name = `variant_is_active_${index}`
+          const sizeSelect = variant.querySelector('.size-select');
+          if (sizeSelect) sizeSelect.name = `size_${index}`;
+
+          const stockInput = variant.querySelector('input[name="stock"], input[name^="stock_"]');
+          if (stockInput) stockInput.name = `stock_${index}`;
+
+          const priceInput = variant.querySelector('input[name="price"], input[name^="price_"]');
+          if (priceInput) priceInput.name = `price_${index}`;
+
+          const activeSelect = variant.querySelector('select[name="variant_is_active"], select[name^="variant_is_active_"]');
+          if (activeSelect) activeSelect.name = `variant_is_active_${index}`;
+
           variant.querySelectorAll('.variantImages').forEach((input) => {
             input.name = `images_${index}[]`
           })

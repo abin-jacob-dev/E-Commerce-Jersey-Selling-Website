@@ -32,8 +32,10 @@ class OTP(models.Model):
 
         Your One-Time Password (OTP) for account verification is:
 
-        👉 {self.otp}
+        
+         {self.otp}
 
+         
         This OTP is valid for 5 minutes. Please do not share this code with anyone.
 
         If you did not attempt to create an account, you can safely ignore this email.

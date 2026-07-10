@@ -4,7 +4,6 @@ from .forms import UserSignupForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import Account
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
@@ -12,6 +11,7 @@ from userauths.utility import OTP
 from products.models import Wallet, WalletTransaction
 
 # verification email import
+from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -28,9 +28,8 @@ def superuser_required(func):
         if request.user.is_authenticated and request.user.is_superuser:
             return func(request, *args, **kwargs)
         return redirect("userauths:signin")
+
     return wrapper
-
-
 
 
 def user_login_required(func):
@@ -41,9 +40,10 @@ def user_login_required(func):
             return redirect("userauths:signin")
         # if request.user.is_authenticated and request.user.is_superuser:
         #     return redirect('admin_panel:dashboard')
-        if request.user.is_authenticated and not request.user.is_blocked :
+        if request.user.is_authenticated and not request.user.is_blocked:
             return func(request, *args, **kwargs)
         return redirect("userauths:signin")
+
     return wrapper
 
 
@@ -159,7 +159,7 @@ def signin(request):
 
         messages.success(request, "You are now logged in.")
         if user.is_superuser:
-            return redirect('admin_panel:dashboard')
+            return redirect("admin_panel:dashboard")
         return redirect("user:profile")  # dashboard
     return render(request, "userauths/signin.html")
 
@@ -199,16 +199,23 @@ def forgot_password(request):
         except Account.DoesNotExist:
             messages.error(request, "Account with this email does not exist.")
             return redirect("userauths:forgot_password")
-        # Reset Password Email
-        current_site = get_current_site(request)
+
+        reset_path = reverse(
+            "userauths:reset_password_validate",
+            kwargs={
+                "uidb64": urlsafe_base64_encode(force_bytes(user.pk)),
+                "token": default_token_generator.make_token(user),
+            },
+        )
+        reset_url = f"{settings.SITE_URL}{reset_path}"
+        print(reset_url)
+
         mail_subject = "Reset your Password"
         message = render_to_string(
             "userauths/reset_password_email.html",
             {
                 "user": user,
-                "domain": current_site,
-                "uid": urlsafe_base64_encode(force_bytes(user.pk)),  # encoding the pk
-                "token": default_token_generator.make_token(user),
+                "reset_url": reset_url,
             },
         )
         to_email = email

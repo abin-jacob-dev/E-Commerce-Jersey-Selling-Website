@@ -34,8 +34,8 @@ class OTP(models.Model):
 
         Your One-Time Password (OTP) is: {self.otp}
 
-        ⏳ This OTP is valid for 5 minutes.
-        🔒 Do not share this OTP with anyone for security reasons.
+          This OTP is valid for 5 minutes.
+         Do not share this OTP with anyone for security reasons.
 
         If you did not request this change, please ignore this email or contact our support team immediately.
 

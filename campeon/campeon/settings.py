@@ -35,8 +35,19 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 # DEBUG = False
 
 
-ALLOWED_HOSTS = ["*", "127.0.0.1"]
+ALLOWED_HOSTS = ["*", "127.0.0.1", "n2h3h0qb-8000.inc1.devtunnels.ms", "localhost"]
+# ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,").split(",")
+print(ALLOWED_HOSTS)
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://n2h3h0qb-8000.inc1.devtunnels.ms",
+    "http://localhost:8000",
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+SITE_URL = os.getenv("SITE_URL")
+SITE_ID =1
 
 # Application definition
 

@@ -252,7 +252,7 @@ VARIANT IMAGES
                               <p class="text-xs text-gray-400">Upload</p>
                             </div>
                             <img src="{{ image.image.url }}" alt="Variant image" class="preview-img absolute inset-0 w-full h-full object-cover rounded-2xl" />
-                            <input type="file" accept="image/*" class="variantImages hidden" />
+                            <input type="file" accept="image/*" class="variantImages hidden" data-image-id="{{ image.id }}" />
                           </div>
                         </div>
                       {% endfor %}
@@ -566,24 +566,30 @@ CROPPER JS + CSS
     
       function updateIndexes() {
         document.querySelectorAll('.variant-item:not(#emptyVariant)').forEach((variant, index) => {
-          const variantIdInput = variant.querySelector('[name="variant_id"]')
+          const variantIdInput = variant.querySelector('[name="variant_id"], [name^="variant_id_"]');
           if (variantIdInput) {
-            variantIdInput.name = `variant_id_${index}`
+            variantIdInput.name = `variant_id_${index}`;
           }
-          variant.querySelectorAll('.size-select').forEach((select) => {
-            select.name = `size_${index}`
-          })
-          variant.querySelectorAll('[name="stock"]').forEach((input) => {
-            input.name = `stock_${index}`
-          })
-          variant.querySelectorAll('[name="price"]').forEach((input) => {
-            input.name = `price_${index}`
-          })
-          variant.querySelectorAll('[name="variant_is_active"]').forEach((select) => {
-            select.name = `variant_is_active_${index}`
-          })
+
+          const sizeSelect = variant.querySelector('.size-select');
+          if (sizeSelect) sizeSelect.name = `size_${index}`;
+
+          const stockInput = variant.querySelector('input[name="stock"], input[name^="stock_"]');
+          if (stockInput) stockInput.name = `stock_${index}`;
+
+          const priceInput = variant.querySelector('input[name="price"], input[name^="price_"]');
+          if (priceInput) priceInput.name = `price_${index}`;
+
+          const activeSelect = variant.querySelector('select[name="variant_is_active"], select[name^="variant_is_active_"]');
+          if (activeSelect) activeSelect.name = `variant_is_active_${index}`;
+
           variant.querySelectorAll('.variantImages').forEach((input) => {
-            input.name = `images_${index}[]`
+            const imageId = input.getAttribute('data-image-id');
+            if (imageId) {
+              input.name = `image_replace_${imageId}`;
+            } else {
+              input.name = `images_${index}[]`;
+            }
           })
         })
       }

@@ -146,6 +146,7 @@
       </div>
     </div>
 
+    {% if similar_products.count > "0" %}
     <section class="py-5">
       <div class="container mx-auto text-center">
         <h3 class="text-3xl font-black uppercase mb-12 tracking-tightest">Similar Products.</h3>
@@ -169,7 +170,7 @@
                 <div class="flex space-x-2 text-xs">
                   {% with variant=product.variants.first %}
                     {% if variant %}
-                      <span class="text-lime font-bold">₹{{ variant.price }}</span>
+                      <span class="text-lime font-bold">₹{{ variant.price|floatformat:2 }}</span>
                     {% endif %}
                   {% endwith %}
                 </div>
@@ -179,6 +180,7 @@
         </div>
       </div>
     </section>
+    {% endif %}
 
     <!-- Reviews Section -->
     {% comment %} <div class="mt-16">

@@ -207,6 +207,87 @@ def products_list(request):
     return render(request, "admin/products/products/products_list.html", context)
 
 
+def _validate_and_parse_variants(request, product=None):
+    # Count variants
+    variant_count = 0
+    while True:
+        if f"size_{variant_count}" in request.POST:
+            variant_count += 1
+        else:
+            break
+
+    seen_sizes = set()
+    variant_forms = []
+    image_errors = []
+    valid = True
+
+    for i in range(variant_count):
+        variant_data = {
+            "size": request.POST.get(f"size_{i}"),
+            "price": request.POST.get(f"price_{i}"),
+            "stock": request.POST.get(f"stock_{i}"),
+            "is_active": (request.POST.get(f"variant_is_active_{i}") == "true"),
+        }
+        variant_id = request.POST.get(f"variant_id_{i}")
+        variant = None
+        if product and variant_id and variant_id.isdigit():
+            variant = Variant.objects.filter(
+                id=int(variant_id), product=product
+            ).first()
+
+        if variant:
+            variant_form = VariantForm(variant_data, instance=variant)
+        else:
+            variant_form = VariantForm(variant_data)
+
+        variant_forms.append(variant_form)
+
+        if not variant_form.is_valid():
+            valid = False
+
+        # Check for duplicate sizes
+        size = variant_data["size"]
+        if size in seen_sizes:
+            valid = False
+        seen_sizes.add(size)
+
+        # Check image count
+        images = request.FILES.getlist(f"images_{i}[]")
+        # If it's a new variant, we need at least 3 images
+        if not variant:
+            if len(images) < 3:
+                image_errors.append(i)
+                valid = False
+
+    return variant_forms, valid, image_errors, variant_count
+
+
+def _save_variants(product, variant_forms, variant_count, request):
+    processed_variant_ids = []
+    for i in range(variant_count):
+        variant = variant_forms[i].save(commit=False)
+        variant.product = product
+        variant.save()
+        processed_variant_ids.append(variant.id)
+
+        # Handle new image uploads for this variant
+        new_images = request.FILES.getlist(f"images_{i}[]")
+        for img in new_images:
+            VariantImage.objects.create(variant=variant, image=img)
+
+        # Handle existing image replacements
+        for image in variant.images.all():
+            replace_key = f"image_replace_{image.id}"
+            if replace_key in request.FILES:
+                image.image = request.FILES[replace_key]
+                image.save()
+
+    # Delete variants not present in the form
+    Variant.objects.filter(product=product).exclude(
+        id__in=processed_variant_ids
+    ).delete()
+
+
 @superuser_required
 def add_product(request):
     form = ProductForm()
@@ -214,68 +295,19 @@ def add_product(request):
     image_errors = []
     if request.method == "POST":
         form = ProductForm(request.POST)
-        sizes = request.POST.getlist("size")
-        prices = request.POST.getlist("price")
-        stocks = request.POST.getlist("stock")
-        variant_status = request.POST.getlist("variant_is_active")
-        seen_sizes = set()
-        variant_forms = []
-        errors = []
-        valid = True
-
-        # Validate product form first
-        if not form.is_valid():
-            valid = False
-
-        # Validate variants
-        for i in range(len(sizes)):
-            variant_data = {
-                "size": sizes[i],
-                "price": prices[i] if i < len(prices) else 0,
-                "stock": stocks[i] if i < len(stocks) else 0,
-                "is_active": (
-                    variant_status[i] == "true" if i < len(variant_status) else True
-                ),
-            }
-            variant_form = VariantForm(variant_data)
-            variant_forms.append(variant_form)
-
-            if not variant_form.is_valid():
-                valid = False
-
-            # Check for duplicate sizes
-            if sizes[i] in seen_sizes:
-                errors.append(f"Duplicate size '{sizes[i]}'")
-                valid = False
-            seen_sizes.add(sizes[i])
-
-            # Check image count
-            images = request.FILES.getlist(f"images_{i}[]")
-            if len(images) < 3:
-                image_errors.append(i)
-                valid = False
+        variant_forms, valid, image_errors, variant_count = _validate_and_parse_variants(request)
 
         if valid and form.is_valid():
             try:
                 with transaction.atomic():
                     product = form.save()
-                    for i in range(len(sizes)):
-                        variant = variant_forms[i].save(commit=False)
-                        variant.product = product
-                        variant.save()
-                        images = request.FILES.getlist(f"images_{i}[]")
-                        for image in images:
-                            VariantImage.objects.create(
-                                variant=variant,
-                                image=image,
-                            )
+                    _save_variants(product, variant_forms, variant_count, request)
                     messages.success(request, "Product created successfully")
                     return redirect("products:products_list")
 
             except Exception as e:
                 messages.error(request, str(e))
         else:
-            # Show a single generic error message
             messages.error(request, "Please fix all the errors below")
 
     categories = Category.objects.filter(is_active=True, is_deleted=False)
@@ -301,96 +333,23 @@ def edit_product(request, slug):
     product = get_object_or_404(Product, slug=slug)
     form = ProductForm(instance=product)
     variant_forms = []
-    errors = []
     image_errors = []
 
     if request.method == "POST":
         form = ProductForm(request.POST, instance=product)
-        # Count how many variants we have (by checking size_0, size_1, etc.)
-        variant_count = 0
-        while True:
-            if f"size_{variant_count}" in request.POST:
-                variant_count += 1
-            else:
-                break
-
-        seen_sizes = set()
-        variant_forms = []
-        valid = True
-
-        # Validate product form first
-        if not form.is_valid():
-            valid = False
-
-        # Validate variants
-        for i in range(variant_count):
-            variant_data = {
-                "size": request.POST.get(f"size_{i}"),
-                "price": request.POST.get(f"price_{i}"),
-                "stock": request.POST.get(f"stock_{i}"),
-                "is_active": (request.POST.get(f"variant_is_active_{i}") == "true"),
-            }
-            variant_id = request.POST.get(f"variant_id_{i}")
-            if variant_id is not None and variant_id.isdigit():
-                variant = Variant.objects.filter(
-                    id=int(variant_id), product=product
-                ).first()
-                if variant:
-                    variant_form = VariantForm(variant_data, instance=variant)
-                else:
-                    variant_form = VariantForm(variant_data)
-            else:
-                variant_form = VariantForm(variant_data)
-            variant_forms.append(variant_form)
-
-            if not variant_form.is_valid():
-                valid = False
-
-            # Check for duplicate sizes
-            size = request.POST.get(f"size_{i}")
-            if size in seen_sizes:
-                errors.append(f"Duplicate size '{size}'")
-                valid = False
-            seen_sizes.add(size)
-
-            # Check image count
-            images = request.FILES.getlist(f"images_{i}[]")
-            # If it's an existing variant, we only need to check if new images are added
-            # If it's a new variant, we need at least 3 images
-            if not variant_id:
-                if len(images) < 3:
-                    image_errors.append(i)
-                    valid = False
+        variant_forms, valid, image_errors, variant_count = _validate_and_parse_variants(request, product=product)
 
         if valid and form.is_valid():
             try:
                 with transaction.atomic():
                     product = form.save()
-                    processed_variant_ids = []
-
-                    for i in range(variant_count):
-                        variant = variant_forms[i].save(commit=False)
-                        variant.product = product
-                        variant.save()
-                        processed_variant_ids.append(variant.id)
-
-                        # Handle new image uploads for this variant
-                        new_images = request.FILES.getlist(f"images_{i}[]")
-                        for img in new_images:
-                            VariantImage.objects.create(variant=variant, image=img)
-
-                    # Delete variants not present in the form
-                    Variant.objects.filter(product=product).exclude(
-                        id__in=processed_variant_ids
-                    ).delete()
-
+                    _save_variants(product, variant_forms, variant_count, request)
                     messages.success(request, "Product updated successfully")
                     return redirect("products:products_list")
 
             except Exception as e:
                 messages.error(request, str(e))
         else:
-            # Show a single generic error message
             messages.error(request, "Please fix all the errors below")
 
     categories = Category.objects.filter(is_active=True, is_deleted=False)
@@ -542,9 +501,9 @@ def product_detail(request, slug):
     default_variant = min(active_variants, key=lambda v: v.price)
     offer = get_best_offer(product, variant=default_variant)
     discount_price = get_discount_price(default_variant)
-    similar_products = Product.objects.filter(category=product.category,is_active=True,is_deleted=False).exclude(
-        pk=product.id
-    )[:4]
+    similar_products = Product.objects.filter(
+        category=product.category, is_active=True, is_deleted=False
+    ).exclude(pk=product.id)[:4]
     print(similar_products)
     if request.user.is_authenticated:
         wishlist_variant_ids = set(
@@ -817,7 +776,12 @@ def add_to_wishlist(request, slug):
                 cart=cart, variant=variant, defaults={"quantity": quantity}
             )
             if not created:
+                if cart_item.quantity >= 5:
+                    messages.warning(request, "maximum limit reached")
+                    return redirect("products:cart")
                 cart_item.quantity += quantity
+                if cart_item.quantity > 5:
+                    cart_item.quantity = 5
                 cart_item.save()
             messages.success(request, "Added to Cart")
             return redirect("products:cart")
