@@ -1484,13 +1484,13 @@ def order_view(request, order_id):
                 )
 
                 order.save()
-                if order.payment_method != "cod":
-                    WalletService.credit_wallet(
-                        order.user,
-                        item.refund_amount,
-                        order,
-                        source="refund",
-                    )
+                # if order.payment_method != "cod":
+                #     WalletService.credit_wallet(
+                #         order.user,
+                #         item.refund_amount,
+                #         order,
+                #         source="refund",
+                #     )
                 messages.success(
                     request,
                     f"Item status updated to {item.get_status_display()}",
@@ -1529,13 +1529,13 @@ def order_view(request, order_id):
                 )
 
                 order.save()
-                if order.payment_method != "cod":
-                    WalletService.credit_wallet(
-                        order.user,
-                        item.refund_amount,
-                        order,
-                        source="refund",
-                    )
+                # if order.payment_method != "cod":
+                #     WalletService.credit_wallet(
+                #         order.user,
+                #         item.refund_amount,
+                #         order,
+                #         source="refund",
+                #     )
                 messages.success(
                     request,
                     f"Item status updated to {item.get_status_display()}",

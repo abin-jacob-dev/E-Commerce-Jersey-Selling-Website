@@ -47,7 +47,7 @@ CSRF_TRUSTED_ORIGINS = [
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 SITE_URL = os.getenv("SITE_URL")
-SITE_ID =1
+
 
 # Application definition
 
@@ -247,7 +247,7 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
 RAZORPAY_KEY_ID = os.getenv("RAZOR_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZOR_KEY_SECRET")
 
-SITE_ID = 1
+# SITE_ID = 1
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],

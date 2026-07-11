@@ -295,4 +295,4 @@ def signin_admin(request):
 @login_required()
 def signout_admin(request):
     logout(request)
-    return redirect("userauths:signin_admin")
+    return redirect("userauths:signin")
