@@ -1,23 +1,29 @@
-from django.shortcuts import render, redirect
-from userauths.models import Account
-from django.db.models import Q, Sum, F, DecimalField, Count
-from django.core.paginator import Paginator
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import never_cache
-from django.contrib.sessions.models import Session
-from django.utils.timezone import now
-from userauths.views import superuser_required
-from products.models import Order, OrderItem, Product, Category
-from django.db.models.functions import TruncDay, TruncMonth, TruncYear
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-from weasyprint import HTML
-from openpyxl import Workbook
-from datetime import datetime
-from django.contrib import messages
+# Standard Library Imports
+import calendar
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
+
+# Django Imports
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.sessions.models import Session
+from django.core.paginator import Paginator
+from django.db.models import Count, Q, Sum
+from django.db.models.functions import TruncDay, TruncMonth, TruncYear
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.timezone import now
+
+# Third-Party Imports
+from openpyxl import Workbook
+from weasyprint import HTML
+
+# Local Application Imports
+from products.models import Order, OrderItem
+from userauths.models import Account
+from userauths.views import superuser_required
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +45,7 @@ def user_management_search(request):
         # users = Account.objects.filter(is_active=True)
         users = users.order_by("-full_name")
 
-    paginator = Paginator(users, 3)
+    paginator = Paginator(users, settings.PAGINATE_BY)
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -54,7 +60,7 @@ def user_management_search(request):
 def users(request):
     users = Account.objects.filter(is_superadmin=False).order_by("-full_name")
 
-    paginator = Paginator(users, 3)  # same as search view
+    paginator = Paginator(users, settings.PAGINATE_BY)  # same as search view
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -143,8 +149,6 @@ def dashboard(request):
     )
 
     # CHART
-
-    import calendar
 
     now = datetime.now()
     sales_data = []
@@ -393,7 +397,9 @@ def sales_report_pdf(request):
     result = html.write_pdf()
 
     response = HttpResponse(result, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="sales_report_{period}.pdf"'
+    response["Content-Disposition"] = (
+        f'attachment; filename="sales_report_{period}.pdf"'
+    )
 
     return response
 
@@ -551,7 +557,9 @@ def sales_report_excel(request):
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-    response["Content-Disposition"] = f'attachment; filename="sales_report_{period}.xlsx"'
+    response["Content-Disposition"] = (
+        f'attachment; filename="sales_report_{period}.xlsx"'
+    )
 
     wb.save(response)
     return response

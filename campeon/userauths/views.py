@@ -1,24 +1,24 @@
-from django.shortcuts import render, redirect
-from django.urls import reverse
-from .forms import UserSignupForm
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from .models import Account
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from django.views.decorators.cache import never_cache
-from userauths.utility import OTP
-from products.models import Wallet, WalletTransaction
+# Standard Library Imports
+import logging
 
-# verification email import
+# Django Imports
 from django.conf import settings
-from django.contrib.sites.shortcuts import get_current_site
-from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.utils.encoding import force_bytes
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
-import logging
+from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.views.decorators.cache import never_cache
+
+# Local Application Imports
+from userauths.forms import UserSignupForm
+from userauths.models import Account
+from userauths.utility import OTP
 
 logger = logging.getLogger(__name__)
 
@@ -148,11 +148,11 @@ def signin(request):
 
         if user is None:
             messages.error(request, "Invalid Credentials")
-            print("user is none")
+
             return redirect("userauths:signin")
         if user.is_blocked:
             messages.error(request, "Your acccount has been blocked")
-            print("user blocked")
+
             return redirect("userauths:signin")
 
         login(request, user)
@@ -208,7 +208,6 @@ def forgot_password(request):
             },
         )
         reset_url = f"{settings.SITE_URL}{reset_path}"
-        print(reset_url)
 
         mail_subject = "Reset your Password"
         message = render_to_string(
@@ -248,10 +247,10 @@ def reset_password(request):  # only works with verification link because of uid
     if request.method == "POST":
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
-        print(password, confirm_password)
+
         if password == confirm_password:
             uid = request.session.get("uid")
-            print(uid)
+
             user = Account.objects.get(pk=uid)
             user.set_password(password)
             user.save()
@@ -278,7 +277,7 @@ def signin_admin(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
         user = authenticate(email=email, password=password)
-        print(user)
+
         if user is None:
             messages.error(request, "Invalid Credentials")
             return render(request, "userauths/signin_admin.html")

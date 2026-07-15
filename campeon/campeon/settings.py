@@ -35,14 +35,15 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 # DEBUG = False
 
 
-ALLOWED_HOSTS = ["*", "127.0.0.1", "n2h3h0qb-8000.inc1.devtunnels.ms", "localhost"]
-# ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,").split(",")
-print(ALLOWED_HOSTS)
+ALLOWED_HOSTS = os.getenv(
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1"
+).split(",")
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://n2h3h0qb-8000.inc1.devtunnels.ms",
-    "http://localhost:8000",
-]
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:8000"
+).split(",")
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
@@ -265,5 +266,8 @@ ACCOUNT_LOGIN_REDIRECT_URL = "products:all_products"  # dashboard
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_ADAPTER = "userauths.adapters.MySocialAccountAdapter"
 
-# SESSION_COOKIE_AGE = 300 #(60*5) 5 MINUTES
-# SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_AGE = 1800 #(60*30) 30 MINUTES
+SESSION_SAVE_EVERY_REQUEST = True
+
+#Pagination
+PAGINATE_BY = 3

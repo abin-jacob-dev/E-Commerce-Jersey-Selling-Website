@@ -1,31 +1,26 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import never_cache
-from userauths.models import Account
-from django.contrib.auth.hashers import check_password
-from django.contrib import messages
-from .utility import OTP
-from django.http import HttpResponse
-from .forms import AddressesForm, EditProfileForm, ReferralForm
-from user.models import Addresses
-import os
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from datetime import timedelta
-from .referral import apply_referral_bonus
-
-from user.utility import validate_password
-from user.utility import validate_name
-from userauths.views import user_login_required
-from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.conf import settings
-import razorpay
-from products.models import Wallet, WalletTransaction
-from payment.models import Payment
-from userauths.models import Account
+# Standard Library Imports
 import logging
+import os
+from datetime import timedelta
+
+# Django Imports
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.hashers import check_password
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.cache import never_cache
+
+# Local Application Imports
+from payment.models import Payment
+from products.models import Wallet, WalletTransaction
+from user.forms import AddressesForm, EditProfileForm, ReferralForm
+from user.models import Addresses
+from user.referral import apply_referral_bonus
+from user.utility import OTP, validate_name, validate_password
+from userauths.models import Account
+from userauths.views import user_login_required
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +156,7 @@ def change_password(request):
         current_password = request.POST.get("current_password")
         new_password = request.POST.get("new_password")
         confirm_password = request.POST.get("confirm_password")
-        print(current_password, new_password, confirm_password)
+
         email = request.user.email
         user = Account.objects.get(email=email)
         error = validate_password(new_password)
@@ -219,7 +214,7 @@ def add_address(request):
 @never_cache
 @user_login_required
 def edit_address(request, id):
-    address = Addresses.objects.get(id=id,user=request.user)
+    address = Addresses.objects.get(id=id, user=request.user)
     if request.method == "POST":
         form = AddressesForm(request.POST, instance=address)
         if form.is_valid():
@@ -237,7 +232,7 @@ def edit_address(request, id):
 @never_cache
 @user_login_required
 def delete_address(request, id):
-    address = Addresses.objects.get(id=id,user=request.user)
+    address = Addresses.objects.get(id=id, user=request.user)
     if request.method == "POST":
         if not address.is_default:
             address.delete()

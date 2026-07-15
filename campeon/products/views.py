@@ -1,54 +1,55 @@
-from django.shortcuts import render, redirect, get_object_or_404
+# Standard library imports
+import logging
+from datetime import datetime, timedelta
+from decimal import Decimal
+
+# Third-party imports
+import razorpay
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.contrib import messages
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+from django.db.models import Min, Prefetch, Q
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import get_template, render_to_string
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.cache import never_cache
+from weasyprint import HTML
+
+# Local application imports
+from payment.models import Payment
+from payment.services import create_order
 from products.forms import (
     CategoryForm,
-    ProductForm,
     CouponForm,
-    ReviewForm,
     OfferForm,
+    ProductForm,
+    ReviewForm,
     VariantForm,
 )
 from products.models import (
-    Category,
-    Product,
-    Variant,
-    VariantImage,
     Cart,
     CartItem,
-    Wishlist,
-    Order,
-    OrderItem,
+    Category,
     Coupon,
     Offer,
-    Wallet,
+    Order,
+    OrderItem,
+    Product,
     Review,
+    Variant,
+    VariantImage,
+    Wallet,
+    Wishlist,
 )
-from payment.models import Payment
+from products.offer_service import get_best_offer, get_discount_price
+from products.service import WalletService
 from user.models import Addresses
-from django.db.models import Prefetch
-from django.db.models import Min, Q
-from datetime import timedelta, datetime
-from django.utils import timezone
-from django.template.loader import get_template
-from django.http import HttpResponse
 from userauths.views import superuser_required, user_login_required
-from django.urls import reverse
-from django.template.loader import render_to_string
-from weasyprint import HTML
-from decimal import Decimal
-from datetime import datetime
-from django.core.exceptions import ValidationError
-from payment.services import create_order
-from django.conf import settings
-import razorpay
-from .service import WalletService
-from .offer_service import get_best_offer, get_discount_price
-from django.views.decorators.cache import never_cache
-import logging
 
 logger = logging.getLogger(__name__)
 # Create your views here.
@@ -65,7 +66,9 @@ def categories(request):
     if search_query:
         categories = categories.filter(name__icontains=search_query)
 
-    paginator = Paginator(categories, 3)  # Show 5 categories per page.
+    paginator = Paginator(
+        categories, settings.PAGINATE_BY
+    )  # Show 5 categories per page.
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -107,7 +110,7 @@ def add_new_category(request):
             messages.success(request, "New Category Added")
             return redirect("products:categories")
         else:
-            print(form.errors)
+
             messages.error(request, "Please include all the values ")
     return render(
         request, "admin/products/categories/add_new_category.html", {"form": form}
@@ -162,6 +165,7 @@ def delete_category(request, slug):
     )
 
 
+@never_cache
 @superuser_required
 def products_list(request):
     products_queryset = (
@@ -186,7 +190,9 @@ def products_list(request):
     elif status == "Inactive":
         products_queryset = products_queryset.filter(is_active=False)
 
-    paginator = Paginator(products_queryset, 3)  # Show 1 products per page.
+    paginator = Paginator(
+        products_queryset, settings.PAGINATE_BY
+    )  # Show 1 products per page.
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -207,7 +213,7 @@ def products_list(request):
     return render(request, "admin/products/products/products_list.html", context)
 
 
-def _validate_and_parse_variants(request, product=None):
+def validate_variant_data(request, product=None):
     # Count variants
     variant_count = 0
     while True:
@@ -262,7 +268,7 @@ def _validate_and_parse_variants(request, product=None):
     return variant_forms, valid, image_errors, variant_count
 
 
-def _save_variants(product, variant_forms, variant_count, request):
+def save_product_variants(product, variant_forms, variant_count, request):
     processed_variant_ids = []
     for i in range(variant_count):
         variant = variant_forms[i].save(commit=False)
@@ -288,6 +294,7 @@ def _save_variants(product, variant_forms, variant_count, request):
     ).delete()
 
 
+@never_cache
 @superuser_required
 def add_product(request):
     form = ProductForm()
@@ -295,13 +302,17 @@ def add_product(request):
     image_errors = []
     if request.method == "POST":
         form = ProductForm(request.POST)
-        variant_forms, valid, image_errors, variant_count = _validate_and_parse_variants(request)
+        variant_forms, valid, image_errors, variant_count = validate_variant_data(
+            request
+        )
 
         if valid and form.is_valid():
             try:
                 with transaction.atomic():
                     product = form.save()
-                    _save_variants(product, variant_forms, variant_count, request)
+                    save_product_variants(
+                        product, variant_forms, variant_count, request
+                    )
                     messages.success(request, "Product created successfully")
                     return redirect("products:products_list")
 
@@ -328,6 +339,7 @@ def add_product(request):
     )
 
 
+@never_cache
 @superuser_required
 def edit_product(request, slug):
     product = get_object_or_404(Product, slug=slug)
@@ -337,13 +349,17 @@ def edit_product(request, slug):
 
     if request.method == "POST":
         form = ProductForm(request.POST, instance=product)
-        variant_forms, valid, image_errors, variant_count = _validate_and_parse_variants(request, product=product)
+        variant_forms, valid, image_errors, variant_count = validate_variant_data(
+            request, product=product
+        )
 
         if valid and form.is_valid():
             try:
                 with transaction.atomic():
                     product = form.save()
-                    _save_variants(product, variant_forms, variant_count, request)
+                    save_product_variants(
+                        product, variant_forms, variant_count, request
+                    )
                     messages.success(request, "Product updated successfully")
                     return redirect("products:products_list")
 
@@ -381,6 +397,7 @@ def edit_product(request, slug):
     )
 
 
+@never_cache
 @superuser_required
 def delete_product(request, slug):
     product = get_object_or_404(Product, slug=slug)
@@ -454,7 +471,7 @@ def all_products(request):
     else:
         products = products.order_by("-created_at")
 
-    paginator = Paginator(products, 3)
+    paginator = Paginator(products, settings.PAGINATE_BY)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -504,7 +521,7 @@ def product_detail(request, slug):
     similar_products = Product.objects.filter(
         category=product.category, is_active=True, is_deleted=False
     ).exclude(pk=product.id)[:4]
-    print(similar_products)
+
     if request.user.is_authenticated:
         wishlist_variant_ids = set(
             Wishlist.objects.filter(
@@ -1153,7 +1170,7 @@ def select_payment(request):
                             "payment_capture": 1,
                         }
                     )
-                    print(razorpay_order)
+                    # print(razorpay_order)
                     Payment.objects.create(
                         order=order,
                         amount=int(total * 100),
@@ -1174,7 +1191,7 @@ def select_payment(request):
                         }
                     )
         except Exception as e:
-            print("Order Creation Failed : ", e)
+
             messages.error(
                 request,
                 "Something went wrong while placing your order. Please try again.",
@@ -1223,7 +1240,7 @@ def orders(request):
     search_query = request.GET.get("search")
     if search_query:
         orders_list = orders_list.filter(order_id__icontains=search_query)
-    paginator = Paginator(orders_list, 3)
+    paginator = Paginator(orders_list, settings.PAGINATE_BY)
 
     page_number = request.GET.get("page")
     orders = paginator.get_page(page_number)
@@ -1364,19 +1381,21 @@ def download_invoice(request, order_id):
     return response
 
 
+@never_cache
 @superuser_required
 def all_orders(request):
     orders_list = Order.objects.all().order_by("-created_at")
     search_query = request.GET.get("search")
     if search_query:
         orders_list = orders_list.filter(order_id__icontains=search_query)
-    paginator = Paginator(orders_list, 3)
+    paginator = Paginator(orders_list, settings.PAGINATE_BY)
     page_number = request.GET.get("page")
     orders = paginator.get_page(page_number)
     context = {"orders": orders}
     return render(request, "admin/orders/all_orders.html", context)
 
 
+@never_cache
 @superuser_required
 def order_view(request, order_id):
     order = get_object_or_404(
@@ -1550,6 +1569,7 @@ def order_view(request, order_id):
     return render(request, "admin/orders/order_view.html", context)
 
 
+@never_cache
 @superuser_required
 def coupons(request):
     coupons = Coupon.objects.order_by("-created_at")
@@ -1559,7 +1579,7 @@ def coupons(request):
     if search_query:
         coupons = coupons.filter(code__icontains=search_query)
 
-    paginator = Paginator(coupons, 3)  # Show 5 categories per page.
+    paginator = Paginator(coupons, settings.PAGINATE_BY)  # Show 5 categories per page.
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -1658,6 +1678,7 @@ def remove_coupon(request):
     return redirect("products:cart")
 
 
+@never_cache
 @superuser_required
 def offers(request):
     offers = Offer.objects.all().order_by("-created_at")
@@ -1667,7 +1688,7 @@ def offers(request):
     if search_query:
         offers = offers.filter(name__icontains=search_query)
 
-    paginator = Paginator(offers, 3)  # Show 5 categories per page.
+    paginator = Paginator(offers, settings.PAGINATE_BY)  # Show 5 categories per page.
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
