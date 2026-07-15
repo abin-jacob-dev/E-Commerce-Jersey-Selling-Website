@@ -12,6 +12,13 @@
 
         h2 {
             text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .report-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 11px;
             margin-bottom: 20px;
         }
 
@@ -68,7 +75,15 @@
 
 <body>
 
-<h2>Sales Report</h2>
+<h2>Sales Report — {% if period == "daily" %}Daily{% elif period == "monthly" %}Monthly{% elif period == "yearly" %}Yearly{% elif period == "custom" %}Custom Range{% endif %}</h2>
+
+<div class="report-subtitle">
+    {% if period == "daily" %}Report for {{ report_date|date:"d M Y" }}
+    {% elif period == "monthly" %}Report for {{ report_date|date:"Y" }}
+    {% elif period == "yearly" %}All-time Yearly Report
+    {% elif period == "custom" %}{{ start_date }} to {{ end_date }}
+    {% endif %}
+</div>
 
 <h3>Summary</h3>
 
@@ -102,12 +117,12 @@
 </div>
 
 <!-- BREAKDOWN -->
-<h3>Sales Breakdown</h3>
+<h3>Sales Breakdown — {% if period == "daily" %}Day-wise{% elif period == "monthly" %}Month-wise{% elif period == "yearly" %}Year-wise{% elif period == "custom" %}Day-wise (Custom){% endif %}</h3>
 
 <table>
     <thead>
         <tr>
-            <th>Date</th>
+            <th>{% if period == "monthly" %}Month{% elif period == "yearly" %}Year{% else %}Date{% endif %}</th>
             <th>Orders</th>
             <th>Sales</th>
             <th>Offer</th>
@@ -119,7 +134,15 @@
     <tbody>
         {% for row in sales_report %}
         <tr>
-            <td>{{ row.date|date:"d M Y" }}</td>
+            <td>
+                {% if period == "monthly" %}
+                    {{ row.date|date:"M Y" }}
+                {% elif period == "yearly" %}
+                    {{ row.date|date:"Y" }}
+                {% else %}
+                    {{ row.date|date:"d M Y" }}
+                {% endif %}
+            </td>
             <td>{{ row.orders }}</td>
             <td>₹{{ row.sales }}</td>
             <td>₹{{ row.offer_discount }}</td>

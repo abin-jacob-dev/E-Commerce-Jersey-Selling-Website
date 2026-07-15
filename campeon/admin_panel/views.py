@@ -16,9 +16,11 @@ from openpyxl import Workbook
 from datetime import datetime
 from django.contrib import messages
 import logging
-
+from datetime import timedelta
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+
 
 # Create your views here.
 @superuser_required
@@ -84,8 +86,8 @@ def delete_user(request, id):
     try:
         user = Account.objects.get(id=id)
     except Account.DoesNotExist:
-        messages.error(request,'User not found.')
-        return redirect('admin_panel:users')
+        messages.error(request, "User not found.")
+        return redirect("admin_panel:users")
     if "delete_user_confirmed" in request.POST:
         user.delete()
         return redirect("admin_panel:users")
@@ -95,13 +97,12 @@ def delete_user(request, id):
 @superuser_required
 def dashboard(request):
 
-    filter_type = request.GET.get("filter", "monthly")
+    filter_type = request.GET.get("filter", "daily")
 
     orders = Order.objects.filter(payment_status="paid")
 
     if filter_type == "monthly":
         orders = orders.filter(created_at__year=datetime.now().year)
-        
 
     elif filter_type == "yearly":
         pass
@@ -175,6 +176,36 @@ def dashboard(request):
                 or 0
             )
             sales_data.append({"label": str(year), "total": float(revenue)})
+    elif filter_type == "weekly":
+        today = timezone.now().date()
+        for i in range(6, -1, -1):
+            day = today - timedelta(days=i)
+            revenue = (
+                orders.filter(created_at__date=day).aggregate(
+                    total=Sum("total_amount")
+                )["total"]
+                or 0
+            )
+            sales_data.append(
+                {
+                    "label": day.strftime("%a"),  # Mon, Tue, Wed
+                    "total": float(revenue),
+                }
+            )
+    elif filter_type == "daily":
+        for hour in range(24):
+            revenue = (
+                orders.filter(created_at__hour=hour).aggregate(
+                    total=Sum("total_amount")
+                )["total"]
+                or 0
+            )
+            sales_data.append(
+                {
+                    "label": f"{hour:02d}:00",  # Mon, Tue, Wed
+                    "total": float(revenue),
+                }
+            )
 
     context = {
         "filter_type": filter_type,
@@ -188,6 +219,7 @@ def dashboard(request):
     }
 
     return render(request, "admin/dashboard.html", context)
+
 
 @superuser_required
 def sales(request):
@@ -269,11 +301,14 @@ def sales(request):
     }
     return render(request, "admin/sales/sales.html", context)
 
+
 @superuser_required
 def sales_report_pdf(request):
     period = request.GET.get("period", "daily")
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
+
+    today = timezone.now().date()
 
     orders = Order.objects.filter(payment_status="paid").prefetch_related("items")
 
@@ -335,6 +370,10 @@ def sales_report_pdf(request):
 
     context = {
         "sales_report": sales_report,
+        "period": period,
+        "report_date": today,
+        "start_date": start_date,
+        "end_date": end_date,
         "total_orders": orders.count(),
         "total_sales": sum(order.subtotal for order in orders),
         "total_offer_discount": sum(
@@ -354,9 +393,10 @@ def sales_report_pdf(request):
     result = html.write_pdf()
 
     response = HttpResponse(result, content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="sales_report.pdf"'
+    response["Content-Disposition"] = f'attachment; filename="sales_report_{period}.pdf"'
 
     return response
+
 
 @superuser_required
 def sales_report_excel(request):
@@ -371,13 +411,10 @@ def sales_report_excel(request):
             created_at__date__gte=start_date, created_at__date__lte=end_date
         )
         group_by = TruncDay("created_at")
-
     elif period == "monthly":
         group_by = TruncMonth("created_at")
-
     elif period == "yearly":
         group_by = TruncYear("created_at")
-
     else:
         group_by = TruncDay("created_at")
 
@@ -481,7 +518,19 @@ def sales_report_excel(request):
 
     # ===== DATA =====
     for r in sales_report:
-        ws.cell(row=row, column=1, value=r["date"].strftime("%d-%m-%Y"))
+        if period == "daily":
+            date = r["date"].strftime("%d-%m-%Y")
+
+        elif period == "monthly":
+            date = r["date"].strftime("%b %Y")
+
+        elif period == "yearly":
+            date = r["date"].strftime("%Y")
+
+        else:  # custom
+            date = r["date"].strftime("%d-%m-%Y")
+
+        ws.cell(row=row, column=1, value=date)
         ws.cell(row=row, column=2, value=r["orders"])
         ws.cell(row=row, column=3, value=r["sales"])
         ws.cell(row=row, column=4, value=r["offer_discount"])
@@ -502,7 +551,7 @@ def sales_report_excel(request):
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-    response["Content-Disposition"] = 'attachment; filename="sales_report.xlsx"'
+    response["Content-Disposition"] = f'attachment; filename="sales_report_{period}.xlsx"'
 
     wb.save(response)
     return response

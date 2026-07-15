@@ -91,6 +91,21 @@
                 onchange="this.form.submit()"
                 class="border px-4 py-2 rounded-lg"
             >
+            <option value="daily"
+                    {% if filter_type == 'daily' %}
+                        selected
+                    {% endif %}
+                >
+                    Daily
+                </option>
+            <option value="weekly"
+                    {% if filter_type == 'weekly' %}
+                        selected
+                    {% endif %}
+                >
+                    Weekly
+                </option>
+                
                 <option value="monthly"
                     {% if filter_type == 'monthly' %}
                         selected
@@ -106,6 +121,7 @@
                 >
                     Yearly
                 </option>
+                
 
             </select>
 

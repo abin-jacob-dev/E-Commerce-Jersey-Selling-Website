@@ -58,13 +58,13 @@
             </button>
 
             <!-- Excel -->
-            <a href="{% url "admin_panel:sales_report_excel" %}"
+            <a href="{% url 'admin_panel:sales_report_excel' %}?period={{ period }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}"
                 class="px-5 py-2 bg-green-600 text-white rounded-lg text-[11px] font-bold uppercase tracking-wider">
                 Excel
             </a>
 
             <!-- PDF -->
-            <a href="{% url "admin_panel:sales_report_pdf" %}"
+            <a href="{% url 'admin_panel:sales_report_pdf' %}?period={{ period }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}"
                 class="px-5 py-2 bg-red-600 text-white rounded-lg text-[11px] font-bold uppercase tracking-wider">
                 PDF
             </a>
@@ -127,7 +127,20 @@
             <tbody>
                 {% for row in sales_report %}
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="py-4">{{ row.date|date:"d M Y" }}</td>
+                    
+                    {% comment %} <td class="py-4">{{ row.date|date:"d M Y" }}</td> {% endcomment %}
+                    <td class="py-4">
+    {% if period == "daily" %}
+        {{ row.date|date:"d M Y" }}
+    {% elif period == "monthly" %}
+        {{ row.date|date:"F Y" }}
+    {% elif period == "yearly" %}
+        {{ row.date|date:"Y" }}
+    {% elif period == "custom" %}
+        {{ row.date|date:"d M Y" }}
+    {% endif %}
+</td>
+
                     <td class="py-4">{{ row.orders }}</td>
                     <td class="py-4">₹{{ row.sales|floatformat:2 }}</td>
                     <td class="py-4">₹{{ row.offer_discount|floatformat:2 }}</td>
