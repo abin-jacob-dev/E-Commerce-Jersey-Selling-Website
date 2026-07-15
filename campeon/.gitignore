@@ -1,11 +1,39 @@
-*.pyc
-__pycache__
-*.pyo
-*.pyd
-db.sqlite3
-*.log
-.env
-media/
-static/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
 venv/
-readme.md
+.venv/
+env/
+ENV/
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+
+# Build
+*.egg-info/
+dist/
+build/
+
+# Ignore README only if you really want to
+README.md
+
+
+audit
+settings_dev.py
