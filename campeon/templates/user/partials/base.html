@@ -9,8 +9,32 @@
         Campeon
       {% endblock %}
     </title>
-    <script src="{% static 'vendor/tailwind.min.js' %}"></script>
-    <script src="{% static 'js/tailwind-config.js' %}"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              lime: {
+                DEFAULT: '#a3e635',
+                bright: '#00ff00',
+                dark: '#006400',
+                light: '#f4fce3',
+              },
+              black: '#121212',
+              'gray-bg': '#f9fafb',
+            },
+            fontFamily: {
+              montserrat: ['Montserrat', 'sans-serif'],
+            },
+            letterSpacing: {
+              tightest: '-0.02em',
+              widest: '0.2em',
+            },
+          }
+        }
+      }
+    </script>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
     {% comment %} <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" /> {% endcomment %}
@@ -117,9 +141,6 @@
 
       {% endblock %}
     </div>
-    {% comment %} <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script> {% endcomment %}
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+
   </body>
 </html>

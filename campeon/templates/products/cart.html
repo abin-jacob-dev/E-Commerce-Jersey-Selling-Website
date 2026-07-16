@@ -193,7 +193,7 @@
 
             <!-- CHECKOUT BUTTON -->
             {% if checkout_disabled %}
-              <div class="w-full block text-center bg-gray-500 text-black font-black uppercase py-5 shadow-none text-sm tracking-[0.2em] cursor-not-allowed">RESOLVE ERRORS TO CHECKOUT</div>
+              <div class="w-full block text-center bg-gray-400 text-white font-black uppercase py-5 shadow-none text-sm tracking-[0.2em] cursor-not-allowed">RESOLVE ERRORS TO CHECKOUT</div>
             {% else %}
               <a href="{% url 'products:checkout' %}" class="w-full block text-center bg-lime-bright text-black font-black uppercase py-5 hover:bg-white transition-all shadow-[0_10px_30px_rgba(0,255,0,0.15)] text-sm tracking-[0.2em]">
                 <span class="inline-flex items-center justify-center gap-3">
@@ -227,10 +227,9 @@
         </div>
       </div>
     </div>
-  </main>
-
-  <script>
+  </main>    <script>
     function updateQty(itemId, action) {
+
       const formData = new FormData()
       formData.append('item_id', itemId)
       formData.append('action', action)

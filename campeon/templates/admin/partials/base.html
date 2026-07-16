@@ -18,9 +18,32 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <!-- Tailwind -->
-    <script src="{% static 'vendor/tailwind.min.js' %}"></script>
-    <script src="{% static 'js/tailwind-config.js' %}"></script>
-    <script src="{% static 'js/script.js' %}"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              lime: {
+                DEFAULT: '#a3e635',
+                bright: '#00ff00',
+                dark: '#006400',
+                light: '#f4fce3',
+              },
+              black: '#121212',
+              'gray-bg': '#f9fafb',
+            },
+            fontFamily: {
+              montserrat: ['Montserrat', 'sans-serif'],
+            },
+            letterSpacing: {
+              tightest: '-0.02em',
+              widest: '0.2em',
+            },
+          }
+        }
+      }
+    </script>
   </head>
   {% include 'components/alert.html' %}
   <body class="bg-lime-light min-h-screen flex font-montserrat antialiased">

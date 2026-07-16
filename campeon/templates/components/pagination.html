@@ -27,7 +27,7 @@
         {% for num in page_obj.paginator.page_range %}
           {% if page_obj.number == num %}
             <!-- Active -->
-            <span class="w-8 h-8 flex items-center justify-center bg-lime-bright text-black rounded-lg font-black text-[10px]">{{ num }}</span>
+            <span class="w-8 h-8 flex items-center justify-center bg-lime-dark text-white rounded-lg font-black text-[10px]">{{ num }}</span>
           {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
             <a href="?{% query_transform request page=num %}" class="w-8 h-8 flex items-center justify-center bg-white border border-gray-100 rounded-lg font-black text-[10px] hover:bg-gray-100 shadow-sm transition">{{ num }}</a>
           {% endif %}
