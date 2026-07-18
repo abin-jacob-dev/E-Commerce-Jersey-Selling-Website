@@ -77,12 +77,7 @@
 												<option value="processing" {% if item.status == 'processing' %} selected {% endif %}>Processing</option>
 												<option value="shipped" {% if item.status == 'shipped' %} selected {% endif %}>Shipped</option>
 												<option value="delivered" {% if item.status == 'delivered' %} selected {% endif %}>Delivered</option>
-												{% comment %}
-													<option value="cancelled" {% if item.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
-																																																																																																								                  <option value="partially_cancel" {% if item.status == 'partially_cancel' %}selected{% endif %}>Partially Cancelled</option>
-																																																																																																								                  <option value="returned" {% if item.status == 'returned' %}selected{% endif %}>Returned</option>
-																																																																																																								                  <option value="partially_return" {% if item.status == 'partially_return' %}selected{% endif %}>Partially Returned</option>
-												{% endcomment %}
+												{% comment %} <option value="cancelled" {% if item.status == 'cancelled' %} selected {% endif %}>Cancelled</option> {% endcomment %}
 											</select>
 
 											<button type="submit" name="update_item_status" value="true" class="bg-black text-white px-4 py-2 text-xs font-black uppercase rounded-lg hover:bg-gray-800">
@@ -246,36 +241,50 @@
 		</div>
 
 		<!-- ADMIN ACTIONS -->
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-			{% if order.order_status != 'cancelled' and order.order_status != 'partially_cancelled' and order.order_status != 'returned' and order.order_status != 'partially_returned' %}
+		{% if order.order_status != 'cancelled' and order.order_status != 'returned' %}
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<!-- GLOBAL STATUS UPDATE -->
-				<div class="bg-white p-6 rounded-xl shadow-sm">
-					<h3 class="text-sm font-black uppercase tracking-widest mb-4">
-						Update Order Status
-					</h3>
-					<form method="POST">
+				<div class="bg-white p-6 rounded-xl shadow-sm flex flex-col justify-between">
+					<div>
+						<h3 class="text-sm font-black uppercase tracking-widest mb-4">
+							Update Order Status
+						</h3>
+						<form method="POST">
+							{% csrf_token %}
+							<select name="order_status" class="w-full border rounded-lg p-3 text-xs font-bold uppercase">
+								<option value="pending" {% if order.order_status == 'pending' %} selected {% endif %}>Pending</option>
+								<option value="processing" {% if order.order_status == 'processing' %} selected {% endif %}>Processing</option>
+								<option value="shipped" {% if order.order_status == 'shipped' %} selected {% endif %}>Shipped</option>
+								<option value="delivered" {% if order.order_status == 'delivered' %} selected {% endif %}>Delivered</option>
+								{% comment %} <option value="cancelled" {% if order.order_status == 'cancelled' %} selected {% endif %}>Cancelled</option> {% endcomment %}
+							</select>
+
+							<button type="submit" name="update_order" value="true" class="w-full mt-4 bg-black text-white py-3 text-xs font-black uppercase rounded-lg hover:bg-gray-800">
+								Update Order
+							</button>
+						</form>
+					</div>
+				</div>
+
+				<!-- CANCEL ORDER -->
+				<div class="bg-white p-6 rounded-xl shadow-sm border border-red-100 flex flex-col justify-between">
+					<div>
+						<h3 class="text-sm font-black uppercase tracking-widest text-red-600 mb-2">
+							Cancel Entire Order
+						</h3>
+						<p class="text-xs text-gray-500 mb-4">
+							This will cancel all remaining active items in the order, replenish variant stock, and refund the amount to the customer's wallet. This action cannot be undone.
+						</p>
+					</div>
+					<form method="POST" onsubmit="return confirm('Are you sure you want to cancel this entire order?');">
 						{% csrf_token %}
-						<select name="order_status" class="w-full border rounded-lg p-3 text-xs font-bold uppercase">
-							<option value="pending" {% if order.order_status == 'pending' %} selected {% endif %}>Pending</option>
-							<option value="processing" {% if order.order_status == 'processing' %} selected {% endif %}>Processing</option>
-							<option value="shipped" {% if order.order_status == 'shipped' %} selected {% endif %}>Shipped</option>
-							<option value="delivered" {% if order.order_status == 'delivered' %} selected {% endif %}>Delivered</option>
-
-							{% comment %}
-								<option value="cancelled" {% if order.order_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
-																																																															          <option value="partially_cancel" {% if order.order_status == 'partially_cancel' %}selected{% endif %}>Partially Cancelled</option>
-																																																															          <option value="returned" {% if order.order_status == 'returned' %}selected{% endif %}>Returned</option>
-																																																															          <option value="partially_return" {% if order.order_status == 'partially_return' %}selected{% endif %}>Partially Returned</option>
-							{% endcomment %}
-						</select>
-
-						<button type="submit" name="update_order" value="true" class="w-full mt-4 bg-black text-white py-3 text-xs font-black uppercase rounded-lg hover:bg-gray-800">
-							Update Order
+						<button type="submit" name="cancel_order" value="true" class="w-full bg-red-600 text-white py-3 text-xs font-black uppercase rounded-lg hover:bg-red-700 transition">
+							Cancel Order
 						</button>
 					</form>
 				</div>
-			{% endif %}
-		</div>
+			</div>
+		{% endif %}
 
 		<!-- CUSTOMER INFO -->
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">

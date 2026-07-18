@@ -1395,6 +1395,106 @@ def all_orders(request):
     return render(request, "admin/orders/all_orders.html", context)
 
 
+def cancel_entire_order(request, order):
+    try:
+        with transaction.atomic():
+            # Get items that are not already fully cancelled or returned
+            active_items = order.items.exclude(status__in=["cancelled", "returned"])
+
+            refund_credited = Decimal("0.00")
+            cancelled_count = 0
+            for item in active_items:
+                # 1. Update item status and refund amount
+                item.status = "cancelled"
+                item.refund_amount = item.final_paid_price
+                item.save()
+
+                # 2. Restore variant stock
+                if item.variant:
+                    item.variant.stock += item.quantity
+                    item.variant.save()
+
+                # 3. Credit wallet
+                if item.final_paid_price > 0:
+                    WalletService.credit_wallet(
+                        order.user,
+                        item.final_paid_price,
+                        order,
+                        source="refund",
+                    )
+                    refund_credited += item.final_paid_price
+                cancelled_count += 1
+
+            # 4. Set order status to cancelled
+            order.order_status = "cancelled"
+            order.total_refund_amount = sum(
+                item.refund_amount for item in order.items.all()
+            )
+            order.save()
+
+            if cancelled_count > 0:
+                messages.success(request, f"Order has been cancelled successfully.")
+            else:
+                messages.info(
+                    request,
+                    "Order is now marked as Cancelled. No active items were left to cancel/refund.",
+                )
+    except Exception as e:
+        messages.error(request, f"Error cancelling order: {str(e)}")
+
+    return redirect("products:order_view", order_id=order.order_id)
+
+
+def cancel_single_item(request, order, item):
+    try:
+        with transaction.atomic():
+            # 1. Update item status and refund amount
+            item.status = "cancelled"
+            item.refund_amount = item.final_paid_price
+            item.save()
+
+            # 2. Restore variant stock
+            if item.variant:
+                item.variant.stock += item.quantity
+                item.variant.save()
+
+            # 3. Credit wallet
+            if item.final_paid_price > 0:
+                WalletService.credit_wallet(
+                    order.user,
+                    item.final_paid_price,
+                    order,
+                    source="refund",
+                )
+
+            # 4. Check if all items in the order are now cancelled or returned
+            remaining_active = order.items.exclude(
+                status__in=["cancelled", "returned"]
+            ).exists()
+            if not remaining_active:
+                statuses = set(order.items.values_list("status", flat=True))
+                if "returned" in statuses:
+                    order.order_status = "returned"
+                else:
+                    order.order_status = "cancelled"
+            else:
+                # If some items are still active, but at least one cancelled, set to partially_cancelled
+                if order.items.filter(status="cancelled").exists():
+                    order.order_status = "partially_cancelled"
+
+            # 5. Update total refund amount for the order
+            order.total_refund_amount = sum(i.refund_amount for i in order.items.all())
+            order.save()
+
+            messages.success(
+                request, f"Item '{item.product_name}' has been cancelled successfully."
+            )
+    except Exception as e:
+        messages.error(request, f"Error cancelling item: {str(e)}")
+
+    return redirect("products:order_view", order_id=order.order_id)
+
+
 @never_cache
 @superuser_required
 def order_view(request, order_id):
@@ -1419,11 +1519,15 @@ def order_view(request, order_id):
             order_status = request.POST.get("order_status")
 
             if order_status:
-                order.order_status = order_status
+                if order_status == "cancelled":
+                    return cancel_entire_order(request, order)
 
+                order.order_status = order_status
                 order.save()
 
-                order.items.all().update(status=order_status)
+                order.items.exclude(status__in=["cancelled", "returned"]).update(
+                    status=order_status
+                )
 
                 messages.success(
                     request,
@@ -1434,6 +1538,17 @@ def order_view(request, order_id):
                     "products:order_view",
                     order_id=order.order_id,
                 )
+
+        elif "cancel_order" in request.POST:
+            if order.order_status in ["cancelled", "returned"]:
+                messages.error(
+                    request, f"This order has already been {order.order_status}."
+                )
+                return redirect(
+                    "products:order_view",
+                    order_id=order.order_id,
+                )
+            return cancel_entire_order(request, order)
 
         elif "update_item_status" in request.POST:
 
@@ -1455,6 +1570,9 @@ def order_view(request, order_id):
                         "products:order_view",
                         order_id=order.order_id,
                     )
+
+                if item_status == "cancelled":
+                    return cancel_single_item(request, order, item)
 
                 item.status = item_status
                 item.save()
@@ -1503,7 +1621,7 @@ def order_view(request, order_id):
                 )
 
                 order.save()
-               
+
                 WalletService.credit_wallet(
                     order.user,
                     item.refund_amount,
@@ -1531,39 +1649,7 @@ def order_view(request, order_id):
                     order=order,
                 )
 
-                item.status = "cancelled"
-                item.refund_amount = item.final_paid_price
-                item.save()
-                if item.variant:
-                    item.variant.stock += item.quantity
-                    item.variant.save()
-
-                all_returned = order.items.exclude(status="cancelled").exists()
-
-                if not all_returned:
-                    order.order_status = "cancelled"
-
-                order.total_refund_amount = sum(
-                    item.refund_amount for item in order.items.all()
-                )
-
-                order.save()
-                
-                WalletService.credit_wallet(
-                    order.user,
-                    item.refund_amount,
-                    order,
-                    source="refund",
-                )
-                messages.success(
-                    request,
-                    f"Item status updated to {item.get_status_display()}",
-                )
-
-                return redirect(
-                    "products:order_view",
-                    order_id=order.order_id,
-                )
+                return cancel_single_item(request, order, item)
 
     context = {"order": order}
     return render(request, "admin/orders/order_view.html", context)
