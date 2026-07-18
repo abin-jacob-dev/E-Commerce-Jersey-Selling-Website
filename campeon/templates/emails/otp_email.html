@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    .container { max-width: 480px; margin: 40px auto; background: #fff; border-radius: 12px; padding: 32px; }
+    .logo { font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; color: #111; text-align: center; }
+    .otp { font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #10b981; text-align: center; margin: 24px 0; }
+    .info { font-size: 14px; color: #555; text-align: center; line-height: 1.6; }
+    .footer { font-size: 12px; color: #999; text-align: center; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">Campeon</div>
+    <p class="info">Use the OTP below to {{ purpose }}:</p>
+
+    <div class="otp">{{ otp }}</div>
+    
+    <p class="info">This OTP is valid for <strong>5 minutes</strong>. Do not share it with anyone.</p>
+    <p class="footer">If you didn't request this, please ignore this email.</p>
+  </div>
+</body>
+</html>

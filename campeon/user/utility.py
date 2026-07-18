@@ -6,6 +6,8 @@ import string
 from django.utils import timezone
 import re
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 
 class OTP(models.Model):
@@ -23,30 +25,18 @@ class OTP(models.Model):
         self.expires_at = timezone.now() + timedelta(minutes=5)
         self.save()
 
-    def send_otp_email(self, email):
-        from django.core.mail import send_mail
-
-        subject = "Your OTP for Profile Update"
-        message = f"""
-        Hello,
-
-        We received a request to update your profile.
-
-        Your One-Time Password (OTP) is: {self.otp}
-
-          This OTP is valid for 5 minutes.
-         Do not share this OTP with anyone for security reasons.
-
-        If you did not request this change, please ignore this email or contact our support team immediately.
-
-        Thank you,  
-        Your Support Team
-        """
-        try:
-            send_mail(subject, message, settings.EMAIL_HOST_USER, [email])
-            print("Email sent from the server")
-        except Exception as e:
-            print(f"Error sending email : {e}")
+    def send_otp_email(self, email, purpose="verify your account"):
+        subject = "Your Campeon OTP Code"
+        html_content = render_to_string(
+            "emails/otp_email.html",
+            {
+                "otp": self.otp,
+                "purpose": purpose,
+            },
+        )
+        msg = EmailMultiAlternatives(subject, "", settings.EMAIL_HOST_USER, [email])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
 
 
 def validate_password(password):

@@ -24,11 +24,14 @@ class AddressesForm(forms.ModelForm):
         full_name = self.cleaned_data.get("full_name")
         if not full_name:
             raise forms.ValidationError("Full name is required.")
+        full_name = full_name.strip()
         if len(full_name) < 3:
-            raise forms.ValidationError("Full name must be at least 3 characters.")
+            raise forms.ValidationError("Name must be at least 3 characters.")
+        if len(full_name) > 50:
+            raise forms.ValidationError("Name is too long.")
         if not full_name.replace(" ", "").isalpha():
-            raise forms.ValidationError("Full name must contain only letters.")
-        return full_name.strip()
+            raise forms.ValidationError("Name must contain only letters.")
+        return full_name
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get("phone_number")
@@ -104,11 +107,14 @@ class EditProfileForm(forms.ModelForm):
         full_name = self.cleaned_data.get("full_name")
         if not full_name:
             raise forms.ValidationError("Full name is required.")
+        full_name = full_name.strip()
         if len(full_name) < 3:
-            raise forms.ValidationError("Full name must be at least 3 characters.")
+            raise forms.ValidationError("Name must be at least 3 characters.")
+        if len(full_name) > 50:
+            raise forms.ValidationError("Name is too long.")
         if not full_name.replace(" ", "").isalpha():
-            raise forms.ValidationError("Full name must contain only letters.")
-        return full_name.strip()
+            raise forms.ValidationError("Name must contain only letters.")
+        return full_name
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get("phone_number")

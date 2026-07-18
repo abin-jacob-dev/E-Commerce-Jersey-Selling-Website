@@ -62,9 +62,7 @@ class Coupon(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
-    image = CloudinaryField(
-        "category_image", folder="category_images"
-    )
+    image = CloudinaryField("category_image", folder="category_images")
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)

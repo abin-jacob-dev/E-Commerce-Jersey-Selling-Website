@@ -14,6 +14,8 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.decorators.cache import never_cache
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 # Local Application Imports
 from userauths.forms import UserSignupForm
@@ -243,25 +245,57 @@ def reset_password_validate(request, uidb64, token):
         return redirect("userauths:signin")
 
 
-def reset_password(request):  # only works with verification link because of uid
+def reset_password(request):
     if request.method == "POST":
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
 
-        if password == confirm_password:
-            uid = request.session.get("uid")
-
-            user = Account.objects.get(pk=uid)
-            user.set_password(password)
-            user.save()
-            messages.success(request, "Your Password set Succesfully")
-            return redirect("userauths:signin")
-        else:
-            messages.error(request, "Passwords does not match")
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match")
             return redirect("userauths:reset_password")
 
-    else:
-        return render(request, "userauths/reset_password.html")
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            messages.error(request, e.messages[0])
+            return redirect("userauths:reset_password")
+
+        uid = request.session.get("uid")
+        if not uid:
+            messages.error(request, "Reset session has expired.")
+            return redirect("userauths:forgot_password")
+
+        user = Account.objects.get(pk=uid)
+        user.set_password(password)
+        user.save()
+
+        request.session.pop("uid", None)
+
+        messages.success(request, "Password reset successfully.")
+        return redirect("userauths:signin")
+
+    return render(request, "userauths/reset_password.html")
+
+
+# def reset_password(request):  # only works with verification link because of uid
+#     if request.method == "POST":
+#         password = request.POST.get("password")
+#         confirm_password = request.POST.get("confirm_password")
+
+#         if password == confirm_password:
+#             uid = request.session.get("uid")
+
+#             user = Account.objects.get(pk=uid)
+#             user.set_password(password)
+#             user.save()
+#             messages.success(request, "Your Password set Succesfully")
+#             return redirect("userauths:signin")
+#         else:
+#             messages.error(request, "Passwords does not match")
+#             return redirect("userauths:reset_password")
+
+#     else:
+#         return render(request, "userauths/reset_password.html")
 
 
 @never_cache

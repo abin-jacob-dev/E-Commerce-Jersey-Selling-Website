@@ -39,4 +39,5 @@ README.md
 
 
 audit
-settings_dev.py
+settings.py.prod
+**/migrations/
