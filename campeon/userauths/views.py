@@ -209,7 +209,7 @@ def forgot_password(request):
                 "token": default_token_generator.make_token(user),
             },
         )
-        reset_url = f"{settings.SITE_URL}{reset_path}"
+        reset_url = f"{settings.SITE_URL.rstrip('/')}{reset_path}"
 
         mail_subject = "Reset your Password"
         message = render_to_string(
