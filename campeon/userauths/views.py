@@ -29,6 +29,9 @@ def superuser_required(func):
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_superuser:
             return func(request, *args, **kwargs)
+        if request.user.is_authenticated:
+            messages.error(request, "You do not have permission to access this page.")
+            return render(request, "core/403.html", status=403)
         return redirect("userauths:signin")
 
     return wrapper
@@ -40,8 +43,6 @@ def user_login_required(func):
             logout(request)
             messages.error(request, "Your Account is blocked!")
             return redirect("userauths:signin")
-        # if request.user.is_authenticated and request.user.is_superuser:
-        #     return redirect('admin_panel:dashboard')
         if request.user.is_authenticated and not request.user.is_blocked:
             return func(request, *args, **kwargs)
         return redirect("userauths:signin")
@@ -52,6 +53,7 @@ def user_login_required(func):
 def signup(request):
     if not request.session.get("is_email_verified"):
         return redirect("userauths:activate_account")
+
     verified_email = request.session.get("verified_email")
     if request.method == "POST":
         form = UserSignupForm(request.POST)
@@ -64,6 +66,7 @@ def signup(request):
             if Account.objects.filter(email=verified_email).exists():
                 messages.error(request, "Email already Registered")
                 return redirect("userauths:activate_account")
+
             user = Account.objects.create_user(
                 full_name=full_name, email=email, password=password, username=username
             )
@@ -141,7 +144,7 @@ def activate_account(request):
 @never_cache
 def signin(request):
     if request.user.is_authenticated:
-        return redirect("core:shop")  # dashboard
+        return redirect("products:all_products")  # dashboard
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
@@ -150,12 +153,10 @@ def signin(request):
 
         if user is None:
             messages.error(request, "Invalid Credentials")
-
-            return redirect("userauths:signin")
+            return render(request, "userauths/signin.html")
         if user.is_blocked:
-            messages.error(request, "Your acccount has been blocked")
-
-            return redirect("userauths:signin")
+            messages.error(request, "Your account has been blocked")
+            return render(request, "userauths/signin.html", status=403)
 
         login(request, user)
 
@@ -302,11 +303,10 @@ def reset_password(request):
 def signin_admin(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
-            login(request, user)
             return redirect("admin_panel:dashboard")
         else:
             messages.error(request, "You do not have admin access.")
-            return redirect("userauths:signin")
+            return render(request, "core/403.html", status=403)
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
@@ -320,7 +320,7 @@ def signin_admin(request):
             return redirect("admin_panel:dashboard")
         else:
             messages.error(request, "You do not have admin access.")
-            return redirect("userauths:signin")
+            return render(request, "core/403.html", status=403)
     return render(request, "userauths/signin_admin.html")
 
 

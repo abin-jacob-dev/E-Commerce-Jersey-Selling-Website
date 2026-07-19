@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDay, TruncMonth, TruncYear
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.timezone import now
@@ -73,31 +73,29 @@ def users(request):
 
 @superuser_required
 def block_user(request, id):
-    user = Account.objects.get(id=id)
-    if "block_user_confimed" in request.POST:
-        user.is_blocked = not user.is_blocked
-        user.save()
-        for session in Session.objects.filter(expire_date__gte=now()):
-            data = session.get_decoded()
-            # print(data)
-            if data.get("_auth_user_id") == str(user.id):
-                # print(data.get('_auth_user_id'))
-                session.delete()
+    user = get_object_or_404(Account, id=id)
+    if request.method == "POST":
+        if "block_user_confimed" in request.POST:
+            user.is_blocked = not user.is_blocked
+            user.save()
+            for session in Session.objects.filter(expire_date__gte=now()):
+                data = session.get_decoded()
+                if data.get("_auth_user_id") == str(user.id):
+                    session.delete()
+            return redirect("admin_panel:users")
         return redirect("admin_panel:users")
     return render(request, "admin/block_user.html", {"user": user})
 
 
 @superuser_required
 def delete_user(request, id):
-    try:
-        user = Account.objects.get(id=id)
-    except Account.DoesNotExist:
-        messages.error(request, "User not found.")
+    user = get_object_or_404(Account, id=id)
+    if request.method == "POST":
+        if "delete_user_confirmed" in request.POST:
+            user.delete()
+            return redirect("admin_panel:users")
         return redirect("admin_panel:users")
-    if "delete_user_confirmed" in request.POST:
-        user.delete()
-        return redirect("admin_panel:users")
-    return render(request, "admin/delete_user.html")
+    return render(request, "admin/delete_user.html", {"user": user})
 
 
 @superuser_required
@@ -396,7 +394,7 @@ def sales_report_pdf(request):
 
     result = html.write_pdf()
 
-    response = HttpResponse(result, content_type="application/pdf")
+    response = HttpResponse(result, content_type="application/pdf", status=200)
     response["Content-Disposition"] = (
         f'attachment; filename="sales_report_{period}.pdf"'
     )

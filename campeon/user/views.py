@@ -142,6 +142,8 @@ def change_email(request):
 @never_cache
 @user_login_required
 def set_default_address(request, address_id):
+    if request.method != "POST":
+        return redirect("user:address")
     address = get_object_or_404(Addresses, id=address_id, user=request.user)
     Addresses.objects.filter(user=request.user).update(is_default=False)
     address.is_default = True
@@ -162,14 +164,14 @@ def change_password(request):
         error = validate_password(new_password)
         if error:
             messages.error(request, error)
-            return redirect("user:change_password")
+            return render(request, "user/change_password.html", status=400)
         if new_password != confirm_password:
-            messages.error(request, "New Passwords donot match")
-            return redirect("user:change_password")
+            messages.error(request, "New Passwords do not match")
+            return render(request, "user/change_password.html", status=400)
         else:
             if not check_password(current_password, user.password):
-                messages.error(request, "You have Entered the wrong password")
-                return redirect("user:change_password")
+                messages.error(request, "You have entered the wrong password")
+                return render(request, "user/change_password.html", status=400)
             else:
                 user.set_password(new_password)
                 user.save()
@@ -232,13 +234,12 @@ def edit_address(request, id):
 @never_cache
 @user_login_required
 def delete_address(request, id):
-    address = Addresses.objects.get(id=id, user=request.user)
+    address = get_object_or_404(Addresses, id=id, user=request.user)
     if request.method == "POST":
         if not address.is_default:
             address.delete()
             messages.success(request, "Address deleted Successfully")
         else:
-            # address.delete()
             messages.error(request, "Default Address cannot be deleted")
         return redirect("user:address")
     return render(request, "user/delete_address.html", {"address": address})

@@ -613,74 +613,85 @@ def cart(request):
 
 @user_login_required
 def add_to_cart(request):
-    if request.method == "POST":
-        variant_id = request.POST.get("variant_id")
-        try:
-            quantity = int(request.POST.get("quantity", 1))
-        except (ValueError, TypeError):
-            return JsonResponse({"status": "error", "message": "Invalid quantity."})
+    if request.method != "POST":
+        return JsonResponse(
+            {"status": "error", "message": "Invalid request method."},
+            status=405,
+        )
 
-        variant = get_object_or_404(Variant, id=variant_id)
+    variant_id = request.POST.get("variant_id")
+    try:
+        quantity = int(request.POST.get("quantity", 1))
+    except (ValueError, TypeError):
+        return JsonResponse(
+            {"status": "error", "message": "Invalid quantity."}, status=400
+        )
 
-        # Prevent adding blocked/unlisted products
-        if (
-            not variant.product.is_active
-            or variant.product.is_deleted
-            or not variant.is_active
-        ):
-            return JsonResponse(
-                {"status": "error", "message": "This product is currently unavailable."}
-            )
+    variant = get_object_or_404(Variant, id=variant_id)
 
-        # Max quantity limit
-        if quantity > 5:
-            return JsonResponse(
-                {"status": "error", "message": "Maximum 5 items allowed per product."}
-            )
+    # Prevent adding blocked/unlisted products
+    if (
+        not variant.product.is_active
+        or variant.product.is_deleted
+        or not variant.is_active
+    ):
+        return JsonResponse(
+            {"status": "error", "message": "This product is currently unavailable."},
+            status=400,
+        )
 
-        # Stock validation
-        if variant.stock < quantity:
+    # Max quantity limit
+    if quantity > 5:
+        return JsonResponse(
+            {"status": "error", "message": "Maximum 5 items allowed per product."},
+            status=400,
+        )
+
+    # Stock validation
+    if variant.stock < quantity:
+        return JsonResponse(
+            {
+                "status": "error",
+                "message": f"Only {variant.stock} items left in stock.",
+            },
+            status=400,
+        )
+
+    cart_obj, created = Cart.objects.get_or_create(user=request.user)
+    cart_item, item_created = CartItem.objects.get_or_create(
+        cart=cart_obj, variant=variant
+    )
+
+    if not item_created:
+        # Increase quantity if already in cart
+        new_quantity = cart_item.quantity + quantity
+        if new_quantity > 5:
+            cart_item.quantity = 5
+            cart_item.save()
             return JsonResponse(
                 {
                     "status": "error",
-                    "message": f"Only {variant.stock} items left in stock.",
-                }
+                    "message": "Total quantity in cart reached the limit of 5.",
+                },
+                status=400,
             )
 
-        cart_obj, created = Cart.objects.get_or_create(user=request.user)
-        cart_item, item_created = CartItem.objects.get_or_create(
-            cart=cart_obj, variant=variant
-        )
+        if variant.stock < new_quantity:
+            return JsonResponse(
+                {"status": "error", "message": "Not enough stock to add more."},
+                status=400,
+            )
 
-        if not item_created:
-            # Increase quantity if already in cart
-            new_quantity = cart_item.quantity + quantity
-            if new_quantity > 5:
-                cart_item.quantity = 5
-                cart_item.save()
-                return JsonResponse(
-                    {
-                        "status": "error",
-                        "message": "Total quantity in cart reached the limit of 5.",
-                    }
-                )
+        cart_item.quantity = new_quantity
+    else:
+        cart_item.quantity = quantity
 
-            if variant.stock < new_quantity:
-                return JsonResponse(
-                    {"status": "error", "message": "Not enough stock to add more."}
-                )
+    cart_item.save()
 
-            cart_item.quantity = new_quantity
-        else:
-            cart_item.quantity = quantity
+    # Remove from wishlist if added to cart
+    Wishlist.objects.filter(user=request.user, product=variant.product).delete()
 
-        cart_item.save()
-
-        # Remove from wishlist if added to cart
-        Wishlist.objects.filter(user=request.user, product=variant.product).delete()
-
-        return JsonResponse({"status": "success", "message": "Product added to cart!"})
-    return JsonResponse({"status": "error", "message": "Invalid request."})
+    return JsonResponse({"status": "success", "message": "Product added to cart!"})
 
 
 @user_login_required
@@ -723,49 +734,62 @@ def calculate_cart_summary(cart, request=None):
 
 @user_login_required
 def update_cart_quantity(request):
-    if request.method == "POST":
-        item_id = request.POST.get("item_id")
-        action = request.POST.get("action")
-
-        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
-
-        if action == "inc":
-            if cart_item.quantity < 5:
-                if cart_item.variant.stock > cart_item.quantity:
-                    cart_item.quantity += 1
-                else:
-                    return JsonResponse(
-                        {"status": "error", "message": "No more stock available."}
-                    )
-            else:
-                return JsonResponse(
-                    {"status": "error", "message": "Maximum limit of 5 reached."}
-                )
-        elif action == "dec":
-            if cart_item.quantity > 1:
-                cart_item.quantity -= 1
-            else:
-                return JsonResponse(
-                    {"status": "error", "message": "Minimum quantity is 1."}
-                )
-        cart_item.save()
-        summary = calculate_cart_summary(cart_item.cart, request)
-        offer_price = get_discount_price(cart_item.variant)
+    if request.method != "POST":
         return JsonResponse(
-            {
-                "status": "success",
-                "quantity": cart_item.quantity,
-                "item_subtotal": float(offer_price * cart_item.quantity),
-                "cart_subtotal": float(summary["subtotal"]),
-                "coupon_discount": float(summary["coupon_discount"]),
-                "final_total": float(summary["final_total"]),
-                "has_coupon": request.session.get("coupon_id") is not None,
-                "coupon_code": (
-                    summary["applied_coupon"].code if summary["applied_coupon"] else ""
-                ),
-            }
+            {"status": "error", "message": "Invalid request method."},
+            status=405,
         )
-    return JsonResponse({"status": "error", "message": "Invalid request."})
+
+    item_id = request.POST.get("item_id")
+    action = request.POST.get("action")
+
+    cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+
+    if action == "inc":
+        if cart_item.quantity < 5:
+            if cart_item.variant.stock > cart_item.quantity:
+                cart_item.quantity += 1
+            else:
+                return JsonResponse(
+                    {"status": "error", "message": "No more stock available."},
+                    status=400,
+                )
+        else:
+            return JsonResponse(
+                {"status": "error", "message": "Maximum limit of 5 reached."},
+                status=400,
+            )
+    elif action == "dec":
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+        else:
+            return JsonResponse(
+                {"status": "error", "message": "Minimum quantity is 1."},
+                status=400,
+            )
+    else:
+        return JsonResponse(
+            {"status": "error", "message": "Invalid action."},
+            status=400,
+        )
+
+    cart_item.save()
+    summary = calculate_cart_summary(cart_item.cart, request)
+    offer_price = get_discount_price(cart_item.variant)
+    return JsonResponse(
+        {
+            "status": "success",
+            "quantity": cart_item.quantity,
+            "item_subtotal": float(offer_price * cart_item.quantity),
+            "cart_subtotal": float(summary["subtotal"]),
+            "coupon_discount": float(summary["coupon_discount"]),
+            "final_total": float(summary["final_total"]),
+            "has_coupon": request.session.get("coupon_id") is not None,
+            "coupon_code": (
+                summary["applied_coupon"].code if summary["applied_coupon"] else ""
+            ),
+        }
+    )
 
 
 @user_login_required
@@ -784,7 +808,11 @@ def add_to_wishlist(request, slug):
     if request.method == "POST":
         action = request.POST.get("action")
         variant_id = request.POST.get("variant_id")
-        quantity = int(request.POST.get("quantity", 1))
+        try:
+            quantity = int(request.POST.get("quantity", 1))
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid quantity.")
+            return redirect("products:product_detail", slug=slug)
         variant = get_object_or_404(Variant, id=variant_id)
 
         if action == "cart":
@@ -957,6 +985,7 @@ def verify_payment(request):
     if payment.status == "paid":
         return JsonResponse({"success": True, "order_id": order.order_id})
 
+
     try:
 
         client.utility.verify_payment_signature(
@@ -970,7 +999,9 @@ def verify_payment(request):
         for item in order.items.all():
 
             if item.variant.stock < item.quantity:
-                return JsonResponse({"success": False, "message": "Out of stock"})
+                return JsonResponse(
+                    {"success": False, "message": "Out of stock"}, status=400
+                )
 
             item.variant.stock -= item.quantity
             item.variant.save()
@@ -1375,7 +1406,7 @@ def download_invoice(request, order_id):
     )
 
     pdf = HTML(string=html_string).write_pdf()
-    response = HttpResponse(pdf, content_type="application/pdf")
+    response = HttpResponse(pdf, content_type="application/pdf", status=200)
 
     response["Content-Disposition"] = f'attachment; filename="invoice_{order_id}.pdf"'
     return response
