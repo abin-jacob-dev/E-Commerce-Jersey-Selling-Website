@@ -92,6 +92,7 @@ CLOUDINARY_STORAGE = {
 }
 # Set Cloudinary as the default storage for media files
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+STATICFILES_STORAGE = "cloudinary_storage.storage.StaticCloudinaryStorage"
 
 
 MIDDLEWARE = [
