@@ -4,8 +4,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}{% endblock title %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>
+      {% block title %}
+      {% endblock %}
+    </title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -15,18 +18,18 @@
                 DEFAULT: '#a3e635',
                 bright: '#00ff00',
                 dark: '#006400',
-                light: '#f4fce3',
+                light: '#f4fce3'
               },
               black: '#121212',
-              'gray-bg': '#f9fafb',
+              'gray-bg': '#f9fafb'
             },
             fontFamily: {
-              montserrat: ['Montserrat', 'sans-serif'],
+              montserrat: ['Montserrat', 'sans-serif']
             },
             letterSpacing: {
               tightest: '-0.02em',
-              widest: '0.2em',
-            },
+              widest: '0.2em'
+            }
           }
         }
       }
@@ -154,6 +157,5 @@
         </div>
       </div>
     </footer>
-    
   </body>
 </html>
