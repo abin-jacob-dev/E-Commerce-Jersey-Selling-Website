@@ -70,7 +70,10 @@
           </div>
           <div class="flex flex-col gap-4 mt-12">
             {% if not address.is_default %}
-              <a href="{% url 'user:set_default_address' address.id %}" class="text-center w-full bg-white/50 py-3 text-[13px] font-black uppercase tracking-widest hover:bg-white">Set as Default</a>
+              <form action="{% url 'user:set_default_address' address.id %}" method="POST" class="w-full">
+                {% csrf_token %}
+                <button type="submit" class="text-center w-full bg-white/50 py-3 text-[13px] font-black uppercase tracking-widest hover:bg-white">Set as Default</button>
+              </form>
             {% endif %}
 
             <div class="flex gap-4">
